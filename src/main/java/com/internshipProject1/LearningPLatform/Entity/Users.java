@@ -1,30 +1,67 @@
 package com.internshipProject1.LearningPLatform.Entity;
 
-import jakarta.persistence.OneToMany;
-import jakarta.persistence.OneToOne;
+import com.fasterxml.jackson.annotation.JsonManagedReference;
+import jakarta.persistence.*;
+import lombok.AllArgsConstructor;
+import lombok.Data;
+import lombok.NoArgsConstructor;
+import lombok.RequiredArgsConstructor;
 
 import java.time.LocalDate;
+import java.util.List;
 
+@Entity
+@Table(name = "users")
+@Data
+@AllArgsConstructor
+@NoArgsConstructor
+@RequiredArgsConstructor
 public class Users {
-    String firstName;
-    String middleName;
-    String LastName;
-    String userPhone;
-    LocalDate userDOB;
-    String address;
-    String email;
-    String gender;
 
-    @OneToOne
+    @Id
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
+    @Column(name = "user_id")
+    private Long userId;
+
+    @Column(name = "first_name",nullable = false)
+    private String firstName;
+
+    @Column(name = "middle_name")
+    private String middleName;
+
+    @Column(name = "last_name",nullable = false)
+    private String LastName;
+
+    @Column(name = "phone",nullable = false)
+    private String userPhone;
+
+
+
+    @Column(name = "dob",nullable = false)
+    private LocalDate userDOB;
+
+    @Column(name = "address",nullable = false)
+    private String address;
+
+    @Column(name = "email",nullable = false)
+    private String email;
+
+    @Column(name = "gender",nullable = false)
+    private String gender;
+
+    @OneToOne(fetch = FetchType.LAZY, cascade = CascadeType.ALL,orphanRemoval = true)
+    @JoinColumn(name = "login_id",referencedColumnName = "login_id")
+    @JsonManagedReference
     private Login login;
 
-    @OneToMany
-    private StudentEnrollment studentEnrollment;
+    @OneToMany(mappedBy = "users",cascade = CascadeType.ALL,orphanRemoval = true)
+    private List<StudentEnrollment> studentEnrollments;
 
-    @OneToMany
-    private Course course;
+    @OneToMany(mappedBy = "users",cascade = CascadeType.ALL,orphanRemoval = true)
+    private List<Course> courses;
 
-    @OneToMany
+    @OneToMany(mappedBy = "users" , cascade = CascadeType.ALL,orphanRemoval = true)
+    private List<Submission> submissions;
 
 
 

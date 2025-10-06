@@ -6,31 +6,32 @@ import lombok.Data;
 import lombok.NoArgsConstructor;
 import lombok.RequiredArgsConstructor;
 
-import java.time.LocalDate;
+import java.time.LocalDateTime;
 
 @Entity
-@Table(name = "enrollemnts")
+@Table(name = "lesson_progress")
 @Data
 @AllArgsConstructor
 @RequiredArgsConstructor
 @NoArgsConstructor
-public class StudentEnrollment {
+public class LessonProgress {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    @Column(name = "enrollment_id")
-    private Long enrollmentId;
+    private Long progressId;
 
-    @Column(name = "enrollment_date")
-    private LocalDate enrollmentDate;
+    private boolean completed = false;
+
+    @Column(name = "Lesson_status")
+    private String lessonStatus;
+    private LocalDateTime completedAt;
 
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "user_id",nullable = false,referencedColumnName = "user_id")
     private Users users;
 
     @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "course_id",nullable = false,referencedColumnName = "course_id")
-    private Course course;
-
+    @JoinColumn(name = "lesson_id",referencedColumnName = "lesson_id",nullable = false)
+    private Lesson lesson;
 
 }
