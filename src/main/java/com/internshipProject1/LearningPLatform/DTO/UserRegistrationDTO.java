@@ -19,6 +19,23 @@ public class UserRegistrationDTO {
     private String email;
     private String gender;
 
+    public UserRegistrationDTO(String username, String password, String role, String firstName, String middleName, String lastName, String phoneNum, LocalDate userDOB, String address, String email, String gender) {
+        this.username = username;
+        this.password = password;
+        this.role = role;
+        this.firstName = firstName;
+        this.middleName = middleName;
+        this.lastName = lastName;
+        this.phoneNum = phoneNum;
+        this.userDOB = userDOB;
+        this.address = address;
+        this.email = email;
+        this.gender = gender;
+    }
+
+    public UserRegistrationDTO() {
+    }
+
     public String getUsername() {
         return username;
     }
@@ -75,11 +92,11 @@ public class UserRegistrationDTO {
         this.phoneNum = phoneNum;
     }
 
-    public LocalDate getDOB() {
+    public LocalDate getUserDOB() {
         return userDOB;
     }
 
-    public void setDOB(LocalDate DOB) {
+    public void setUserDOB(LocalDate DOB) {
         this.userDOB = DOB;
     }
 

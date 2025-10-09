@@ -2,6 +2,7 @@ package com.internshipProject1.LearningPLatform.Service.ServiceImpl;
 
 import com.internshipProject1.LearningPLatform.DTO.UserRegistrationDTO;
 //import com.internshipProject1.LearningPLatform.Entity.Course;
+import com.internshipProject1.LearningPLatform.Entity.Course;
 import com.internshipProject1.LearningPLatform.Entity.Login;
 import com.internshipProject1.LearningPLatform.Entity.Users;
 import com.internshipProject1.LearningPLatform.Repository.LoginRepository;
@@ -45,7 +46,7 @@ public class UserDetailsImpl implements UserService {
         users.setMiddleName(userRegistrationDTO.getMiddleName());
         users.setLastName(userRegistrationDTO.getLastName());
         users.setUserPhone(userRegistrationDTO.getPhoneNum());
-        users.setUserDOB(userRegistrationDTO.getDOB());
+        users.setUserDOB(userRegistrationDTO.getUserDOB());
         users.setAddress(userRegistrationDTO.getAddress());
         users.setEmail(userRegistrationDTO.getEmail());
         users.setGender(userRegistrationDTO.getGender());
@@ -67,7 +68,7 @@ public class UserDetailsImpl implements UserService {
         users.setMiddleName(userRegistrationDTO.getMiddleName());
         users.setLastName(userRegistrationDTO.getLastName());
         users.setUserPhone(userRegistrationDTO.getPhoneNum());
-        users.setUserDOB(userRegistrationDTO.getDOB());
+        users.setUserDOB(userRegistrationDTO.getUserDOB());
         users.setAddress(userRegistrationDTO.getAddress());
         users.setEmail(userRegistrationDTO.getEmail());
         users.setGender(userRegistrationDTO.getGender());
@@ -90,8 +91,14 @@ public class UserDetailsImpl implements UserService {
         loginRepository.save(login);
     }
 
+    @Override
+    public List<Course> viewCourses(Long userId) {
+        Users user = userRepository.findById(userId).orElseThrow(()->new UsernameNotFoundException("Username not found"));
+        return user.getCourses();
+    }
+
 //    @Override
-//    public List<Course> viewEnrolledCourses(Long userId) {
+//    public List<StudentEnrolled> viewEnrolledCourses(Long userId) {
 //        Users users = userRepository.findById(userId).orElseThrow(()->new UsernameNotFoundException("User does not exist"));
 //        return users.getCourses();
 //    }

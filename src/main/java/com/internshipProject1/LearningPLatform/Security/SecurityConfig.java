@@ -1,5 +1,6 @@
 package com.internshipProject1.LearningPLatform.Security;
 
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.security.authentication.AuthenticationManager;
@@ -18,24 +19,22 @@ import org.springframework.security.web.authentication.UsernamePasswordAuthentic
 @Configuration
 @EnableMethodSecurity
 public class SecurityConfig {
-    private final JWTAuthenticationFilter jwtAuthenticationFilter;
-    private final CustomUserDetailsService customUserDetailsService;
+    @Autowired
+    private  JWTAuthenticationFilter jwtAuthenticationFilter;
+    @Autowired
+    private  CustomUserDetailsService customUserDetailsService;
 
-    public SecurityConfig(JWTAuthenticationFilter jwtAuthenticationFilter, CustomUserDetailsService customUserDetailsService) {
-        this.jwtAuthenticationFilter = jwtAuthenticationFilter;
-        this.customUserDetailsService = customUserDetailsService;
-    }
+
 
     @Bean
     public SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception{
         return http
                 .csrf(AbstractHttpConfigurer::disable)
                 .authorizeHttpRequests(auth -> auth
-                        .requestMatchers("/users/register","/auth/authenticate").permitAll()
-                        .requestMatchers("/users/getAll").hasRole("ADMIN")
-                        .requestMatchers("/users/updateUser","/users/deactivate","/users/activate").permitAll()
-                        .requestMatchers("/users/allEnrolledCourses").hasAnyRole("ADMIN","INSTRUCTOR")
-                        .anyRequest().permitAll()
+                        .requestMatchers("api/users/register","api/auth/authenticate","api/users/updateUser","api/users/deactivate","api/users/activate").permitAll()
+                        .requestMatchers("api/users/getAll","api/users/deactivate","api/users/activate").hasRole("ADMIN")
+                        .requestMatchers("api/users/allEnrolledCourses").hasAnyRole("ADMIN","INSTRUCTOR")
+                        .anyRequest().authenticated()
                 )
                 .sessionManagement(session -> session.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
                 .authenticationProvider(authenticationProvider())
