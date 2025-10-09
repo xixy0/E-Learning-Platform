@@ -1,4 +1,4 @@
-package com.internshipProject1.LearningPLatform.Repository;
-
-public interface QuizRepository {
-}
+//package com.internshipProject1.LearningPLatform.Repository;
+//
+//public interface QuizRepository {
+//}
