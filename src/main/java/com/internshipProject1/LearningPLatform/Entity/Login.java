@@ -33,8 +33,6 @@ public class Login {
     @Column(name= "account_Status",nullable = false)
     private String accountStatus;
 
-
-
     @OneToOne(mappedBy = "login")
     @JsonBackReference
     private Users users;

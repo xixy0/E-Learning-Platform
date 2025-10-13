@@ -1,5 +1,7 @@
 package com.internshipProject1.LearningPLatform.Entity;
 
+import com.fasterxml.jackson.annotation.JsonBackReference;
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.fasterxml.jackson.annotation.JsonManagedReference;
 import jakarta.persistence.*;
@@ -19,6 +21,7 @@ import java.util.List;
 @Data
 @AllArgsConstructor
 @NoArgsConstructor
+@JsonIgnoreProperties({"hibernateLazyInitializer", "handler"})
 public class Users {
 
     @Id
@@ -53,16 +56,17 @@ public class Users {
     @JsonIgnoreProperties({"hibernateLazyInitializer", "handler"})
     @OneToOne(fetch = FetchType.LAZY, cascade = CascadeType.ALL,orphanRemoval = true)
     @JoinColumn(name = "login_id",referencedColumnName = "login_id")
-    @JsonManagedReference
+    @JsonManagedReference()
     private Login login;
 
     @OneToMany(mappedBy = "instructor",cascade = CascadeType.ALL,orphanRemoval = true)
+    @JsonIgnore
     private List<Course> courses;
 
+    @OneToMany(mappedBy = "users",cascade = CascadeType.ALL,orphanRemoval = true)
+    @JsonIgnore
+    private List<StudentEnrollment> studentEnrollments;
 
-//    @OneToMany(mappedBy = "users",cascade = CascadeType.ALL,orphanRemoval = true)
-//    private List<StudentEnrollment> studentEnrollments;
-//
 
 //    @OneToMany(mappedBy = "users" , cascade = CascadeType.ALL,orphanRemoval = true)
 //    private List<Submission> submissions;

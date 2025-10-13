@@ -1,19 +1,27 @@
 package com.internshipProject1.LearningPLatform.Service.ServiceImpl;
 
+import com.internshipProject1.LearningPLatform.DTO.CourseRegistrationDTO;
+import com.internshipProject1.LearningPLatform.DTO.UserDTO;
 import com.internshipProject1.LearningPLatform.DTO.UserRegistrationDTO;
-//import com.internshipProject1.LearningPLatform.Entity.Course;
 import com.internshipProject1.LearningPLatform.Entity.Course;
 import com.internshipProject1.LearningPLatform.Entity.Login;
+import com.internshipProject1.LearningPLatform.Entity.StudentEnrollment;
 import com.internshipProject1.LearningPLatform.Entity.Users;
+import com.internshipProject1.LearningPLatform.Repository.CourseRepository;
 import com.internshipProject1.LearningPLatform.Repository.LoginRepository;
 import com.internshipProject1.LearningPLatform.Repository.UserRepository;
 import com.internshipProject1.LearningPLatform.Service.UserService;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.security.core.Authentication;
+import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
+import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
+import java.util.Optional;
 
 @Service
 public class UserDetailsImpl implements UserService {
@@ -50,6 +58,9 @@ public class UserDetailsImpl implements UserService {
         users.setAddress(userRegistrationDTO.getAddress());
         users.setEmail(userRegistrationDTO.getEmail());
         users.setGender(userRegistrationDTO.getGender());
+
+        List<Course> courses = new ArrayList<>();
+        users.setCourses(courses);
 
         return userRepository.save(users);
 
@@ -91,15 +102,51 @@ public class UserDetailsImpl implements UserService {
         loginRepository.save(login);
     }
 
+
+
     @Override
-    public List<Course> viewCourses(Long userId) {
-        Users user = userRepository.findById(userId).orElseThrow(()->new UsernameNotFoundException("Username not found"));
-        return user.getCourses();
+    public Users getLoggedInUser() {
+        Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
+        if(authentication==null || !authentication.isAuthenticated()){
+            throw new RuntimeException("No authenticated user found");
+        }
+        String username = authentication.getName();
+        Login login = loginRepository.findByUsername(username).get();
+        return login.getUsers();
+
     }
 
-//    @Override
-//    public List<StudentEnrolled> viewEnrolledCourses(Long userId) {
-//        Users users = userRepository.findById(userId).orElseThrow(()->new UsernameNotFoundException("User does not exist"));
-//        return users.getCourses();
-//    }
+    @Override
+    public Long getLoggedInUserId() {
+        return getLoggedInUser().getUserId();
+    }
+
+    @Override
+    public Users getUserById(Long userId) {
+        return userRepository.findById(userId).orElseThrow(()->new UsernameNotFoundException("Username not found"));
+
+    }
+
+
+    @Override
+    public List<CourseRegistrationDTO> viewCourses(Long userId) {
+        Users user = userRepository.findById(userId).orElseThrow(()->new UsernameNotFoundException("Username not found"));
+        List<Course> course =user.getCourses();
+        List<CourseRegistrationDTO> courseRegistrationDTOArrayList = new ArrayList<>();
+        for(Course course1 : course){
+            courseRegistrationDTOArrayList.add(new CourseRegistrationDTO(course1.getCourseTitle(),course1.getCourseDescription(),course1.getCourseCategory(),course1.getCourseDuration()));
+        }
+          return courseRegistrationDTOArrayList;
+    }
+
+    @Override
+    public List<CourseRegistrationDTO> viewEnrolledCourses(Long userId) {
+        Users users = userRepository.findById(userId).orElseThrow(()->new UsernameNotFoundException("User does not exist"));
+        List<StudentEnrollment> enrollments =users.getStudentEnrollments();
+        List<CourseRegistrationDTO> courseRegistrationDTOArrayList = new ArrayList<>();
+        for(StudentEnrollment enrollment : enrollments){
+            courseRegistrationDTOArrayList.add(new CourseRegistrationDTO(enrollment.getCourse().getCourseTitle(),enrollment.getCourse().getCourseDescription(),enrollment.getCourse().getCourseCategory(),enrollment.getCourse().getCourseDuration()));
+        }
+        return courseRegistrationDTOArrayList;
+    }
 }

@@ -1,6 +1,8 @@
 package com.internshipProject1.LearningPLatform.Entity;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
+import com.fasterxml.jackson.annotation.JsonManagedReference;
 import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
 import lombok.Data;
@@ -14,6 +16,7 @@ import java.util.List;
 @Data
 @AllArgsConstructor
 @NoArgsConstructor
+@JsonIgnoreProperties({"hibernateLazyInitializer", "handler"})
 public class Course {
 
     @Id
@@ -25,26 +28,30 @@ public class Course {
     private String courseTitle;
 
     @Column(name = "course_description",nullable = false)
-    private String description;
+    private String courseDescription;
 
     @Column(name = "course_category",nullable = false)
-    private String category;
+    private String courseCategory;
 
     @Column(name = "course_duration",nullable = false)
-    private String duration;
+    private String courseDuration;
 
 
-    @JsonIgnoreProperties({"hibernateLazyInitializer", "handler"})
+//    @JsonIgnoreProperties({"hibernateLazyInitializer", "handler"})
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "instructor_id")
+    @JsonIgnore
     private Users instructor;
 
-//    @OneToMany(mappedBy = "course" ,cascade = CascadeType.ALL,orphanRemoval = true)
-//    private List<Lesson> lessons;
-//
-//    @OneToMany(mappedBy = "course" , cascade = CascadeType.ALL,orphanRemoval = true)
-//    private List<StudentEnrollment> studentEnrollments;
-//
+    @OneToMany(mappedBy = "course" ,cascade = CascadeType.ALL,orphanRemoval = true)
+    @JsonIgnore
+    private List<Lesson> lessons;
+
+//    @JsonIgnoreProperties({"hibernateLazyInitializer", "handler"})
+    @OneToMany(mappedBy = "course" , cascade = CascadeType.ALL,orphanRemoval = true)
+    @JsonIgnore
+    private List<StudentEnrollment> studentEnrollments;
+
 //    @OneToMany(mappedBy = "course",cascade = CascadeType.ALL,orphanRemoval = true)
 //    private List<Quiz> quiz;
 

@@ -36,7 +36,8 @@ public class JWTAuthenticationFilter extends OncePerRequestFilter {
 
 
         if(authHead == null || !authHead.startsWith("Bearer ")){
-           System.out.println("JWTAuthenticationFilter triggered for: " + request.getRequestURI());
+
+            System.out.println(authHead);
            filterChain.doFilter(request,response);
            return;
         }
@@ -56,7 +57,7 @@ public class JWTAuthenticationFilter extends OncePerRequestFilter {
                 authenticationToken.setDetails(new WebAuthenticationDetailsSource().buildDetails(request));
                 SecurityContextHolder.getContext().setAuthentication(authenticationToken);
 
-                System.out.println("Authentication set for: " + username);
+
             }
         }
 

@@ -1,15 +1,23 @@
 package com.internshipProject1.LearningPLatform.Service.ServiceImpl;
 
+import com.internshipProject1.LearningPLatform.DTO.CourseRegistrationDTO;
+import com.internshipProject1.LearningPLatform.DTO.LessonDTO;
+import com.internshipProject1.LearningPLatform.DTO.UserDTO;
 import com.internshipProject1.LearningPLatform.Entity.Course;
+import com.internshipProject1.LearningPLatform.Entity.Lesson;
+import com.internshipProject1.LearningPLatform.Entity.StudentEnrollment;
 import com.internshipProject1.LearningPLatform.Entity.Users;
 import com.internshipProject1.LearningPLatform.Repository.CourseRepository;
 import com.internshipProject1.LearningPLatform.Repository.UserRepository;
 import com.internshipProject1.LearningPLatform.Service.CourseService;
+import com.internshipProject1.LearningPLatform.Service.UserService;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.stereotype.Service;
 
+
+import java.util.ArrayList;
 import java.util.List;
+import java.util.Objects;
 
 @Service
 public class CourseServiceImpl implements CourseService {
@@ -20,40 +28,58 @@ public class CourseServiceImpl implements CourseService {
     @Autowired
     private UserRepository userRepository;
 
+    @Autowired
+    private UserService userService;
+
+
 
     @Override
-    public Course addCourse(Course course) {
-        Users instructor = userRepository.findById(course.getInstructor().getUserId()).orElseThrow(()->new UsernameNotFoundException("User not found"));
-        List<Course> courses = instructor.getCourses();
-        courses.add(course);
-        instructor.setCourses(courses);
-        userRepository.save(instructor);
-        return courseRepository.save(course);
+    public Course addCourse(CourseRegistrationDTO courseRegistrationDTO) {
+      Course course = new Course();
+      course.setCourseTitle(courseRegistrationDTO.getCourseTitle());
+      course.setCourseDescription(courseRegistrationDTO.getCourseDescription());
+      course.setCourseCategory(courseRegistrationDTO.getCourseCategory());
+      course.setCourseDuration(courseRegistrationDTO.getCourseDuration());
+      Users instructor = userService.getLoggedInUser();
+      course.setInstructor(instructor);
+      course.setStudentEnrollments(new ArrayList<>());
+      return courseRepository.save(course);
+
+
     }
 
     @Override
-    public Course updateCourse(Long courseId, Course course) {
+    public Course updateCourse(Long courseId, CourseRegistrationDTO courseRegistrationDTO) {
         Course courses = courseRepository.findById(courseId).orElseThrow(()->new RuntimeException("Course not found"));
+        if(!userService.getLoggedInUser().getLogin().getRole().equalsIgnoreCase("ADMIN")
+                && !Objects.equals(courses.getInstructor().getUserId(), userService.getLoggedInUser().getUserId())){
+           throw new RuntimeException("Unauthorized Instructor");
+        }
+        courses.setCourseTitle(courseRegistrationDTO.getCourseTitle());
+        courses.setCourseCategory(courseRegistrationDTO.getCourseCategory());
+        courses.setCourseDuration(courseRegistrationDTO.getCourseDuration());
+        courses.setInstructor(courses.getInstructor());
+        courses.setCourseDescription(courseRegistrationDTO.getCourseDescription());
 
-        courses.setCourseTitle(course.getCourseTitle());
-        courses.setCategory(course.getCategory());
-        courses.setDuration(courses.getDuration());
-        courses.setInstructor(course.getInstructor());
-        courses.setDescription(courses.getDescription());
-
-        return addCourse(courses);
-
+        return courseRepository.save(courses);
     }
 
     @Override
     public void deleteCourse(Long courseId) {
-        if (!courseRepository.existsById(courseId)) {
-            throw new RuntimeException("Course not found");
-        }
-        else{
+        Course course = courseRepository.findById(courseId).orElseThrow(()->  new RuntimeException("Course not found"));
+        if(userService.getLoggedInUser().getLogin().getRole().equalsIgnoreCase("ADMIN")){
             courseRepository.deleteById(courseId);
         }
-    }
+        else{
+            Long instructorId = (course.getInstructor() != null) ? course.getInstructor().getUserId() : null;
+            Long loggedInUserId = userService.getLoggedInUser().getUserId();
+            if(instructorId == null || !instructorId.equals(loggedInUserId)){
+                throw new RuntimeException("Unauthorized Instructor");
+            }
+            courseRepository.deleteById(courseId);
+        }
+        }
+
 
     @Override
     public List<Course> getAll() {
@@ -61,8 +87,49 @@ public class CourseServiceImpl implements CourseService {
     }
 
     @Override
-    public Users getInstructor(Long courseId) {
+    public UserDTO getInstructor(Long courseId) {
         Course course = courseRepository.findById(courseId).orElseThrow(()->new RuntimeException("Course not found"));
-        return course.getInstructor();
+        return new UserDTO(
+                course.getInstructor().getFirstName(),
+                course.getInstructor().getMiddleName(),
+                course.getInstructor().getLastName(),
+                course.getInstructor().getEmail(),
+                course.getInstructor().getGender()
+        );
+    }
+
+    @Override
+    public List<UserDTO> getStudentsEnrolled(Long courseId) {
+
+
+        Course course = courseRepository.findById(courseId).orElseThrow(()->new RuntimeException("Course not found"));
+         if(!userService.getLoggedInUser().getLogin().getRole().equalsIgnoreCase("ADMIN")
+                && !Objects.equals(course.getInstructor().getUserId(), userService.getLoggedInUser().getUserId())){
+            throw new RuntimeException("Unauthorized Instructor");
+        }
+        List<StudentEnrollment> studentEnrollments = course.getStudentEnrollments();
+        List<UserDTO> userDTOList = new ArrayList<>();
+        for(StudentEnrollment studentEnrollment:studentEnrollments){
+            userDTOList.add(new UserDTO(studentEnrollment.getUsers().getFirstName(),
+                    studentEnrollment.getUsers().getMiddleName(),
+                    studentEnrollment.getUsers().getLastName(),
+                    studentEnrollment.getUsers().getEmail(),
+                    studentEnrollment.getUsers().getGender())
+                    );
+        }
+        return userDTOList;
+    }
+
+    @Override
+    public List<LessonDTO> getLessons(Long courseId) {
+        List<Lesson> lessons =  courseRepository.findById(courseId).orElseThrow(()->new RuntimeException("Course not founnd")).getLessons();
+        List<LessonDTO> lessonDTOList = new ArrayList<>();
+        for(Lesson lesson : lessons){
+            lessonDTOList.add(new LessonDTO(lesson.getLessonDescription(),
+                    lesson.getLessonTitle(),lesson.getCourse().getCourseTitle(),
+                    lesson.getVideourl(),
+                    lesson.getPdfUrl()));
+        }
+        return lessonDTOList;
     }
 }
