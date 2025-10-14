@@ -2,12 +2,11 @@ package com.internshipProject1.LearningPLatform.Service.ServiceImpl;
 
 import com.internshipProject1.LearningPLatform.DTO.CourseRegistrationDTO;
 import com.internshipProject1.LearningPLatform.DTO.LessonDTO;
+import com.internshipProject1.LearningPLatform.DTO.QuizDTO;
 import com.internshipProject1.LearningPLatform.DTO.UserDTO;
-import com.internshipProject1.LearningPLatform.Entity.Course;
-import com.internshipProject1.LearningPLatform.Entity.Lesson;
-import com.internshipProject1.LearningPLatform.Entity.StudentEnrollment;
-import com.internshipProject1.LearningPLatform.Entity.Users;
+import com.internshipProject1.LearningPLatform.Entity.*;
 import com.internshipProject1.LearningPLatform.Repository.CourseRepository;
+import com.internshipProject1.LearningPLatform.Repository.StudentEnrollmentRepository;
 import com.internshipProject1.LearningPLatform.Repository.UserRepository;
 import com.internshipProject1.LearningPLatform.Service.CourseService;
 import com.internshipProject1.LearningPLatform.Service.UserService;
@@ -27,6 +26,9 @@ public class CourseServiceImpl implements CourseService {
 
     @Autowired
     private UserRepository userRepository;
+
+    @Autowired
+    private StudentEnrollmentRepository studentEnrollmentRepository;
 
     @Autowired
     private UserService userService;
@@ -131,5 +133,37 @@ public class CourseServiceImpl implements CourseService {
                     lesson.getPdfUrl()));
         }
         return lessonDTOList;
+    }
+
+    @Override
+    public void removeEnrolledStudent(Long courseId ,Long userId) {
+        Course course = courseRepository.findById(courseId).orElseThrow(()->new RuntimeException("Course not found"));
+        Users users = userRepository.findById(userId).orElseThrow(()->new RuntimeException("User not found"));
+
+        List<StudentEnrollment> studentEnrollments = course.getStudentEnrollments();
+        for(StudentEnrollment studentEnrollment : studentEnrollments){
+            if(studentEnrollment.getUsers().getUserId() == userId){
+                studentEnrollments.remove(studentEnrollment);
+                users.getStudentEnrollments().remove(studentEnrollment);
+                studentEnrollmentRepository.delete(studentEnrollment);
+            }
+        }
+
+    }
+
+    @Override
+    public List<QuizDTO> getAllQuiz(Long courseId) {
+        Course course = courseRepository.findById(courseId).orElseThrow(()->new RuntimeException("Course not found"));
+        if(!userService.getLoggedInUser().getLogin().getRole().equalsIgnoreCase("ADMIN")
+                && !Objects.equals(course.getInstructor().getUserId(), userService.getLoggedInUser().getUserId())){
+            throw new RuntimeException("Unauthorized Instructor");
+        }
+        List<Quiz> quizzes = course.getQuiz();
+        List<QuizDTO> quizDTOList = new ArrayList<>();
+        for(Quiz quiz:quizzes){
+            quizDTOList.add(new QuizDTO(quiz.getQuizTitle(),quiz.getTotalMarks(),
+                    quiz.getCourse().getCourseTitle(),quiz.getTimestamp()));
+        }
+        return quizDTOList;
     }
 }

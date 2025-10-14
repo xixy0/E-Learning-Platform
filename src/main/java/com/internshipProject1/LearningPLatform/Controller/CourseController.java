@@ -30,7 +30,7 @@ public class CourseController {
         try{
             return ResponseEntity.status(HttpStatus.ACCEPTED).body(courseService.updateCourse(courseId,courseRegistrationDTO));
         }catch (RuntimeException ex){
-            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body("Course not found");
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(ex.getMessage());
         }
     }
 
@@ -40,7 +40,7 @@ public class CourseController {
             courseService.deleteCourse(courseId);
             return ResponseEntity.status(HttpStatus.OK).body("Course removed successfully");
         }catch (RuntimeException ex){
-            return  ResponseEntity.status(HttpStatus.BAD_REQUEST).body("Unauthorized User");
+            return  ResponseEntity.status(HttpStatus.BAD_REQUEST).body(ex.getMessage());
         }
     }
 
@@ -54,7 +54,7 @@ public class CourseController {
         try{
             return ResponseEntity.status(HttpStatus.OK).body(courseService.getInstructor(courseId));
         }catch (RuntimeException ex){
-            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body("getInstructor error");
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(ex.getMessage());
         }
     }
 
@@ -63,7 +63,36 @@ public class CourseController {
         try{
             return ResponseEntity.status(HttpStatus.OK).body(courseService.getStudentsEnrolled(courseId));
         }catch (RuntimeException ex){
-            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(List.of("Unauthorized"));
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(List.of(ex.getMessage()));
+        }
+    }
+
+    @GetMapping("/getLessons/{courseId}")
+    public ResponseEntity<List<?>> getLessons(@PathVariable Long courseId){
+        try{
+            return ResponseEntity.status(HttpStatus.OK).body(courseService.getLessons(courseId));
+        }catch (RuntimeException ex){
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(List.of(ex.getMessage()));
+        }
+    }
+
+    @DeleteMapping("/removeEnroll/{courseId}/{userId}")
+    public ResponseEntity<?> removeEnrolled(@PathVariable Long courseId,@PathVariable Long userId){
+        try{
+            courseService.removeEnrolledStudent(courseId,userId);
+            return ResponseEntity.status(HttpStatus.OK).body("Student removed by ADMIN");
+        }
+        catch (RuntimeException ex){
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(ex.getMessage());
+        }
+    }
+
+    @GetMapping("/getAllQuiz/{courseId}")
+    public ResponseEntity<List<?>> getAllQuiz(@PathVariable Long courseId){
+        try{
+            return ResponseEntity.status(HttpStatus.ACCEPTED).body(courseService.getAllQuiz(courseId));
+        }catch (RuntimeException ex){
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(List.of(ex.getMessage()));
         }
     }
 

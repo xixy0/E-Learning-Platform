@@ -23,7 +23,7 @@ public class UserController {
         try {
             return ResponseEntity.status(HttpStatus.OK).body(userService.addUser(userRegistrationDTO));
         }catch(IllegalAccessException e){
-            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body("Username already exist");
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(e.getMessage());
 
         }
     }
@@ -40,7 +40,7 @@ public class UserController {
 
         }
         catch(UsernameNotFoundException e){
-            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body("Username not found");
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(e.getMessage());
         }
     }
 
@@ -52,7 +52,7 @@ public class UserController {
 
         }
         catch(UsernameNotFoundException e){
-            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body("Username not found");
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(e.getMessage());
         }
     }
 
@@ -64,21 +64,19 @@ public class UserController {
 
         }
         catch(UsernameNotFoundException e){
-            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body("Username not found");
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(e.getMessage());
         }
     }
-//
-//    @GetMapping("/allEnrolledCourses")
-//    public ResponseEntity<?> viewAllEnrolledCourses(@PathVariable Long userId){
-//        try{
-//
-//            return ResponseEntity.status(HttpStatus.OK).body(userService.viewEnrolledCourses(userId));
-//
-//        }
-//        catch(UsernameNotFoundException e){
-//            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body("Username not found");
-//        }
-//    }
+
+    @GetMapping("/allEnrolledCourses")
+    public ResponseEntity<?> viewAllEnrolledCourses(@PathVariable Long userId){
+        try{
+            return ResponseEntity.status(HttpStatus.OK).body(userService.viewEnrolledCourses(userId));
+        }
+        catch(UsernameNotFoundException e){
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(e.getMessage());
+        }
+    }
 
 
 

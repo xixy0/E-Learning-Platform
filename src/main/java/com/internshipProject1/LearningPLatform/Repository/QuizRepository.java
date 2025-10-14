@@ -1,4 +1,10 @@
-//package com.internshipProject1.LearningPLatform.Repository;
-//
-//public interface QuizRepository {
-//}
+package com.internshipProject1.LearningPLatform.Repository;
+
+import com.internshipProject1.LearningPLatform.Entity.Quiz;
+import org.springframework.data.jpa.repository.JpaRepository;
+import org.springframework.web.bind.annotation.RestController;
+
+@RestController
+public interface QuizRepository extends JpaRepository<Quiz, Long> {
+
+}

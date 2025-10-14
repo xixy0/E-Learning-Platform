@@ -1,13 +1,11 @@
 package com.internshipProject1.LearningPLatform.Service.ServiceImpl;
 
 import com.internshipProject1.LearningPLatform.DTO.CourseRegistrationDTO;
-import com.internshipProject1.LearningPLatform.DTO.UserDTO;
 import com.internshipProject1.LearningPLatform.DTO.UserRegistrationDTO;
 import com.internshipProject1.LearningPLatform.Entity.Course;
 import com.internshipProject1.LearningPLatform.Entity.Login;
 import com.internshipProject1.LearningPLatform.Entity.StudentEnrollment;
 import com.internshipProject1.LearningPLatform.Entity.Users;
-import com.internshipProject1.LearningPLatform.Repository.CourseRepository;
 import com.internshipProject1.LearningPLatform.Repository.LoginRepository;
 import com.internshipProject1.LearningPLatform.Repository.UserRepository;
 import com.internshipProject1.LearningPLatform.Service.UserService;
@@ -18,10 +16,7 @@ import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.List;
-import java.util.Optional;
+import java.util.*;
 
 @Service
 public class UserDetailsImpl implements UserService {
@@ -61,6 +56,9 @@ public class UserDetailsImpl implements UserService {
 
         List<Course> courses = new ArrayList<>();
         users.setCourses(courses);
+
+        List<StudentEnrollment> studentEnrollments= new ArrayList<>();
+        users.setStudentEnrollments(studentEnrollments);
 
         return userRepository.save(users);
 
@@ -141,6 +139,7 @@ public class UserDetailsImpl implements UserService {
 
     @Override
     public List<CourseRegistrationDTO> viewEnrolledCourses(Long userId) {
+
         Users users = userRepository.findById(userId).orElseThrow(()->new UsernameNotFoundException("User does not exist"));
         List<StudentEnrollment> enrollments =users.getStudentEnrollments();
         List<CourseRegistrationDTO> courseRegistrationDTOArrayList = new ArrayList<>();

@@ -2,12 +2,11 @@ package com.internshipProject1.LearningPLatform.Entity;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
-import com.fasterxml.jackson.annotation.JsonManagedReference;
 import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
-import lombok.RequiredArgsConstructor;
+
 
 import java.util.List;
 
@@ -24,7 +23,7 @@ public class Course {
     @Column(name = "course_id")
     private Long courseId;
 
-    @Column(name = "course_title",nullable = false)
+    @Column(name = "course_title",nullable = false,unique = true)
     private String courseTitle;
 
     @Column(name = "course_description",nullable = false)
@@ -52,7 +51,8 @@ public class Course {
     @JsonIgnore
     private List<StudentEnrollment> studentEnrollments;
 
-//    @OneToMany(mappedBy = "course",cascade = CascadeType.ALL,orphanRemoval = true)
-//    private List<Quiz> quiz;
+    @OneToMany(mappedBy = "course",cascade = CascadeType.ALL,orphanRemoval = true)
+    @JsonIgnore
+    private List<Quiz> quiz;
 
 }

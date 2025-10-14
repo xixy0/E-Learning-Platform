@@ -23,6 +23,7 @@ public class Lesson {
     private String lessonDescription;
 
     private String videourl;
+
     private String pdfUrl;
 
     @Column(name = "title")

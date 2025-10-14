@@ -8,11 +8,16 @@ import com.internshipProject1.LearningPLatform.Repository.LessonRepository;
 import com.internshipProject1.LearningPLatform.Service.LessonService;
 import com.internshipProject1.LearningPLatform.Service.UserService;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Service;
+import org.springframework.web.multipart.MultipartFile;
 
+import java.io.File;
+import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
 
+@Service
 public class LessonServiceImpl implements LessonService {
 
     @Autowired
@@ -26,12 +31,19 @@ public class LessonServiceImpl implements LessonService {
 
     @Override
     public LessonDTO addLesson(LessonDTO lessonDTO) {
+        Course course = courseRepository.findByCourseTitle(lessonDTO.getCourseTitle()).orElseThrow(()->new RuntimeException("Course not found"));
+        System.out.println("addLesson");
+        if(!userService.getLoggedInUser().getLogin().getRole().equalsIgnoreCase("ADMIN")
+                && !Objects.equals(course.getInstructor().getUserId(), userService.getLoggedInUser().getUserId())){
+            throw new RuntimeException("Unauthorized Instructor");
+        }
+        System.out.println("addLesson");
+
         Lesson lesson = new Lesson();
         lesson.setLessonDescription(lessonDTO.getLessonDescription());
         lesson.setVideourl(lessonDTO.getVideoUrl());
         lesson.setPdfUrl(lessonDTO.getPdfUrl());
         lesson.setLessonTitle(lessonDTO.getLessonTitle());
-        Course course = courseRepository.findByCourseTitle(lessonDTO.getCourseTitle()).orElseThrow(()->new RuntimeException("Course not found"));
         lesson.setCourse(course);
         lessonRepository.save(lesson);
         return lessonDTO;
@@ -63,21 +75,49 @@ public class LessonServiceImpl implements LessonService {
         {
             throw new RuntimeException("Unauthorized Instructor");
         }
-//        Course course = lesson.getCourse();
-//        course.getLessons().remove(lesson);
+
         lessonRepository.deleteById(lessonId);
     }
 
     @Override
-    public List<LessonDTO> getAll() {
-        List<Lesson> lessons = lessonRepository.findAll();
-        List<LessonDTO> lessonDTOList = new ArrayList<>();
-        for(Lesson lesson : lessons){
-            lessonDTOList.add(new LessonDTO(lesson.getLessonDescription(),
-                    lesson.getLessonTitle(),lesson.getCourse().getCourseTitle(),
-                    lesson.getVideourl(),
-                    lesson.getPdfUrl()));
+    public List<Lesson> getAll() {
+       return lessonRepository.findAll();
+    }
+
+    @Override
+    public String uploadPdf(Long lessonId, MultipartFile file) {
+        final String UPLOAD_DIR = "/uploads/pdfs/";
+        Lesson lesson = lessonRepository.findById(lessonId).orElseThrow(()-> new RuntimeException("Course not found"));
+        if(!userService.getLoggedInUser().getLogin().getRole().equalsIgnoreCase("ADMIN")
+                && !Objects.equals(lesson.getCourse().getInstructor().getUserId(), userService.getLoggedInUser().getUserId())){
+            throw new RuntimeException("Unauthorized Instructor");
         }
-        return lessonDTOList;
+        try{
+
+            if (file.isEmpty()) {
+                return "File is empty!";
+            }
+                String uploadDir = System.getProperty("user.dir") + File.separator + "uploads" + File.separator + "pdfs";
+                File directory = new File(uploadDir);
+                if (!directory.exists()) directory.mkdirs();
+
+                String originalFilename = file.getOriginalFilename();
+                String extension = "";
+                if (originalFilename != null && originalFilename.contains(".")) {
+                    extension = originalFilename.substring(originalFilename.lastIndexOf("."));
+                }
+
+                String safeFilename = "lesson_" + lessonId + "_" + System.currentTimeMillis() + extension;
+                File destinationFile = new File(directory, safeFilename);
+                file.transferTo(destinationFile);
+
+                String relativePath = "/uploads/pdfs/" + safeFilename;
+                lesson.setPdfUrl(relativePath);
+                lessonRepository.save(lesson);
+                return relativePath;
+
+        }catch (IOException ex){
+            throw  new RuntimeException("Upload failed");
+        }
     }
 }

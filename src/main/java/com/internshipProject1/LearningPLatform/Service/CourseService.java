@@ -3,6 +3,7 @@ package com.internshipProject1.LearningPLatform.Service;
 
 import com.internshipProject1.LearningPLatform.DTO.CourseRegistrationDTO;
 import com.internshipProject1.LearningPLatform.DTO.LessonDTO;
+import com.internshipProject1.LearningPLatform.DTO.QuizDTO;
 import com.internshipProject1.LearningPLatform.DTO.UserDTO;
 import com.internshipProject1.LearningPLatform.Entity.Course;
 //import com.internshipProject1.LearningPLatform.Entity.Lesson;
@@ -20,8 +21,10 @@ public interface CourseService {
      UserDTO getInstructor(Long courseId);
      List<UserDTO> getStudentsEnrolled(Long courseId);
      List<LessonDTO> getLessons(Long courseId);
-     //void removeEnrolledStudent(Long userId);
-    //public void uploadCourseFiles(Long courseId);
+     void removeEnrolledStudent(Long courseId, Long userId);
+     List<QuizDTO> getAllQuiz(Long courseId);
+
+
     //public List<Course> trackCourseStats();
-    //public List<Lesson> viewLessonByCourse(Long courseId);
+
 }

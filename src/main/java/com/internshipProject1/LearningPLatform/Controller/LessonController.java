@@ -6,6 +6,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.web.multipart.MultipartFile;
 
 import java.util.List;
 
@@ -21,7 +22,7 @@ public class LessonController {
         try{
             return ResponseEntity.status(HttpStatus.CREATED).body(lessonService.addLesson(lessonDTO));
         }catch(RuntimeException ex){
-            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body("Lesson cannot be added");
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(ex.getMessage());
         }
     }
 
@@ -49,6 +50,14 @@ public class LessonController {
      return  ResponseEntity.status(HttpStatus.OK).body(lessonService.getAll());
     }
 
+    @PostMapping("/uploadPdf/{lessonId}")
+    public ResponseEntity<?> uploadPdf(@PathVariable Long lessonId, @RequestBody MultipartFile file){
+        try{
+            return ResponseEntity.status(HttpStatus.OK).body(lessonService.uploadPdf(lessonId,file));
+        }catch (RuntimeException ex){
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(ex.getMessage());
+        }
+    }
 
 
 
