@@ -1,7 +1,9 @@
 package com.internshipProject1.LearningPLatform.Service.ServiceImpl;
 
+
 import com.internshipProject1.LearningPLatform.DTO.QuizDTO;
 import com.internshipProject1.LearningPLatform.Entity.Course;
+import com.internshipProject1.LearningPLatform.Entity.Questions;
 import com.internshipProject1.LearningPLatform.Entity.Quiz;
 import com.internshipProject1.LearningPLatform.Repository.CourseRepository;
 import com.internshipProject1.LearningPLatform.Repository.QuizRepository;
@@ -92,4 +94,19 @@ public class QuizServiceImpl implements QuizService {
     public List<Quiz> getAll() {
         return quizRepository.findAll();
     }
+
+    @Override
+    public List<Questions> getQuestions(Long quizId) {
+        Quiz quiz = quizRepository.findById(quizId).orElseThrow(()->new RuntimeException("Quiz not found"));
+
+        if(!userService.getLoggedInUser().getLogin().getRole().equalsIgnoreCase("ADMIN")
+                && !Objects.equals(quiz.getCourse().getInstructor().getUserId(), userService.getLoggedInUser().getUserId())){
+            throw new RuntimeException("Unauthorized Instructor");
+        }
+
+
+        return quiz.getQuestions();
+    }
+
+
 }

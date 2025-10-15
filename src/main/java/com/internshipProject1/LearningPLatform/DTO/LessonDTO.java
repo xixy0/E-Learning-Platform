@@ -14,4 +14,5 @@ public class LessonDTO {
     private String courseTitle;
     private String videoUrl;
     private String pdfUrl;
+    private String instructor;
 }

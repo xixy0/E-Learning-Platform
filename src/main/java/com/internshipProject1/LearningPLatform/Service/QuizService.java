@@ -1,6 +1,8 @@
 package com.internshipProject1.LearningPLatform.Service;
 
+
 import com.internshipProject1.LearningPLatform.DTO.QuizDTO;
+import com.internshipProject1.LearningPLatform.Entity.Questions;
 import com.internshipProject1.LearningPLatform.Entity.Quiz;
 import org.springframework.stereotype.Service;
 
@@ -16,6 +18,8 @@ public interface QuizService {
     //Question getQuestions(Long quizId)
     Quiz getQuizById(Long quizId);
     List<Quiz> getAll();
+    List<Questions> getQuestions(Long quizId);
+
 
 
 }

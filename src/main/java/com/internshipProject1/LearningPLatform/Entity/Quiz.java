@@ -6,6 +6,7 @@ import lombok.Data;
 import lombok.NoArgsConstructor;
 
 import java.time.LocalDate;
+import java.util.List;
 
 
 @Entity
@@ -29,13 +30,14 @@ public class Quiz {
     @Column(name = "timestamp")
     private LocalDate timestamp;
 
+
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name="course_id",referencedColumnName = "course_id",nullable = false)
     private Course course;
 
-//    @OneToMany(mappedBy = "quiz",cascade = CascadeType.ALL,orphanRemoval = true)
-//    private List<Questions> questions;
-//
+    @OneToMany(mappedBy = "quiz",cascade = CascadeType.ALL,orphanRemoval = true)
+    private List<Questions> questions;
+
 //    @OneToMany(mappedBy = "quiz",cascade = CascadeType.ALL,orphanRemoval = true)
 //    private List<Submission> submissions;
 }

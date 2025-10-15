@@ -39,12 +39,16 @@ public class LessonServiceImpl implements LessonService {
         }
         System.out.println("addLesson");
 
+        lessonDTO.setInstructor(course.getInstructor().getFirstName()+" "+course.getInstructor().getMiddleName() + " " + course.getInstructor().getLastName());
+
         Lesson lesson = new Lesson();
         lesson.setLessonDescription(lessonDTO.getLessonDescription());
         lesson.setVideourl(lessonDTO.getVideoUrl());
         lesson.setPdfUrl(lessonDTO.getPdfUrl());
         lesson.setLessonTitle(lessonDTO.getLessonTitle());
         lesson.setCourse(course);
+        lesson.setInstructor(course.getInstructor().getFirstName()+" "+course.getInstructor().getMiddleName() + " " + course.getInstructor().getLastName());
+
         lessonRepository.save(lesson);
         return lessonDTO;
     }
@@ -63,6 +67,7 @@ public class LessonServiceImpl implements LessonService {
         lesson.setLessonTitle(lessonDTO.getLessonTitle());
         Course course = courseRepository.findByCourseTitle(lessonDTO.getCourseTitle()).orElseThrow(()->new RuntimeException("Course not found"));
         lesson.setCourse(course);
+        lesson.setInstructor(course.getInstructor().getFirstName()+" "+course.getInstructor().getMiddleName() + " " + course.getInstructor().getLastName());
         lessonRepository.save(lesson);
         return lessonDTO;
     }

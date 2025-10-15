@@ -29,6 +29,8 @@ public class Lesson {
     @Column(name = "title")
     private String lessonTitle;
 
+    @Column(name = "instructor")
+    private String instructor;
 
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "course_id",referencedColumnName = "course_id")

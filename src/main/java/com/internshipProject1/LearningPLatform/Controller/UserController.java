@@ -39,7 +39,7 @@ public class UserController {
             return ResponseEntity.status(HttpStatus.OK).body(userService.updateUser(userId,userRegistrationDTO));
 
         }
-        catch(UsernameNotFoundException e){
+        catch(RuntimeException e){
             return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(e.getMessage());
         }
     }
@@ -51,7 +51,7 @@ public class UserController {
             return ResponseEntity.status(HttpStatus.OK).body("User Deactivated");
 
         }
-        catch(UsernameNotFoundException e){
+        catch(RuntimeException e){
             return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(e.getMessage());
         }
     }
@@ -63,21 +63,41 @@ public class UserController {
             return ResponseEntity.status(HttpStatus.OK).body("User Activated");
 
         }
-        catch(UsernameNotFoundException e){
+        catch(RuntimeException e){
             return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(e.getMessage());
         }
     }
 
-    @GetMapping("/allEnrolledCourses")
-    public ResponseEntity<?> viewAllEnrolledCourses(@PathVariable Long userId){
+    @GetMapping("/viewCourses/{userId}")
+    public ResponseEntity<?> viewCourses(@PathVariable Long userId){
+        try{
+            return ResponseEntity.status(HttpStatus.OK).body(userService.viewCourses(userId));
+        }
+        catch(RuntimeException e){
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(e.getMessage());
+        }
+    }
+
+    @GetMapping("/viewEnrolledCourses/{userId}")
+    public ResponseEntity<?> viewEnrolledCourses(@PathVariable Long userId){
         try{
             return ResponseEntity.status(HttpStatus.OK).body(userService.viewEnrolledCourses(userId));
         }
-        catch(UsernameNotFoundException e){
+        catch(RuntimeException e){
             return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(e.getMessage());
         }
     }
 
+    @DeleteMapping("/deleteUser/{userId}")
+    public ResponseEntity<?> deleteUser(@PathVariable Long userId){
+        try{
+            userService.deleteUser(userId);
+            return ResponseEntity.status(HttpStatus.OK).body("User deleted");
+        }
+        catch(UsernameNotFoundException e){
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(e.getMessage());
+        }
+    }
 
 
 

@@ -15,10 +15,9 @@ public interface UserService {
      void deactivateUser(Long userId);
      void activateUser(Long userId);
      Users getLoggedInUser();
-     Long getLoggedInUserId();
-     Users getUserById(Long userId);
      List<CourseRegistrationDTO> viewEnrolledCourses(Long userId);
      List<CourseRegistrationDTO> viewCourses(Long userId);
+     void deleteUser(Long userId);
 
 
 

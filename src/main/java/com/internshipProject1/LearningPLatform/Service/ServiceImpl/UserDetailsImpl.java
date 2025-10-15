@@ -71,8 +71,11 @@ public class UserDetailsImpl implements UserService {
 
     @Override
     public Users updateUser(Long userId, UserRegistrationDTO userRegistrationDTO) {
-        Users users = userRepository.findById(userId).orElseThrow(()->new UsernameNotFoundException("User does not exist"));
-
+        Users users = userRepository.findById(userId).orElseThrow(()->new RuntimeException("User does not exist"));
+        if(!getLoggedInUser().getLogin().getRole().equalsIgnoreCase("ADMIN")
+                && !Objects.equals(getLoggedInUser().getUserId(),userId)){
+            throw new RuntimeException("Unauthorized user");
+        }
         users.setFirstName(userRegistrationDTO.getFirstName());
         users.setMiddleName(userRegistrationDTO.getMiddleName());
         users.setLastName(userRegistrationDTO.getLastName());
@@ -87,7 +90,7 @@ public class UserDetailsImpl implements UserService {
 
     @Override
     public void deactivateUser(Long loginId) {
-        Login login = loginRepository.findById(loginId).orElseThrow(()->new UsernameNotFoundException("User does not exist"));
+        Login login = loginRepository.findById(loginId).orElseThrow(()->new RuntimeException("User does not exist"));
         login.setAccountStatus("INACTIVE");
         loginRepository.save(login);
 
@@ -95,7 +98,7 @@ public class UserDetailsImpl implements UserService {
 
     @Override
     public void activateUser(Long loginId) {
-        Login login = loginRepository.findById(loginId).orElseThrow(()->new UsernameNotFoundException("User does not exist"));
+        Login login = loginRepository.findById(loginId).orElseThrow(()->new RuntimeException("User does not exist"));
         login.setAccountStatus("ACTIVE");
         loginRepository.save(login);
     }
@@ -115,20 +118,12 @@ public class UserDetailsImpl implements UserService {
     }
 
     @Override
-    public Long getLoggedInUserId() {
-        return getLoggedInUser().getUserId();
-    }
-
-    @Override
-    public Users getUserById(Long userId) {
-        return userRepository.findById(userId).orElseThrow(()->new UsernameNotFoundException("Username not found"));
-
-    }
-
-
-    @Override
     public List<CourseRegistrationDTO> viewCourses(Long userId) {
-        Users user = userRepository.findById(userId).orElseThrow(()->new UsernameNotFoundException("Username not found"));
+        if(getLoggedInUser().getLogin().getRole().equalsIgnoreCase("INSTRUCTOR")
+        && !Objects.equals(getLoggedInUser().getUserId(),userId)){
+            throw new RuntimeException("Unauthorized instructor");
+        }
+        Users user = userRepository.findById(userId).orElseThrow(()->new RuntimeException("Username not found"));
         List<Course> course =user.getCourses();
         List<CourseRegistrationDTO> courseRegistrationDTOArrayList = new ArrayList<>();
         for(Course course1 : course){
@@ -137,10 +132,23 @@ public class UserDetailsImpl implements UserService {
           return courseRegistrationDTOArrayList;
     }
 
+
+
+    @Override
+    public void deleteUser(Long userId) {
+        if(userRepository.findById(userId).isEmpty()){
+            throw new UsernameNotFoundException("User does not exist");
+        }
+        userRepository.deleteById(userId);
+    }
+
     @Override
     public List<CourseRegistrationDTO> viewEnrolledCourses(Long userId) {
-
-        Users users = userRepository.findById(userId).orElseThrow(()->new UsernameNotFoundException("User does not exist"));
+        if(getLoggedInUser().getLogin().getRole().equalsIgnoreCase("STUDENT")
+                && !Objects.equals(getLoggedInUser().getUserId(),userId)){
+            throw new RuntimeException("Unauthorized instructor");
+        }
+        Users users = userRepository.findById(userId).orElseThrow(()->new RuntimeException("User does not exist"));
         List<StudentEnrollment> enrollments =users.getStudentEnrollments();
         List<CourseRegistrationDTO> courseRegistrationDTOArrayList = new ArrayList<>();
         for(StudentEnrollment enrollment : enrollments){

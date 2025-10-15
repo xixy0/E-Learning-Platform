@@ -45,6 +45,8 @@ public class CourseServiceImpl implements CourseService {
       Users instructor = userService.getLoggedInUser();
       course.setInstructor(instructor);
       course.setStudentEnrollments(new ArrayList<>());
+      List<Quiz> quizzes = new ArrayList<>();
+      course.setQuiz(quizzes);
       return courseRepository.save(course);
 
 
@@ -128,9 +130,11 @@ public class CourseServiceImpl implements CourseService {
         List<LessonDTO> lessonDTOList = new ArrayList<>();
         for(Lesson lesson : lessons){
             lessonDTOList.add(new LessonDTO(lesson.getLessonDescription(),
-                    lesson.getLessonTitle(),lesson.getCourse().getCourseTitle(),
+                    lesson.getLessonTitle(),
+                    lesson.getCourse().getCourseTitle(),
                     lesson.getVideourl(),
-                    lesson.getPdfUrl()));
+                    lesson.getPdfUrl(),
+                    lesson.getCourse().getInstructor().getFirstName()));
         }
         return lessonDTOList;
     }
@@ -139,8 +143,8 @@ public class CourseServiceImpl implements CourseService {
     public void removeEnrolledStudent(Long courseId ,Long userId) {
         Course course = courseRepository.findById(courseId).orElseThrow(()->new RuntimeException("Course not found"));
         Users users = userRepository.findById(userId).orElseThrow(()->new RuntimeException("User not found"));
-
         List<StudentEnrollment> studentEnrollments = course.getStudentEnrollments();
+        if(studentEnrollments.isEmpty()) throw new RuntimeException("Student not enrolled");
         for(StudentEnrollment studentEnrollment : studentEnrollments){
             if(studentEnrollment.getUsers().getUserId() == userId){
                 studentEnrollments.remove(studentEnrollment);

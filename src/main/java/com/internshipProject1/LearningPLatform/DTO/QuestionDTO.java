@@ -4,17 +4,15 @@ import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
-import java.time.LocalDate;
-
 @Data
 @AllArgsConstructor
 @NoArgsConstructor
-public class QuizDTO {
-
+public class QuestionDTO {
+    private String questionText;
+    private String option1;
+    private String option2;
+    private String option3;
+    private String option4;
+    private String correctAnswer;
     private String quizTitle;
-    private Double totalMarks;
-    private String  courseTitle;
-    private LocalDate timestamp;
-
-
 }
