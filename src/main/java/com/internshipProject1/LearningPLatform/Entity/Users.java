@@ -1,6 +1,5 @@
 package com.internshipProject1.LearningPLatform.Entity;
 
-import com.fasterxml.jackson.annotation.JsonBackReference;
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.fasterxml.jackson.annotation.JsonManagedReference;
@@ -8,10 +7,6 @@ import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
-//import lombok.AllArgsConstructor;
-//import lombok.Data;
-//import lombok.NoArgsConstructor;
-//import lombok.RequiredArgsConstructor;
 
 import java.time.LocalDate;
 import java.util.List;
@@ -67,9 +62,12 @@ public class Users {
     @JsonIgnore
     private List<StudentEnrollment> studentEnrollments;
 
+    @OneToMany(mappedBy = "student" , cascade = CascadeType.ALL,orphanRemoval = true)
+    @JsonIgnore
+    private List<Submission> submissions;
 
-//    @OneToMany(mappedBy = "users" , cascade = CascadeType.ALL,orphanRemoval = true)
-//    private List<Submission> submissions;
-
+    @OneToMany(mappedBy = "users",cascade = CascadeType.ALL,orphanRemoval = true)
+    @JsonIgnore
+    private List<AssignmentSubmission> assignmentSubmissions;
 
 }

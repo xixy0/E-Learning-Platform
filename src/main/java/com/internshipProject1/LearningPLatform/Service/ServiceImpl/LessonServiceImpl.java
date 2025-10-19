@@ -91,7 +91,7 @@ public class LessonServiceImpl implements LessonService {
 
     @Override
     public String uploadPdf(Long lessonId, MultipartFile file) {
-        final String UPLOAD_DIR = "/uploads/pdfs/";
+        final String UPLOAD_DIR = "/lessons/pdfs/";
         Lesson lesson = lessonRepository.findById(lessonId).orElseThrow(()-> new RuntimeException("Course not found"));
         if(!userService.getLoggedInUser().getLogin().getRole().equalsIgnoreCase("ADMIN")
                 && !Objects.equals(lesson.getCourse().getInstructor().getUserId(), userService.getLoggedInUser().getUserId())){
@@ -116,7 +116,7 @@ public class LessonServiceImpl implements LessonService {
                 File destinationFile = new File(directory, safeFilename);
                 file.transferTo(destinationFile);
 
-                String relativePath = "/uploads/pdfs/" + safeFilename;
+                String relativePath = "/lessons/pdfs/" + safeFilename;
                 lesson.setPdfUrl(relativePath);
                 lessonRepository.save(lesson);
                 return relativePath;

@@ -19,7 +19,6 @@ public class CourseController {
     @Autowired
     private CourseService courseService;
 
-
     @PostMapping("/addCourse")
     public ResponseEntity<?> addCourse(@RequestBody CourseRegistrationDTO courseRegistrationDTO){
          return ResponseEntity.status(HttpStatus.CREATED).body(courseService.addCourse(courseRegistrationDTO));
@@ -75,22 +74,32 @@ public class CourseController {
             return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(List.of(ex.getMessage()));
         }
     }
-
-    @DeleteMapping("/removeEnroll/{courseId}/{userId}")
-    public ResponseEntity<?> removeEnrolled(@PathVariable Long courseId,@PathVariable Long userId){
-        try{
-            courseService.removeEnrolledStudent(courseId,userId);
-            return ResponseEntity.status(HttpStatus.OK).body("Student removed by ADMIN");
-        }
-        catch (RuntimeException ex){
-            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(ex.getMessage());
-        }
-    }
+//
+//    @DeleteMapping("/removeEnroll/{courseId}/{userId}")
+//    public ResponseEntity<?> removeEnrolled(@PathVariable Long courseId,@PathVariable Long userId){
+//        try{
+//            courseService.removeEnrolledStudent(courseId,userId);
+//            return ResponseEntity.status(HttpStatus.OK).body("Student removed by ADMIN");
+//        }
+//        catch (RuntimeException ex){
+//            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(ex.getMessage());
+//        }
+//    }
 
     @GetMapping("/getAllQuiz/{courseId}")
     public ResponseEntity<List<?>> getAllQuiz(@PathVariable Long courseId){
         try{
             return ResponseEntity.status(HttpStatus.ACCEPTED).body(courseService.getAllQuiz(courseId));
+        }catch (RuntimeException ex){
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(List.of(ex.getMessage()));
+        }
+    }
+
+
+    @GetMapping("/getAllAssignments/{courseId}")
+    public ResponseEntity<List<?>> getAllAssignments(@PathVariable Long courseId){
+        try{
+            return ResponseEntity.status(HttpStatus.ACCEPTED).body(courseService.getAllAssignments(courseId));
         }catch (RuntimeException ex){
             return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(List.of(ex.getMessage()));
         }

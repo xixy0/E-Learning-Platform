@@ -5,6 +5,7 @@ import com.internshipProject1.LearningPLatform.DTO.QuizDTO;
 import com.internshipProject1.LearningPLatform.Entity.Course;
 import com.internshipProject1.LearningPLatform.Entity.Questions;
 import com.internshipProject1.LearningPLatform.Entity.Quiz;
+import com.internshipProject1.LearningPLatform.Entity.Submission;
 import com.internshipProject1.LearningPLatform.Repository.CourseRepository;
 import com.internshipProject1.LearningPLatform.Repository.QuizRepository;
 import com.internshipProject1.LearningPLatform.Service.QuizService;
@@ -13,6 +14,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import java.time.LocalDate;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
 
@@ -29,8 +31,8 @@ public class QuizServiceImpl implements QuizService {
     private QuizRepository quizRepository;
 
     @Override
-    public Quiz addQuiz(QuizDTO quizDTO) {
-        Course course = courseRepository.findByCourseTitle(quizDTO.getCourseTitle()).orElseThrow(()->new RuntimeException("Course not found"));
+    public Quiz addQuiz(Long courseId ,QuizDTO quizDTO) {
+        Course course = courseRepository.findById(courseId).orElseThrow(()->new RuntimeException("Course not found"));
 
         if(!userService.getLoggedInUser().getLogin().getRole().equalsIgnoreCase("ADMIN")
                 && !Objects.equals(course.getInstructor().getUserId(), userService.getLoggedInUser().getUserId())){
@@ -38,10 +40,12 @@ public class QuizServiceImpl implements QuizService {
         }
 
         Quiz quiz = new Quiz();
-        quiz.setQuizTitle(quiz.getQuizTitle());
+        quiz.setQuizTitle(quizDTO.getQuizTitle());
         quiz.setCourse(course);
         quiz.setTotalMarks(quizDTO.getTotalMarks());
         quiz.setTimestamp(LocalDate.now());
+        quiz.setQuestions(new ArrayList<>());
+        quiz.setSubmissions(new ArrayList<>());
 
         return quizRepository.save(quiz);
     }
@@ -59,24 +63,20 @@ public class QuizServiceImpl implements QuizService {
     }
 
     @Override
-    public QuizDTO updateQuiz(Long quizId, QuizDTO quizDTO) {
+    public Quiz updateQuiz(Long quizId, QuizDTO quizDTO) {
         Quiz quiz = quizRepository.findById(quizId).orElseThrow(()->new RuntimeException("Quiz not found"));
         if(!userService.getLoggedInUser().getLogin().getRole().equalsIgnoreCase("ADMIN")
                 && !Objects.equals(quiz.getCourse().getInstructor().getUserId(), userService.getLoggedInUser().getUserId()))
         {
             throw new RuntimeException("Unauthorized Instructor");
         }
-        Course course = quiz.getCourse();
-        if(!quizDTO.getCourseTitle().equalsIgnoreCase("")) {
-            course = courseRepository.findByCourseTitle(quizDTO.getCourseTitle()).orElseThrow(() -> new RuntimeException("Course not found"));
-        }
-        quiz.setQuizTitle(quiz.getQuizTitle());
-        quiz.setCourse(course);
+
+        quiz.setQuizTitle(quizDTO.getQuizTitle());
         quiz.setTotalMarks(quizDTO.getTotalMarks());
         quiz.setTimestamp(LocalDate.now());
 
-        quizRepository.save(quiz);
-        return quizDTO;
+        return quizRepository.save(quiz);
+
     }
 
     @Override
@@ -104,8 +104,19 @@ public class QuizServiceImpl implements QuizService {
             throw new RuntimeException("Unauthorized Instructor");
         }
 
-
         return quiz.getQuestions();
+    }
+
+    @Override
+    public List<Submission> getSubmissions(Long quizId) {
+        Quiz quiz = quizRepository.findById(quizId).orElseThrow(()->new RuntimeException("Quiz not found"));
+
+        if(!userService.getLoggedInUser().getLogin().getRole().equalsIgnoreCase("ADMIN")
+                && !Objects.equals(quiz.getCourse().getInstructor().getUserId(), userService.getLoggedInUser().getUserId())){
+            throw new RuntimeException("Unauthorized Instructor");
+        }
+
+        return quiz.getSubmissions();
     }
 
 

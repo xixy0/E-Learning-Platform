@@ -31,18 +31,26 @@ public class SecurityConfig {
         return http
                 .csrf(AbstractHttpConfigurer::disable)
                 .authorizeHttpRequests(auth -> auth
-                        .requestMatchers("api/users/register","api/auth/authenticate","api/users/updateUser/**",
+                        .requestMatchers(
+                                "api/users/register","api/auth/authenticate","api/users/updateUser/**",
                                 "api/course/getInstructor/**","api/course/getAll",
                                 "api/student/unenroll/**",
-                                "api/course/getLessons/**").permitAll()
-                        .requestMatchers("api/users/getAll","api/users/deactivate/**","api/users/activate/**","api/users/deleteUser/**",
+                                "api/course/getLessons/**",
+                                "api/submissions/getAll").permitAll()
+                        .requestMatchers(
+                                "api/users/getAll","api/users/deactivate/**","api/users/activate/**","api/users/deleteUser/**",
                                 "api/course/removeEnroll/**").hasRole("ADMIN")
-                        .requestMatchers("api/users/viewEnrolledCourses/**",
-                                "api/student/enroll/**").hasAnyRole("ADMIN","STUDENT")
-                        .requestMatchers("api/users/viewCourses/**","api/course/**",
+                        .requestMatchers(
+                                "api/users/viewEnrolledCourses/**",
+                                "api/student/enroll/**",
+                                 "api/submissions/**",
+                                "api/assignmentSubmissions/**").hasAnyRole("ADMIN","STUDENT")
+                        .requestMatchers(
+                                "api/users/viewCourses/**","api/course/**",
                                 "api/lesson/**",
                                 "api/quiz/**",
-                                "api/questions/**").hasAnyRole("ADMIN","INSTRUCTOR")
+                                "api/questions/**",
+                                "api/assignment/**").hasAnyRole("ADMIN","INSTRUCTOR")
                         .anyRequest().authenticated()
                 )
                 .sessionManagement(session -> session.sessionCreationPolicy(SessionCreationPolicy.STATELESS))

@@ -35,8 +35,6 @@ public class Course {
     @Column(name = "course_duration",nullable = false)
     private String courseDuration;
 
-
-//    @JsonIgnoreProperties({"hibernateLazyInitializer", "handler"})
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "instructor_id")
     @JsonIgnore
@@ -46,7 +44,6 @@ public class Course {
     @JsonIgnore
     private List<Lesson> lessons;
 
-//    @JsonIgnoreProperties({"hibernateLazyInitializer", "handler"})
     @OneToMany(mappedBy = "course" , cascade = CascadeType.ALL,orphanRemoval = true)
     @JsonIgnore
     private List<StudentEnrollment> studentEnrollments;
@@ -54,5 +51,9 @@ public class Course {
     @OneToMany(mappedBy = "course",cascade = CascadeType.ALL,orphanRemoval = true)
     @JsonIgnore
     private List<Quiz> quiz;
+
+    @OneToMany(mappedBy = "course",cascade = CascadeType.ALL,orphanRemoval = true)
+    @JsonIgnore
+    private List<Assignment> assignments;
 
 }

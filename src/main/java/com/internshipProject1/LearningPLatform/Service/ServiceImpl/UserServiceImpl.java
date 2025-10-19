@@ -1,11 +1,9 @@
 package com.internshipProject1.LearningPLatform.Service.ServiceImpl;
 
+import com.internshipProject1.LearningPLatform.DTO.AssignmentSubmissionDTO;
 import com.internshipProject1.LearningPLatform.DTO.CourseRegistrationDTO;
 import com.internshipProject1.LearningPLatform.DTO.UserRegistrationDTO;
-import com.internshipProject1.LearningPLatform.Entity.Course;
-import com.internshipProject1.LearningPLatform.Entity.Login;
-import com.internshipProject1.LearningPLatform.Entity.StudentEnrollment;
-import com.internshipProject1.LearningPLatform.Entity.Users;
+import com.internshipProject1.LearningPLatform.Entity.*;
 import com.internshipProject1.LearningPLatform.Repository.LoginRepository;
 import com.internshipProject1.LearningPLatform.Repository.UserRepository;
 import com.internshipProject1.LearningPLatform.Service.UserService;
@@ -19,7 +17,7 @@ import org.springframework.stereotype.Service;
 import java.util.*;
 
 @Service
-public class UserDetailsImpl implements UserService {
+public class UserServiceImpl implements UserService {
     @Autowired
     private UserRepository userRepository;
 
@@ -140,6 +138,22 @@ public class UserDetailsImpl implements UserService {
             throw new UsernameNotFoundException("User does not exist");
         }
         userRepository.deleteById(userId);
+    }
+
+    @Override
+    public List<AssignmentSubmissionDTO> getAllStudentAssignmentSubmissions() {
+
+        Users users = getLoggedInUser();
+        List<AssignmentSubmission> assignmentSubmissions =users.getAssignmentSubmissions();
+        List<AssignmentSubmissionDTO> assignmentSubmissionDTOList = new ArrayList<>();
+        for(AssignmentSubmission assignmentSubmission: assignmentSubmissions){
+            assignmentSubmissionDTOList.add(new AssignmentSubmissionDTO(assignmentSubmission.getAssignmentSubmissionId(),
+                    assignmentSubmission.getSubmissionDate(),assignmentSubmission.getAssignmentSubmissionUrl(),
+                    assignmentSubmission.getUsers().getUserId(),
+                    assignmentSubmission.getAssignment().getAssignmentId()));
+
+        }
+        return assignmentSubmissionDTOList;
     }
 
     @Override

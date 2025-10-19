@@ -1,5 +1,6 @@
 package com.internshipProject1.LearningPLatform.Entity;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
 import lombok.Data;
@@ -30,14 +31,15 @@ public class Quiz {
     @Column(name = "timestamp")
     private LocalDate timestamp;
 
-
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name="course_id",referencedColumnName = "course_id",nullable = false)
     private Course course;
 
     @OneToMany(mappedBy = "quiz",cascade = CascadeType.ALL,orphanRemoval = true)
+    @JsonIgnore
     private List<Questions> questions;
 
-//    @OneToMany(mappedBy = "quiz",cascade = CascadeType.ALL,orphanRemoval = true)
-//    private List<Submission> submissions;
+    @OneToMany(mappedBy = "quiz",cascade = CascadeType.ALL,orphanRemoval = true)
+    @JsonIgnore
+    private List<Submission> submissions;
 }

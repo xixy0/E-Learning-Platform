@@ -41,7 +41,7 @@ public class QuestionServiceImpl implements QuestionService {
         questions.setOption4(questionDTO.getOption4());
         questions.setCorrectAnswer(questionDTO.getCorrectAnswer());
         questions.setQuiz(quiz);
-
+        questionRepository.save(questions);
         return questions;
 
     }

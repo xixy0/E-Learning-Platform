@@ -42,11 +42,14 @@ public class CourseServiceImpl implements CourseService {
       course.setCourseDescription(courseRegistrationDTO.getCourseDescription());
       course.setCourseCategory(courseRegistrationDTO.getCourseCategory());
       course.setCourseDuration(courseRegistrationDTO.getCourseDuration());
+
       Users instructor = userService.getLoggedInUser();
       course.setInstructor(instructor);
+
       course.setStudentEnrollments(new ArrayList<>());
-      List<Quiz> quizzes = new ArrayList<>();
-      course.setQuiz(quizzes);
+      course.setQuiz(new ArrayList<>());
+      course.setAssignments(new ArrayList<>());
+
       return courseRepository.save(course);
 
 
@@ -62,7 +65,6 @@ public class CourseServiceImpl implements CourseService {
         courses.setCourseTitle(courseRegistrationDTO.getCourseTitle());
         courses.setCourseCategory(courseRegistrationDTO.getCourseCategory());
         courses.setCourseDuration(courseRegistrationDTO.getCourseDuration());
-        courses.setInstructor(courses.getInstructor());
         courses.setCourseDescription(courseRegistrationDTO.getCourseDescription());
 
         return courseRepository.save(courses);
@@ -104,8 +106,6 @@ public class CourseServiceImpl implements CourseService {
 
     @Override
     public List<UserDTO> getStudentsEnrolled(Long courseId) {
-
-
         Course course = courseRepository.findById(courseId).orElseThrow(()->new RuntimeException("Course not found"));
          if(!userService.getLoggedInUser().getLogin().getRole().equalsIgnoreCase("ADMIN")
                 && !Objects.equals(course.getInstructor().getUserId(), userService.getLoggedInUser().getUserId())){
@@ -139,35 +139,40 @@ public class CourseServiceImpl implements CourseService {
         return lessonDTOList;
     }
 
-    @Override
-    public void removeEnrolledStudent(Long courseId ,Long userId) {
-        Course course = courseRepository.findById(courseId).orElseThrow(()->new RuntimeException("Course not found"));
-        Users users = userRepository.findById(userId).orElseThrow(()->new RuntimeException("User not found"));
-        List<StudentEnrollment> studentEnrollments = course.getStudentEnrollments();
-        if(studentEnrollments.isEmpty()) throw new RuntimeException("Student not enrolled");
-        for(StudentEnrollment studentEnrollment : studentEnrollments){
-            if(studentEnrollment.getUsers().getUserId() == userId){
-                studentEnrollments.remove(studentEnrollment);
-                users.getStudentEnrollments().remove(studentEnrollment);
-                studentEnrollmentRepository.delete(studentEnrollment);
-            }
-        }
+//    @Override
+//    public void removeEnrolledStudent(Long courseId ,Long userId) {
+//        Course course = courseRepository.findById(courseId).orElseThrow(()->new RuntimeException("Course not found"));
+//        Users users = userRepository.findById(userId).orElseThrow(()->new RuntimeException("User not found"));
+//        List<StudentEnrollment> studentEnrollments = course.getStudentEnrollments();
+//        if(studentEnrollments.isEmpty()) throw new RuntimeException("Student not enrolled");
+//        for(StudentEnrollment studentEnrollment : studentEnrollments){
+//            if(studentEnrollment.getUsers().getUserId() == userId){
+//                studentEnrollments.remove(studentEnrollment);
+//                users.getStudentEnrollments().remove(studentEnrollment);
+//                studentEnrollmentRepository.delete(studentEnrollment);
+//            }
+//        }
+//
+//    }
 
-    }
-
     @Override
-    public List<QuizDTO> getAllQuiz(Long courseId) {
+    public List<Quiz> getAllQuiz(Long courseId) {
         Course course = courseRepository.findById(courseId).orElseThrow(()->new RuntimeException("Course not found"));
         if(!userService.getLoggedInUser().getLogin().getRole().equalsIgnoreCase("ADMIN")
                 && !Objects.equals(course.getInstructor().getUserId(), userService.getLoggedInUser().getUserId())){
             throw new RuntimeException("Unauthorized Instructor");
         }
-        List<Quiz> quizzes = course.getQuiz();
-        List<QuizDTO> quizDTOList = new ArrayList<>();
-        for(Quiz quiz:quizzes){
-            quizDTOList.add(new QuizDTO(quiz.getQuizTitle(),quiz.getTotalMarks(),
-                    quiz.getCourse().getCourseTitle(),quiz.getTimestamp()));
+
+        return course.getQuiz();
+    }
+
+    @Override
+    public List<Assignment> getAllAssignments(Long courseId) {
+        Course course = courseRepository.findById(courseId).orElseThrow(()->new RuntimeException("Course not found"));
+        if(!userService.getLoggedInUser().getLogin().getRole().equalsIgnoreCase("ADMIN")
+                && !Objects.equals(course.getInstructor().getUserId(), userService.getLoggedInUser().getUserId())){
+            throw new RuntimeException("Unauthorized Instructor");
         }
-        return quizDTOList;
+        return course.getAssignments();
     }
 }

@@ -16,10 +16,10 @@ public class QuizController  {
     private QuizService quizService;
 
 
-    @PostMapping("/addQuiz")
-    public ResponseEntity<?> addQuiz(@RequestBody QuizDTO quizDTO){
+    @PostMapping("/addQuiz/{courseId}")
+    public ResponseEntity<?> addQuiz(@PathVariable Long courseId ,@RequestBody QuizDTO quizDTO){
         try {
-            return ResponseEntity.status(HttpStatus.CREATED).body(quizService.addQuiz(quizDTO));
+            return ResponseEntity.status(HttpStatus.CREATED).body(quizService.addQuiz(courseId,quizDTO));
         }catch (RuntimeException ex){
             return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(ex.getMessage());
         }
@@ -59,10 +59,19 @@ public class QuizController  {
     }
 
 
-    @GetMapping("/getAllQuestions/{quizId}")
+    @GetMapping("/getQuestions/{quizId}")
     public ResponseEntity<List<?>> getAllQuestions(@PathVariable Long quizId){
         try{
             return ResponseEntity.status(HttpStatus.ACCEPTED).body(quizService.getQuestions(quizId));
+        }catch (RuntimeException ex){
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(List.of(ex.getMessage()));
+        }
+    }
+
+    @GetMapping("/getSubmissions/{quizId}")
+    public ResponseEntity<List<?>> getSubmissions(@PathVariable Long quizId){
+        try{
+            return ResponseEntity.status(HttpStatus.ACCEPTED).body(quizService.getSubmissions(quizId));
         }catch (RuntimeException ex){
             return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(List.of(ex.getMessage()));
         }

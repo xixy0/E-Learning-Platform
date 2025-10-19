@@ -1,10 +1,14 @@
-//package com.internshipProject1.LearningPLatform.Service;
-//
-//import com.internshipProject1.LearningPLatform.Entity.Submission;
-//
-//public interface SubmissionService {
-//    public void submitQuiz(Long quzId, Submission submission);
-//    public double fetchUserScore(Long submissionId);
-//    public Double calculateScore();
-//}
-//
+package com.internshipProject1.LearningPLatform.Service;
+
+import com.internshipProject1.LearningPLatform.DTO.SubmissionDTO;
+import com.internshipProject1.LearningPLatform.Entity.Submission;
+
+import java.util.List;
+
+public interface SubmissionService {
+    Submission addSubmission(SubmissionDTO submissionDTO);
+    void deleteSubmission(Long submissionId);
+    List<Submission> getAll();
+
+}
+
