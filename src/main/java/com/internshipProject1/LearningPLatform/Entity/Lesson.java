@@ -30,7 +30,7 @@ public class Lesson {
     private String lessonTitle;
 
     @Column(name = "instructor")
-    private String instructor;
+    private String instructorName;
 
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "course_id",referencedColumnName = "course_id")

@@ -6,6 +6,7 @@ import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
+import java.time.LocalDateTime;
 import java.util.List;
 
 @Entity
@@ -25,6 +26,9 @@ public class Assignment {
 
     @Column(name = "assignment_desc")
     private String assignmentDescription;
+
+    @Column(name="submissionDate")
+    private LocalDateTime submissionDate;
 
     @Column(name = "assignmentPdf_url")
     private List<String> assignmentPdfUrl;

@@ -10,6 +10,8 @@ import com.internshipProject1.LearningPLatform.Repository.CourseRepository;
 import com.internshipProject1.LearningPLatform.Service.AssignmentService;
 import com.internshipProject1.LearningPLatform.Service.UserService;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.cache.annotation.CacheEvict;
+import org.springframework.cache.annotation.Cacheable;
 import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
 
@@ -31,6 +33,7 @@ public class AssignmentServiceImpl implements AssignmentService {
     private CourseRepository courseRepository;
 
     @Override
+    @CacheEvict(value = {"assignments"},allEntries = true)
     public Assignment addAssignment(Long courseId, AssignmentDTO assignmentDTO) {
         Course course = courseRepository.findById(courseId).orElseThrow(()->new RuntimeException("Course not found"));
         if(!userService.getLoggedInUser().getLogin().getRole().equalsIgnoreCase("ADMIN")
@@ -41,12 +44,13 @@ public class AssignmentServiceImpl implements AssignmentService {
         assignment.setAssignmentTitle(assignmentDTO.getAssignmentTitle());
         assignment.setAssignmentDescription(assignmentDTO.getAssignmentDescription());
         assignment.setCourse(course);
-        assignment.setAssignmentPdfUrl(new ArrayList<String>());
+        assignment.setAssignmentPdfUrl(new ArrayList<>());
         assignment.setAssignmentSubmissions(new ArrayList<>());
         return assignmentRepository.save(assignment);
     }
 
     @Override
+    @CacheEvict(value = {"assignments"},allEntries = true)
     public Assignment updateAssignment(Long assignmentId, AssignmentDTO assignmentDTO) {
         Assignment assignment = assignmentRepository.findById(assignmentId).orElseThrow(
                 ()->new RuntimeException("Assignment not found"));
@@ -56,6 +60,7 @@ public class AssignmentServiceImpl implements AssignmentService {
     }
 
     @Override
+    @CacheEvict(value = {"assignments"},allEntries = true)
     public void deleteAssignment(Long assignmentId) {
         Assignment assignment = assignmentRepository.findById(assignmentId).orElseThrow(
                 ()->new RuntimeException("Assignment not found"));
@@ -67,20 +72,25 @@ public class AssignmentServiceImpl implements AssignmentService {
     }
 
     @Override
+    @Cacheable(value = "assignments",key="'all'")
     public List<AssignmentDTO> getAll() {
         List<AssignmentDTO> assignmentDTOList = new ArrayList<>();
         List<Assignment> assignments = assignmentRepository.findAll();
 
         for(Assignment assignment : assignments){
-            assignmentDTOList.add(new AssignmentDTO(assignment.getAssignmentId(),
-                    assignment.getAssignmentTitle(), assignment.getAssignmentDescription(),
-                    assignment.getCourse().getCourseId(),assignment.getAssignmentPdfUrl()));
+            assignmentDTOList.add(new AssignmentDTO(
+                    assignment.getAssignmentId(),
+                    assignment.getAssignmentTitle(),
+                    assignment.getAssignmentDescription(),
+                    assignment.getCourse().getCourseId(),
+                    assignment.getAssignmentPdfUrl()));
         }
 
         return assignmentDTOList;
     }
 
     @Override
+    @CacheEvict(value = {"assignments"},allEntries = true)
     public String uploadAssignmentPdf(Long assignmentId, MultipartFile file) {
         final String ASSIGNMENT_DIR = "/assignments/pdfs/";
         Assignment assignment = assignmentRepository.findById(assignmentId).orElseThrow(
@@ -116,7 +126,9 @@ public class AssignmentServiceImpl implements AssignmentService {
         }
     }
 
+    /*Here the String path has a hidden /n.So without trimming it .equals dont work*/
     @Override
+    @CacheEvict(value = {"assignments"},allEntries = true)
     public void removeAssignmentPdf(Long assignmentId, String path) {
         Assignment assignment = assignmentRepository.findById(assignmentId).orElseThrow(
                 ()-> new RuntimeException("Assignment not found"));
@@ -124,13 +136,20 @@ public class AssignmentServiceImpl implements AssignmentService {
                 && !Objects.equals(assignment.getCourse().getInstructor().getUserId(), userService.getLoggedInUser().getUserId())){
             throw new RuntimeException("Unauthorized Instructor");
         }
-
+        System.out.println("[" +path+ "]");
+        String trimPath = path.trim();
+        System.out.println("["+trimPath+"]");
+        System.out.println("Before");
         List<String> paths = assignment.getAssignmentPdfUrl();
-        for(String path1 : paths){
-            if(path.equalsIgnoreCase(path1)){
-                paths.remove(path1);
+        for(int i=0;i<paths.size();i++){
+            if(Objects.equals(trimPath,paths.get(i))){
+                System.out.println("Inside if");
+                paths.remove(i);
+                break;
             }
+            System.out.println("["+paths.get(i)+"]");
         }
+        System.out.println("After");
         assignmentRepository.save(assignment);
     }
 
@@ -145,13 +164,28 @@ public class AssignmentServiceImpl implements AssignmentService {
         List<AssignmentSubmission> assignmentSubmissions = assignment.getAssignmentSubmissions();
         List<AssignmentSubmissionDTO> assignmentSubmissionDTOList = new ArrayList<>();
         for (AssignmentSubmission assignmentSubmission : assignmentSubmissions) {
-            assignmentSubmissionDTOList.add(new AssignmentSubmissionDTO(assignmentSubmission.getAssignmentSubmissionId(),
-                    assignmentSubmission.getSubmissionDate(), assignmentSubmission.getAssignmentSubmissionUrl(),
+            assignmentSubmissionDTOList.add(new AssignmentSubmissionDTO(
+                    assignmentSubmission.getAssignmentSubmissionId(),
+                    assignmentSubmission.getSubmissionDate(),
+                    assignmentSubmission.getAssignmentSubmissionUrl(),
                     assignmentSubmission.getUsers().getUserId(),
                     assignmentSubmission.getAssignment().getAssignmentId()));
 
         }
         return assignmentSubmissionDTOList;
+    }
+
+    @Override
+    @Cacheable(value = "assignments",key = "#assignmentId")
+    public AssignmentDTO getAssignmentById(Long assignmentId) {
+        Assignment assignment = assignmentRepository.findById(assignmentId).orElseThrow(
+                () -> new RuntimeException("Assignment not found"));
+        return new AssignmentDTO(
+                assignment.getAssignmentId(),
+                assignment.getAssignmentTitle(),
+                assignment.getAssignmentDescription(),
+                assignment.getCourse().getCourseId(),
+                assignment.getAssignmentPdfUrl());
     }
 }
 

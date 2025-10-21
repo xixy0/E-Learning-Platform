@@ -8,6 +8,8 @@ import com.internshipProject1.LearningPLatform.Repository.QuizRepository;
 import com.internshipProject1.LearningPLatform.Service.QuestionService;
 import com.internshipProject1.LearningPLatform.Service.UserService;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.cache.annotation.CacheEvict;
+import org.springframework.cache.annotation.Cacheable;
 import org.springframework.stereotype.Service;
 
 import java.util.ArrayList;
@@ -27,8 +29,9 @@ public class QuestionServiceImpl implements QuestionService {
     private QuizRepository quizRepository;
 
     @Override
+    @CacheEvict(value = "questions",allEntries = true)
     public Questions addQuestion(QuestionDTO questionDTO) {
-       Quiz quiz = quizRepository.findByQuizTitle(questionDTO.getQuizTitle()).orElseThrow(()->new RuntimeException("Quiz not found"));
+       Quiz quiz = quizRepository.findById(questionDTO.getQuizId()).orElseThrow(()->new RuntimeException("Quiz not found"));
         if(!userService.getLoggedInUser().getLogin().getRole().equalsIgnoreCase("ADMIN")
                 && !Objects.equals(quiz.getCourse().getInstructor().getUserId(), userService.getLoggedInUser().getUserId())){
             throw new RuntimeException("Unauthorized Instructor");
@@ -47,6 +50,7 @@ public class QuestionServiceImpl implements QuestionService {
     }
 
     @Override
+    @CacheEvict(value = "questions",allEntries = true)
     public void deleteQuestion(Long questionId) {
         Questions questions = questionRepository.findById(questionId).orElseThrow(()->new RuntimeException("Quiz not found"));
         if(!userService.getLoggedInUser().getLogin().getRole().equalsIgnoreCase("ADMIN")
@@ -60,10 +64,11 @@ public class QuestionServiceImpl implements QuestionService {
 
 
     @Override
+    @CacheEvict(value = "questions",allEntries = true)
     public Questions updateQuestion(Long questionId, QuestionDTO questionDTO) {
         Questions question = questionRepository.findById(questionId).orElseThrow(
                 () -> new RuntimeException("Quiz not found"));
-        Quiz quiz = quizRepository.findByQuizTitle(questionDTO.getQuizTitle()).orElseThrow(
+        Quiz quiz = quizRepository.findById(questionDTO.getQuizId()).orElseThrow(
                 ()->new RuntimeException("Quiz not found"));
 
         if (!userService.getLoggedInUser().getLogin().getRole().equalsIgnoreCase("ADMIN")
@@ -83,17 +88,27 @@ public class QuestionServiceImpl implements QuestionService {
 
     }
     @Override
+    @Cacheable(value = "questions",key="'all'")
     public List<QuestionDTO> getAll() {
 
         List<Questions> questions = questionRepository.findAll();
         List<QuestionDTO> questionDTOList = new ArrayList<>();
         for(Questions question : questions){
-         questionDTOList.add(new QuestionDTO(question.getQuestionText(),
+         questionDTOList.add(new QuestionDTO(question.getQuiz().getQuizId(),question.getQuestionId(),question.getQuestionText(),
                  question.getOption1(), question.getOption2(), question.getOption3(),
-                 question.getOption4(), question.getCorrectAnswer(),
-                 question.getQuiz().getQuizTitle()));
+                 question.getOption4(), question.getCorrectAnswer()));
         }
 
         return questionDTOList;
+    }
+
+    @Override
+    @Cacheable(value = "questions",key = "#questionId")
+    public QuestionDTO getQuestionById(Long questionId) {
+        Questions question = questionRepository.findById(questionId).orElseThrow(
+                () -> new RuntimeException("Quiz not found"));
+        return new QuestionDTO(question.getQuiz().getQuizId(),question.getQuestionId(),question.getQuestionText(),
+                question.getOption1(), question.getOption2(), question.getOption3(),
+                question.getOption4(), question.getCorrectAnswer());
     }
 }

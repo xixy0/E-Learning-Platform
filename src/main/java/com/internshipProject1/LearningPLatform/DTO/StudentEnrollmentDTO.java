@@ -6,19 +6,19 @@ import lombok.NoArgsConstructor;
 
 import java.io.Serial;
 import java.io.Serializable;
-import java.util.List;
+import java.time.LocalDate;
 
 @Data
 @AllArgsConstructor
 @NoArgsConstructor
-public class AssignmentDTO implements Serializable {
+public class StudentEnrollmentDTO implements Serializable {
 
     @Serial
-    private static final long serialVersionUID = 1L;
+    private static final long serialVersionUID = 7L;
 
-    private Long assignmentId;
-    private String assignmentTitle;
-    private String assignmentDescription;
+    private Long enrollmentId;
+    private LocalDate enrollmentDate;
+    private Long userId;
     private Long courseId;
-    private List<String> assignmentPdfUrl;
+
 }

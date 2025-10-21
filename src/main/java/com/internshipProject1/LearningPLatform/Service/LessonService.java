@@ -10,9 +10,9 @@ import java.util.List;
 @Service
 public interface LessonService {
     LessonDTO addLesson(LessonDTO lessonDTO);
-    LessonDTO updateLesson(Long lessonId,LessonDTO lessonDTO);
+    Lesson updateLesson(Long lessonId,LessonDTO lessonDTO);
     void deleteLesson(Long lessonId);
-    List<Lesson> getAll();
+    List<LessonDTO> getAll();
     String uploadPdf(Long lessonId, MultipartFile file);
-
+    LessonDTO getLessonById(Long lessonId);
 }

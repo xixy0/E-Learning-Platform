@@ -60,7 +60,7 @@ public class AssignmentController {
     }
 
     @DeleteMapping("/deleteAssignmentUrl/{assignmentId}")// not tested
-    public ResponseEntity<?> deleteAssignmentUrl(@PathVariable Long assignmentId,@RequestBody String path){
+    public ResponseEntity<?> deleteAssignmentUrl(@PathVariable Long assignmentId,@RequestParam String path){
         try{
             assignmentService.removeAssignmentPdf(assignmentId,path);
             return ResponseEntity.status(HttpStatus.OK).body("Deleted pdf successfully");

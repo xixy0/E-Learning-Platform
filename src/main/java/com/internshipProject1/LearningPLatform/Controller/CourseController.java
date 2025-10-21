@@ -44,7 +44,7 @@ public class CourseController {
     }
 
     @GetMapping("/getAll")
-    public ResponseEntity<List<Course>> getAllCourses(){
+    public ResponseEntity<List<?>> getAllCourses(){
         return ResponseEntity.status(HttpStatus.OK).body(courseService.getAll());
     }
 
@@ -74,17 +74,7 @@ public class CourseController {
             return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(List.of(ex.getMessage()));
         }
     }
-//
-//    @DeleteMapping("/removeEnroll/{courseId}/{userId}")
-//    public ResponseEntity<?> removeEnrolled(@PathVariable Long courseId,@PathVariable Long userId){
-//        try{
-//            courseService.removeEnrolledStudent(courseId,userId);
-//            return ResponseEntity.status(HttpStatus.OK).body("Student removed by ADMIN");
-//        }
-//        catch (RuntimeException ex){
-//            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(ex.getMessage());
-//        }
-//    }
+
 
     @GetMapping("/getAllQuiz/{courseId}")
     public ResponseEntity<List<?>> getAllQuiz(@PathVariable Long courseId){

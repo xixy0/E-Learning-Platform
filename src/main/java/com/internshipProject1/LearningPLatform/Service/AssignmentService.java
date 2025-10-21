@@ -18,4 +18,5 @@ public interface AssignmentService {
     String uploadAssignmentPdf(Long assignmentId, MultipartFile file);
     void removeAssignmentPdf(Long assignmentId,String path);
     List<AssignmentSubmissionDTO> getAllCourseAssignmentSubmissions(Long assignmentId);
+    AssignmentDTO getAssignmentById(Long assignmentId);
 }

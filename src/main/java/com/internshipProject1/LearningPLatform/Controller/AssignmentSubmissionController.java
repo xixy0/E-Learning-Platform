@@ -17,7 +17,7 @@ public class AssignmentSubmissionController {
     private AssignmentSubmissionService assignmentSubmissionService;
 
     @PostMapping("/addAssignmentSubmission/{assignmentId}")
-    public ResponseEntity<?> addAssignment(@PathVariable Long assignmentId ,@RequestBody AssignmentSubmissionDTO assignmentSubmissionDTO){
+    public ResponseEntity<?> addAssignment(@PathVariable Long assignmentId ,@ModelAttribute AssignmentSubmissionDTO assignmentSubmissionDTO){
         try{
             return ResponseEntity.status(HttpStatus.CREATED).body(assignmentSubmissionService.addAssignmentSubmission(assignmentId,assignmentSubmissionDTO));
         }catch(RuntimeException ex){

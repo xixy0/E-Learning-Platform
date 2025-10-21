@@ -99,6 +99,15 @@ public class UserController {
         }
     }
 
+    @GetMapping("getUserById/{userId}")
+    public ResponseEntity<?> getUserById(@PathVariable Long userId){
+        try{
+            return ResponseEntity.status(HttpStatus.OK).body(userService.getUserById(userId));
+        }
+        catch(UsernameNotFoundException e){
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(e.getMessage());
+        }
+    }
 
 
 }

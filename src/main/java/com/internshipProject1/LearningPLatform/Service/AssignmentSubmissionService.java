@@ -12,6 +12,7 @@ public interface AssignmentSubmissionService {
     AssignmentSubmission addAssignmentSubmission(Long assignmentId,AssignmentSubmissionDTO assignmentSubmissionDTO);
     void deleteAssignmentSubmission(Long assignmentSubmissionId);
     String uploadAssignmentSubmission(Long assignmentId ,MultipartFile file);
-    AssignmentSubmission getAssignmentSubmissionByUser(Long assignmentId);
-    List<AssignmentSubmission> getAll();
+    AssignmentSubmissionDTO getAssignmentSubmissionByUser(Long assignmentId);
+    List<AssignmentSubmissionDTO> getAll();
+    AssignmentSubmissionDTO getAssignmentSubmissionById(Long assignmentSubmissionId);
 }

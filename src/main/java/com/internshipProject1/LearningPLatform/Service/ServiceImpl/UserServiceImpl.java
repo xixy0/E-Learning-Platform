@@ -2,12 +2,15 @@ package com.internshipProject1.LearningPLatform.Service.ServiceImpl;
 
 import com.internshipProject1.LearningPLatform.DTO.AssignmentSubmissionDTO;
 import com.internshipProject1.LearningPLatform.DTO.CourseRegistrationDTO;
+import com.internshipProject1.LearningPLatform.DTO.UserDTO;
 import com.internshipProject1.LearningPLatform.DTO.UserRegistrationDTO;
 import com.internshipProject1.LearningPLatform.Entity.*;
 import com.internshipProject1.LearningPLatform.Repository.LoginRepository;
 import com.internshipProject1.LearningPLatform.Repository.UserRepository;
 import com.internshipProject1.LearningPLatform.Service.UserService;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.cache.annotation.CacheEvict;
+import org.springframework.cache.annotation.Cacheable;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
@@ -63,11 +66,13 @@ public class UserServiceImpl implements UserService {
     }
 
     @Override
+    @Cacheable(value = "users",key = "'all'")
     public List<Users> getAll() {
         return userRepository.findAll();
     }
 
     @Override
+    @CacheEvict(value = {"users", "userCourses","userDTO"}, allEntries = true)
     public Users updateUser(Long userId, UserRegistrationDTO userRegistrationDTO) {
         Users users = userRepository.findById(userId).orElseThrow(()->new RuntimeException("User does not exist"));
         if(!getLoggedInUser().getLogin().getRole().equalsIgnoreCase("ADMIN")
@@ -104,6 +109,7 @@ public class UserServiceImpl implements UserService {
 
 
     @Override
+    @Cacheable(value = "users",key = "'loggedIn:' + T(org.springframework.security.core.context.SecurityContextHolder).getContext().getAuthentication().getName()")
     public Users getLoggedInUser() {
         Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
         if(authentication==null || !authentication.isAuthenticated()){
@@ -112,10 +118,10 @@ public class UserServiceImpl implements UserService {
         String username = authentication.getName();
         Login login = loginRepository.findByUsername(username).get();
         return login.getUsers();
-
     }
 
     @Override
+    @Cacheable(value = "userCourses", key = "#userId")
     public List<CourseRegistrationDTO> viewCourses(Long userId) {
         if(getLoggedInUser().getLogin().getRole().equalsIgnoreCase("INSTRUCTOR")
         && !Objects.equals(getLoggedInUser().getUserId(),userId)){
@@ -125,7 +131,8 @@ public class UserServiceImpl implements UserService {
         List<Course> course =user.getCourses();
         List<CourseRegistrationDTO> courseRegistrationDTOArrayList = new ArrayList<>();
         for(Course course1 : course){
-            courseRegistrationDTOArrayList.add(new CourseRegistrationDTO(course1.getCourseTitle(),course1.getCourseDescription(),course1.getCourseCategory(),course1.getCourseDuration()));
+            courseRegistrationDTOArrayList.add(new CourseRegistrationDTO(course1.getCourseId(),course1.getCourseTitle(),course1.getCourseDescription(),course1.getCourseCategory(),course1.getCourseDuration(),
+                    (course1.getInstructor().getFirstName()+" "+ course1.getInstructor().getMiddleName()+" "+course1.getInstructor().getLastName())));
         }
           return courseRegistrationDTOArrayList;
     }
@@ -133,6 +140,7 @@ public class UserServiceImpl implements UserService {
 
 
     @Override
+    @CacheEvict(value ={"users","userDTO","userCourses"},allEntries = true)
     public void deleteUser(Long userId) {
         if(userRepository.findById(userId).isEmpty()){
             throw new UsernameNotFoundException("User does not exist");
@@ -142,7 +150,6 @@ public class UserServiceImpl implements UserService {
 
     @Override
     public List<AssignmentSubmissionDTO> getAllStudentAssignmentSubmissions() {
-
         Users users = getLoggedInUser();
         List<AssignmentSubmission> assignmentSubmissions =users.getAssignmentSubmissions();
         List<AssignmentSubmissionDTO> assignmentSubmissionDTOList = new ArrayList<>();
@@ -157,6 +164,15 @@ public class UserServiceImpl implements UserService {
     }
 
     @Override
+    @Cacheable(value = "userDTO", key = "#userId")
+    public UserDTO getUserById(Long userId) {
+        Users users = userRepository.findById(userId).orElseThrow(()->new RuntimeException("User not found"));
+        return new UserDTO(users.getFirstName(), users.getMiddleName(),users.getLastName(),
+                users.getEmail(), users.getGender());
+    }
+
+    @Override
+    @Cacheable(value = "userCourses", key = "'enrolled:'+#userId")
     public List<CourseRegistrationDTO> viewEnrolledCourses(Long userId) {
         if(getLoggedInUser().getLogin().getRole().equalsIgnoreCase("STUDENT")
                 && !Objects.equals(getLoggedInUser().getUserId(),userId)){
@@ -166,7 +182,10 @@ public class UserServiceImpl implements UserService {
         List<StudentEnrollment> enrollments =users.getStudentEnrollments();
         List<CourseRegistrationDTO> courseRegistrationDTOArrayList = new ArrayList<>();
         for(StudentEnrollment enrollment : enrollments){
-            courseRegistrationDTOArrayList.add(new CourseRegistrationDTO(enrollment.getCourse().getCourseTitle(),enrollment.getCourse().getCourseDescription(),enrollment.getCourse().getCourseCategory(),enrollment.getCourse().getCourseDuration()));
+            courseRegistrationDTOArrayList.add(new CourseRegistrationDTO(enrollment.getCourse().getCourseId(), enrollment.getCourse().getCourseTitle(),
+                    enrollment.getCourse().getCourseDescription(),enrollment.getCourse().getCourseCategory(),enrollment.getCourse().getCourseDuration(),
+                    (enrollment.getCourse().getInstructor().getFirstName()+" "+enrollment.getCourse().getInstructor().getMiddleName()+" "+ enrollment.getCourse().getInstructor().getLastName())
+                    ));
         }
         return courseRegistrationDTOArrayList;
     }

@@ -1,9 +1,6 @@
 package com.internshipProject1.LearningPLatform.Service.ServiceImpl;
 
-import com.internshipProject1.LearningPLatform.DTO.CourseRegistrationDTO;
-import com.internshipProject1.LearningPLatform.DTO.LessonDTO;
-import com.internshipProject1.LearningPLatform.DTO.QuizDTO;
-import com.internshipProject1.LearningPLatform.DTO.UserDTO;
+import com.internshipProject1.LearningPLatform.DTO.*;
 import com.internshipProject1.LearningPLatform.Entity.*;
 import com.internshipProject1.LearningPLatform.Repository.CourseRepository;
 import com.internshipProject1.LearningPLatform.Repository.StudentEnrollmentRepository;
@@ -11,6 +8,8 @@ import com.internshipProject1.LearningPLatform.Repository.UserRepository;
 import com.internshipProject1.LearningPLatform.Service.CourseService;
 import com.internshipProject1.LearningPLatform.Service.UserService;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.cache.annotation.CacheEvict;
+import org.springframework.cache.annotation.Cacheable;
 import org.springframework.stereotype.Service;
 
 
@@ -36,6 +35,7 @@ public class CourseServiceImpl implements CourseService {
 
 
     @Override
+    @CacheEvict(value = {"courses","courseLesson","courseQuiz","courseAssignment"},allEntries = true)
     public Course addCourse(CourseRegistrationDTO courseRegistrationDTO) {
       Course course = new Course();
       course.setCourseTitle(courseRegistrationDTO.getCourseTitle());
@@ -56,6 +56,7 @@ public class CourseServiceImpl implements CourseService {
     }
 
     @Override
+    @CacheEvict(value = {"courses","courseLesson","courseQuiz","courseAssignment"},allEntries = true)
     public Course updateCourse(Long courseId, CourseRegistrationDTO courseRegistrationDTO) {
         Course courses = courseRepository.findById(courseId).orElseThrow(()->new RuntimeException("Course not found"));
         if(!userService.getLoggedInUser().getLogin().getRole().equalsIgnoreCase("ADMIN")
@@ -71,6 +72,7 @@ public class CourseServiceImpl implements CourseService {
     }
 
     @Override
+    @CacheEvict(value = {"courses","courseLesson","courseQuiz","courseAssignment"},allEntries = true)
     public void deleteCourse(Long courseId) {
         Course course = courseRepository.findById(courseId).orElseThrow(()->  new RuntimeException("Course not found"));
         if(userService.getLoggedInUser().getLogin().getRole().equalsIgnoreCase("ADMIN")){
@@ -88,11 +90,27 @@ public class CourseServiceImpl implements CourseService {
 
 
     @Override
-    public List<Course> getAll() {
-        return courseRepository.findAll();
+    @Cacheable(value = "courses",key = "'all'")
+    public List<CourseRegistrationDTO> getAll() {
+
+        List<Course> courses =  courseRepository.findAll();
+        List<CourseRegistrationDTO> courseRegistrationDTOList = new ArrayList<>();
+
+        for(Course course : courses){
+            courseRegistrationDTOList.add(new CourseRegistrationDTO(
+                    course.getCourseId(),
+                    course.getCourseTitle(),
+                    course.getCourseDescription(),
+                    course.getCourseCategory(),
+                    course.getCourseDuration(),
+                    (course.getInstructor().getFirstName()+" "+ course.getInstructor().getMiddleName()+" "+course.getInstructor().getLastName()),
+                    course.getStudentEnrollments().size()));
+        }
+        return courseRegistrationDTOList;
     }
 
     @Override
+    @Cacheable(value = "courseInstructor",key = "#courseId")
     public UserDTO getInstructor(Long courseId) {
         Course course = courseRepository.findById(courseId).orElseThrow(()->new RuntimeException("Course not found"));
         return new UserDTO(
@@ -114,7 +132,8 @@ public class CourseServiceImpl implements CourseService {
         List<StudentEnrollment> studentEnrollments = course.getStudentEnrollments();
         List<UserDTO> userDTOList = new ArrayList<>();
         for(StudentEnrollment studentEnrollment:studentEnrollments){
-            userDTOList.add(new UserDTO(studentEnrollment.getUsers().getFirstName(),
+            userDTOList.add(new UserDTO(
+                    studentEnrollment.getUsers().getFirstName(),
                     studentEnrollment.getUsers().getMiddleName(),
                     studentEnrollment.getUsers().getLastName(),
                     studentEnrollment.getUsers().getEmail(),
@@ -125,16 +144,19 @@ public class CourseServiceImpl implements CourseService {
     }
 
     @Override
+    @Cacheable(value = "courseLesson",key = "#courseId")
     public List<LessonDTO> getLessons(Long courseId) {
         List<Lesson> lessons =  courseRepository.findById(courseId).orElseThrow(()->new RuntimeException("Course not founnd")).getLessons();
         List<LessonDTO> lessonDTOList = new ArrayList<>();
         for(Lesson lesson : lessons){
-            lessonDTOList.add(new LessonDTO(lesson.getLessonDescription(),
+            lessonDTOList.add(new LessonDTO(
+                    lesson.getCourse().getCourseId(),
+                    lesson.getLessonId(),
                     lesson.getLessonTitle(),
-                    lesson.getCourse().getCourseTitle(),
+                    lesson.getLessonDescription(),
                     lesson.getVideourl(),
                     lesson.getPdfUrl(),
-                    lesson.getCourse().getInstructor().getFirstName()));
+                    (lesson.getCourse().getInstructor().getFirstName()+" "+ lesson.getCourse().getInstructor().getMiddleName()+" "+lesson.getCourse().getInstructor().getLastName())));
         }
         return lessonDTOList;
     }
@@ -156,6 +178,7 @@ public class CourseServiceImpl implements CourseService {
 //    }
 
     @Override
+    @Cacheable(value = "courseQuiz", key="#courseId")
     public List<Quiz> getAllQuiz(Long courseId) {
         Course course = courseRepository.findById(courseId).orElseThrow(()->new RuntimeException("Course not found"));
         if(!userService.getLoggedInUser().getLogin().getRole().equalsIgnoreCase("ADMIN")
@@ -167,12 +190,38 @@ public class CourseServiceImpl implements CourseService {
     }
 
     @Override
-    public List<Assignment> getAllAssignments(Long courseId) {
+    @Cacheable(value = "courseAssignment",key = "#courseId")
+    public List<AssignmentDTO> getAllAssignments(Long courseId) {
         Course course = courseRepository.findById(courseId).orElseThrow(()->new RuntimeException("Course not found"));
         if(!userService.getLoggedInUser().getLogin().getRole().equalsIgnoreCase("ADMIN")
                 && !Objects.equals(course.getInstructor().getUserId(), userService.getLoggedInUser().getUserId())){
             throw new RuntimeException("Unauthorized Instructor");
         }
-        return course.getAssignments();
+        List<Assignment> assignments =  course.getAssignments();
+        List<AssignmentDTO> assignmentDTOList = new ArrayList<>();
+        for(Assignment assignment:assignments){
+          assignmentDTOList.add(new AssignmentDTO(
+                  assignment.getAssignmentId(),
+                  assignment.getAssignmentTitle(),
+                  assignment.getAssignmentDescription(),
+                  assignment.getCourse().getCourseId(),
+                  assignment.getAssignmentPdfUrl()
+          ));
+        }
+        return assignmentDTOList;
+    }
+
+    @Override
+    @Cacheable(value = "courses", key = "#courseId")
+    public CourseRegistrationDTO getCourseById(Long courseId) {
+        Course course = courseRepository.findById(courseId).orElseThrow(()->new RuntimeException("Course not found"));
+        return new CourseRegistrationDTO(
+                course.getCourseId(),
+                course.getCourseTitle(),
+                course.getCourseDescription(),
+                course.getCourseCategory(),
+                course.getCourseDuration(),
+                (course.getInstructor().getFirstName()+" "+ course.getInstructor().getMiddleName()+" "+course.getInstructor().getLastName()),
+                course.getStudentEnrollments().size());
     }
 }

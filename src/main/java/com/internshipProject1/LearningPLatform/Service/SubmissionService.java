@@ -9,6 +9,7 @@ public interface SubmissionService {
     Submission addSubmission(SubmissionDTO submissionDTO);
     void deleteSubmission(Long submissionId);
     List<Submission> getAll();
+    SubmissionDTO getSubmissionById(Long submissionId);
 
 }
 

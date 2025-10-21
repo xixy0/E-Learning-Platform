@@ -7,6 +7,8 @@ import com.internshipProject1.LearningPLatform.Repository.SubmissionRepository;
 import com.internshipProject1.LearningPLatform.Service.SubmissionService;
 import com.internshipProject1.LearningPLatform.Service.UserService;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.cache.annotation.CacheEvict;
+import org.springframework.cache.annotation.Cacheable;
 import org.springframework.stereotype.Service;
 import java.time.LocalDateTime;
 import java.util.List;
@@ -25,6 +27,7 @@ public class SubmissionServiceImpl implements SubmissionService {
     private SubmissionRepository submissionRepository;
 
     @Override
+    @CacheEvict(value = "submissions",allEntries = true)
     public Submission addSubmission(SubmissionDTO submissionDTO) {
         Quiz quiz = quizRepository.findById(submissionDTO.getQuizId()).orElseThrow(
                 () -> new RuntimeException("Quiz not found"));
@@ -64,6 +67,7 @@ public class SubmissionServiceImpl implements SubmissionService {
     }
 
     @Override
+    @CacheEvict(value = "submissions",allEntries = true)
     public void deleteSubmission(Long submissionId) {
         Submission submission = submissionRepository.findById(submissionId).orElseThrow(
                 ()->new RuntimeException("No submission found"));
@@ -72,9 +76,19 @@ public class SubmissionServiceImpl implements SubmissionService {
     }
 
     @Override
+    @Cacheable(value = "submissions",key = "'all'")
     public List<Submission> getAll() {
         return submissionRepository.findAll();
 
+    }
+
+    @Override
+    @Cacheable(value = "submissions",key="#subimissionId")
+    public SubmissionDTO getSubmissionById(Long submissionId) {
+        Submission submission = submissionRepository.findById(submissionId).orElseThrow(
+                ()->new RuntimeException("No submission found"));
+        return new SubmissionDTO(submission.getSubmissionId(),submission.getQuiz().getQuizId(),
+                submission.getStudent().getUserId(),submission.getScore(),submission.getTimestamp());
     }
 
 
