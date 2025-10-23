@@ -12,10 +12,7 @@ import java.util.Map;
 @Data
 @AllArgsConstructor
 @NoArgsConstructor
-public class SubmissionDTO implements Serializable {
-
-    @Serial
-    private static final long serialVersionUID = 8L;
+public class SubmissionDTO {
 
     private Long submissionId;
     private Long quizId;

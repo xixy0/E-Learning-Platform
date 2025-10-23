@@ -40,4 +40,13 @@ public class SubmissionController {
     public ResponseEntity<List<?>> getAllCourses(){
         return ResponseEntity.status(HttpStatus.OK).body(submissionService.getAll());
     }
+
+    @GetMapping("/getSubmissionById/{submissionId}")
+    public ResponseEntity<?> getSubmissionById(@PathVariable Long submissionId){
+        try{
+            return ResponseEntity.status(HttpStatus.ACCEPTED).body(submissionService.getSubmissionById(submissionId));
+        }catch (RuntimeException ex){
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(List.of(ex.getMessage()));
+        }
+    }
 }

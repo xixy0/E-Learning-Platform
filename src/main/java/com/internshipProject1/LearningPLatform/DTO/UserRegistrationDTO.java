@@ -13,13 +13,10 @@ import java.time.LocalDate;
 @Data
 @AllArgsConstructor
 @NoArgsConstructor
-public class UserRegistrationDTO implements Serializable {
-
-    @Serial
-    private static final long serialVersionUID = 10L;
+public class UserRegistrationDTO {
 
     private Long userId;
-    private long loginId;
+    private Long loginId;
     private String username;
     private String password;
     private String role;
@@ -32,6 +29,6 @@ public class UserRegistrationDTO implements Serializable {
     private String address;
     private String email;
     private String gender;
-    private Long numberOfCoursesEnrolled;
-    private Long numberOfCoursesCreated;
+    private Integer numberOfCoursesEnrolled;
+
 }

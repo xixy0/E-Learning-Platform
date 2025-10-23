@@ -34,6 +34,7 @@ public class Quiz {
 
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name="course_id",referencedColumnName = "course_id",nullable = false)
+    @JsonIgnore
     private Course course;
 
     @OneToMany(mappedBy = "quiz",cascade = CascadeType.ALL,orphanRemoval = true)

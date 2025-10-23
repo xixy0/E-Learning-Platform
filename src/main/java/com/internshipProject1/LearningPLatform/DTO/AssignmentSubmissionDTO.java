@@ -12,9 +12,8 @@ import java.time.LocalDateTime;
 @Data
 @AllArgsConstructor
 @NoArgsConstructor
-public class AssignmentSubmissionDTO implements Serializable {
-    @Serial
-    private static final long serialVersionUID = 2L;
+public class AssignmentSubmissionDTO {
+
 
 
     private Long userId;

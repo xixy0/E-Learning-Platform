@@ -8,7 +8,7 @@ import java.util.List;
 public interface SubmissionService {
     Submission addSubmission(SubmissionDTO submissionDTO);
     void deleteSubmission(Long submissionId);
-    List<Submission> getAll();
+    List<SubmissionDTO> getAll();
     SubmissionDTO getSubmissionById(Long submissionId);
 
 }

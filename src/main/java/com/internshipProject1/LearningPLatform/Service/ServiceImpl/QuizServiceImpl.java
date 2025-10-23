@@ -1,7 +1,9 @@
 package com.internshipProject1.LearningPLatform.Service.ServiceImpl;
 
 
+import com.internshipProject1.LearningPLatform.DTO.QuestionDTO;
 import com.internshipProject1.LearningPLatform.DTO.QuizDTO;
+import com.internshipProject1.LearningPLatform.DTO.SubmissionDTO;
 import com.internshipProject1.LearningPLatform.Entity.Course;
 import com.internshipProject1.LearningPLatform.Entity.Questions;
 import com.internshipProject1.LearningPLatform.Entity.Quiz;
@@ -34,11 +36,11 @@ public class QuizServiceImpl implements QuizService {
     private QuizRepository quizRepository;
 
     @Override
-    @CacheEvict(value = {"quizzes","quizQuestion","quizSubmission"},allEntries = true)
+    @CacheEvict(value = {"quizzes","quizQuestion","quizSubmission","courseQuiz"},allEntries = true)
     public Quiz addQuiz(Long courseId ,QuizDTO quizDTO) {
         Course course = courseRepository.findById(courseId).orElseThrow(()->new RuntimeException("Course not found"));
 
-        if(!userService.getLoggedInUser().getLogin().getRole().equalsIgnoreCase("ADMIN")
+        if(!userService.getLoggedInUser().getRole().equalsIgnoreCase("ADMIN")
                 && !Objects.equals(course.getInstructor().getUserId(), userService.getLoggedInUser().getUserId())){
             throw new RuntimeException("Unauthorized Instructor");
         }
@@ -55,10 +57,10 @@ public class QuizServiceImpl implements QuizService {
     }
 
     @Override
-    @CacheEvict(value = {"quizzes","quizQuestion","quizSubmission"},allEntries = true)
+    @CacheEvict(value = {"quizzes","quizQuestion","quizSubmission","courseQuiz"},allEntries = true)
     public void deleteQuiz(Long quizId) {
     Quiz quiz = quizRepository.findById(quizId).orElseThrow(()->new RuntimeException("Quiz not found"));
-        if(!userService.getLoggedInUser().getLogin().getRole().equalsIgnoreCase("ADMIN")
+        if(!userService.getLoggedInUser().getRole().equalsIgnoreCase("ADMIN")
                 && !Objects.equals(quiz.getCourse().getInstructor().getUserId(), userService.getLoggedInUser().getUserId()))
         {
             throw new RuntimeException("Unauthorized Instructor");
@@ -68,18 +70,22 @@ public class QuizServiceImpl implements QuizService {
     }
 
     @Override
-    @CacheEvict(value = {"quizzes","quizQuestion","quizSubmission"},allEntries = true)
+    @CacheEvict(value = {"quizzes","quizQuestion","quizSubmission","courseQuiz"},allEntries = true)
     public Quiz updateQuiz(Long quizId, QuizDTO quizDTO) {
         Quiz quiz = quizRepository.findById(quizId).orElseThrow(()->new RuntimeException("Quiz not found"));
-        if(!userService.getLoggedInUser().getLogin().getRole().equalsIgnoreCase("ADMIN")
+        if(!userService.getLoggedInUser().getRole().equalsIgnoreCase("ADMIN")
                 && !Objects.equals(quiz.getCourse().getInstructor().getUserId(), userService.getLoggedInUser().getUserId()))
         {
             throw new RuntimeException("Unauthorized Instructor");
         }
+        if(!quizDTO.getQuizTitle().isEmpty())
+            quiz.setQuizTitle(quizDTO.getQuizTitle());
 
-        quiz.setQuizTitle(quizDTO.getQuizTitle());
-        quiz.setTotalMarks(quizDTO.getTotalMarks());
-        quiz.setTimestamp(LocalDateTime.now());
+        if(quizDTO.getTotalMarks()!=null)
+            quiz.setTotalMarks(quizDTO.getTotalMarks());
+
+        if(quizDTO.getTimestamp()!=null)
+            quiz.setTimestamp(LocalDateTime.now());
 
         return quizRepository.save(quiz);
 
@@ -87,46 +93,85 @@ public class QuizServiceImpl implements QuizService {
 
     @Override
     @Cacheable(value = "quizzes",key = "#quizId")
-    public Quiz getQuizById(Long quizId){
+    public QuizDTO getQuizById(Long quizId){
         Quiz quiz = quizRepository.findById(quizId).orElseThrow(()->new RuntimeException("Quiz not found"));
-        if(!userService.getLoggedInUser().getLogin().getRole().equalsIgnoreCase("ADMIN")
+        if(!userService.getLoggedInUser().getRole().equalsIgnoreCase("ADMIN")
                 && !Objects.equals(quiz.getCourse().getInstructor().getUserId(), userService.getLoggedInUser().getUserId()))
         {
             throw new RuntimeException("Unauthorized Instructor");
         }
-       return quiz;
+       return new QuizDTO(
+               quiz.getQuizId(),
+               quiz.getQuizTitle(),
+               quiz.getTotalMarks(),
+               quiz.getTimestamp(),
+               quiz.getCourse().getCourseId());
     }
 
     @Override
     @Cacheable(value = "quizzes",key="'all'")
-    public List<Quiz> getAll() {
-        return quizRepository.findAll();
+    public List<QuizDTO> getAll() {
+        List<Quiz> quizzes = quizRepository.findAll();
+        List<QuizDTO> quizDTOList = new ArrayList<>();
+        for(Quiz quiz : quizzes){
+            quizDTOList.add(new QuizDTO(
+                    quiz.getQuizId(),
+                    quiz.getQuizTitle(),
+                    quiz.getTotalMarks(),
+                    quiz.getTimestamp(),
+                    quiz.getCourse().getCourseId()));
+        }
+        return quizDTOList;
     }
 
     @Override
     @Cacheable(value = "quizQuestion",key = "#quizId")
-    public List<Questions> getQuestions(Long quizId) {
+    public List<QuestionDTO> getQuestions(Long quizId) {
         Quiz quiz = quizRepository.findById(quizId).orElseThrow(()->new RuntimeException("Quiz not found"));
 
-        if(!userService.getLoggedInUser().getLogin().getRole().equalsIgnoreCase("ADMIN")
+        if(!userService.getLoggedInUser().getRole().equalsIgnoreCase("ADMIN")
                 && !Objects.equals(quiz.getCourse().getInstructor().getUserId(), userService.getLoggedInUser().getUserId())){
             throw new RuntimeException("Unauthorized Instructor");
         }
 
-        return quiz.getQuestions();
+        List<Questions> questions = quiz.getQuestions();
+        List<QuestionDTO> questionDTOList = new ArrayList<>();
+        for(Questions question : questions){
+            questionDTOList.add(new QuestionDTO(
+                    question.getQuiz().getQuizId(),
+                    question.getQuestionId(),
+                    question.getQuestionText(),
+                    question.getOption1(),
+                    question.getOption2(),
+                    question.getOption3(),
+                    question.getOption4(),
+                    question.getCorrectAnswer()));
+        }
+        return questionDTOList;
     }
 
     @Override
     @Cacheable(value = "quizSubmission",key = "#quizId")
-    public List<Submission> getSubmissions(Long quizId) {
+    public List<SubmissionDTO> getSubmissions(Long quizId) {
         Quiz quiz = quizRepository.findById(quizId).orElseThrow(()->new RuntimeException("Quiz not found"));
 
-        if(!userService.getLoggedInUser().getLogin().getRole().equalsIgnoreCase("ADMIN")
+        if(!userService.getLoggedInUser().getRole().equalsIgnoreCase("ADMIN")
                 && !Objects.equals(quiz.getCourse().getInstructor().getUserId(), userService.getLoggedInUser().getUserId())){
             throw new RuntimeException("Unauthorized Instructor");
         }
 
-        return quiz.getSubmissions();
+        List<Submission> submissions = quiz.getSubmissions();
+        List<SubmissionDTO> submissionDTOList = new ArrayList<>();
+
+        for(Submission submission:submissions){
+            submissionDTOList.add(new SubmissionDTO(
+                    submission.getSubmissionId(),
+                    submission.getQuiz().getQuizId(),
+                    submission.getStudent().getUserId(),
+                    submission.getScore(),
+                    submission.getTimestamp()));
+        }
+        return submissionDTOList;
     }
 
 

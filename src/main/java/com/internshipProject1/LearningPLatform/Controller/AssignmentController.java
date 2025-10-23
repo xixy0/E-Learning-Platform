@@ -78,4 +78,13 @@ public class AssignmentController {
         }
     }
 
+    @GetMapping("/getAssignmentById/{assignmentId}")
+    public ResponseEntity<?> getAssignmentById(@PathVariable Long assignmentId){
+        try{
+            return ResponseEntity.status(HttpStatus.ACCEPTED).body(assignmentService.getAssignmentById(assignmentId));
+        }catch (RuntimeException ex){
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(List.of(ex.getMessage()));
+        }
+    }
+
 }

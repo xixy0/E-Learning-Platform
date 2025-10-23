@@ -1,12 +1,8 @@
 package com.internshipProject1.LearningPLatform.Service;
 
 
-import com.internshipProject1.LearningPLatform.DTO.AssignmentDTO;
-import com.internshipProject1.LearningPLatform.DTO.CourseRegistrationDTO;
-import com.internshipProject1.LearningPLatform.DTO.LessonDTO;
-import com.internshipProject1.LearningPLatform.DTO.UserDTO;
+import com.internshipProject1.LearningPLatform.DTO.*;
 import com.internshipProject1.LearningPLatform.Entity.Course;
-import com.internshipProject1.LearningPLatform.Entity.Quiz;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
@@ -20,7 +16,7 @@ public interface CourseService {
      UserDTO getInstructor(Long courseId);
      List<UserDTO> getStudentsEnrolled(Long courseId);
      List<LessonDTO> getLessons(Long courseId);
-     List<Quiz> getAllQuiz(Long courseId);
+     List<QuizDTO> getAllQuiz(Long courseId);
      List<AssignmentDTO> getAllAssignments(Long courseId);
      CourseRegistrationDTO getCourseById(Long courseId);
 

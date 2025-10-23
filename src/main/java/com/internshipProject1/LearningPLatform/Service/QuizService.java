@@ -1,7 +1,9 @@
 package com.internshipProject1.LearningPLatform.Service;
 
 
+import com.internshipProject1.LearningPLatform.DTO.QuestionDTO;
 import com.internshipProject1.LearningPLatform.DTO.QuizDTO;
+import com.internshipProject1.LearningPLatform.DTO.SubmissionDTO;
 import com.internshipProject1.LearningPLatform.Entity.Questions;
 import com.internshipProject1.LearningPLatform.Entity.Quiz;
 import com.internshipProject1.LearningPLatform.Entity.Submission;
@@ -15,10 +17,10 @@ public interface QuizService {
     Quiz addQuiz(Long courseId , QuizDTO quizDTO);
     void deleteQuiz(Long quizId);
     Quiz updateQuiz(Long quizId,QuizDTO quizDTO);
-    Quiz getQuizById(Long quizId);
-    List<Quiz> getAll();
-    List<Questions> getQuestions(Long quizId);
-    List<Submission> getSubmissions(Long quizId);
+    QuizDTO getQuizById(Long quizId);
+    List<QuizDTO> getAll();
+    List<QuestionDTO> getQuestions(Long quizId);
+    List<SubmissionDTO> getSubmissions(Long quizId);
 
 
 

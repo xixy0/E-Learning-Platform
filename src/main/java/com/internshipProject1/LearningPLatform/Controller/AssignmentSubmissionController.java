@@ -35,10 +35,27 @@ public class AssignmentSubmissionController {
         }
     }
 
+    @GetMapping("/getAssignmentSubmissionByUser/{assignmentSubmissionId}")
+    public ResponseEntity<?> getAssignmentSubmissionByUser(@PathVariable Long assignmentSubmissionId){
+        try{
+            return ResponseEntity.status(HttpStatus.ACCEPTED).body(assignmentSubmissionService.getAssignmentSubmissionByUser(assignmentSubmissionId));
+        }catch (RuntimeException ex){
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(List.of(ex.getMessage()));
+        }
+    }
+
     @GetMapping("/getAll")
     public ResponseEntity<List<?>> getAll(){
         return  ResponseEntity.status(HttpStatus.OK).body(assignmentSubmissionService.getAll());
     }
 
+    @GetMapping("/getAssignmentSubmissionById/{assignmentSubmissionId}")
+    public ResponseEntity<?> getAssignmentSubmissionById(@PathVariable Long assignmentSubmissionId){
+        try{
+            return ResponseEntity.status(HttpStatus.ACCEPTED).body(assignmentSubmissionService.getAssignmentSubmissionById(assignmentSubmissionId));
+        }catch (RuntimeException ex){
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(List.of(ex.getMessage()));
+        }
+    }
 
 }

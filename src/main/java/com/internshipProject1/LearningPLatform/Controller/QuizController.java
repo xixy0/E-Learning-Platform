@@ -34,8 +34,8 @@ public class QuizController  {
         }
     }
 
-    @DeleteMapping("/deleteCourse/{quizId}")
-    public ResponseEntity<?> deleteCourse(@PathVariable Long quizId){
+    @DeleteMapping("/deleteQuiz/{quizId}")
+    public ResponseEntity<?> deleteQuiz(@PathVariable Long quizId){
         try{
             quizService.deleteQuiz(quizId);
             return ResponseEntity.status(HttpStatus.OK).body("Quiz removed successfully");

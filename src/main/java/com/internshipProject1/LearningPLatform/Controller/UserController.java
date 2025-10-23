@@ -109,5 +109,24 @@ public class UserController {
         }
     }
 
+    @GetMapping("/getSubmissions/{userId}")
+    public ResponseEntity<?> getSubmissions(@PathVariable Long userId){
+        try{
+            return ResponseEntity.status(HttpStatus.OK).body(userService.getSubmissions(userId));
+        }
+        catch(RuntimeException e){
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(e.getMessage());
+        }
+    }
+
+    @GetMapping("/getAllStudentAssignmentSubmissions/{userId}")
+    public ResponseEntity<?> getAllAssignmentSubmissions(@PathVariable Long userId){
+        try{
+            return ResponseEntity.status(HttpStatus.OK).body(userService.getAllStudentAssignmentSubmissions(userId));
+        }
+        catch(RuntimeException e){
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(e.getMessage());
+        }
+    }
 
 }

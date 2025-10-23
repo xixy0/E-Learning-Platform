@@ -4,8 +4,10 @@ import com.internshipProject1.LearningPLatform.DTO.AssignmentSubmissionDTO;
 import com.internshipProject1.LearningPLatform.Entity.Assignment;
 import com.internshipProject1.LearningPLatform.Entity.AssignmentSubmission;
 import com.internshipProject1.LearningPLatform.Entity.Course;
+import com.internshipProject1.LearningPLatform.Entity.Users;
 import com.internshipProject1.LearningPLatform.Repository.AssignmentRepository;
 import com.internshipProject1.LearningPLatform.Repository.AssignmentSubmissionRepository;
+import com.internshipProject1.LearningPLatform.Repository.UserRepository;
 import com.internshipProject1.LearningPLatform.Service.AssignmentSubmissionService;
 import com.internshipProject1.LearningPLatform.Service.UserService;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -32,15 +34,19 @@ public class AssignmentSubmissionServiceImpl implements AssignmentSubmissionServ
     @Autowired
     private UserService userService;
 
+    @Autowired
+    private UserRepository userRepository;
+
 
     @Override
-    @CacheEvict(value={"assignmentSubmissions","assignmentSubmissionUser"},allEntries = true)
+    @CacheEvict(value={"assignmentSubmissions","assignmentSubmissionUser","assignmentsAssignmentSubmissions"},allEntries = true)
     public AssignmentSubmission addAssignmentSubmission(Long assignmentId, AssignmentSubmissionDTO assignmentSubmissionDTO) {
         Assignment assignment = assignmentRepository.findById(assignmentId).orElseThrow(
                 ()->new RuntimeException("Assignment not found"));
-        List<Course> courses = userService.getLoggedInUser().getCourses();
+        Users users = userRepository.findById(userService.getLoggedInUser().getUserId()).get();
+        List<Course> courses = users.getCourses();
         boolean c = false;
-        if(userService.getLoggedInUser().getLogin().getRole().equalsIgnoreCase("ADMIN")) c=true;
+        if(userService.getLoggedInUser().getRole().equalsIgnoreCase("ADMIN")) c=true;
         else {
             for (Course course : courses) {
                 if (Objects.equals(course.getCourseId(), assignment.getCourse().getCourseId())) {
@@ -55,18 +61,18 @@ public class AssignmentSubmissionServiceImpl implements AssignmentSubmissionServ
         AssignmentSubmission assignmentSubmission = new AssignmentSubmission();
         assignmentSubmission.setAssignment(assignment);
         assignmentSubmission.setSubmissionDate(LocalDateTime.now());
-        assignmentSubmission.setUsers(userService.getLoggedInUser());
+        assignmentSubmission.setUsers(users);
         assignmentSubmission.setAssignmentSubmissionUrl(uploadAssignmentSubmission(assignmentId,assignmentSubmissionDTO.getFile()));
         return assignmentSubmissionRepository.save(assignmentSubmission);
     }
 
     @Override
-    @CacheEvict(value = {"assignmentSubmissions","assignmentSubmissionUser"},allEntries = true)
+    @CacheEvict(value = {"assignmentSubmissions","assignmentSubmissionUser","assignmentsAssignmentSubmissions"},allEntries = true)
     public void deleteAssignmentSubmission(Long assignmentSubmissionId) {
        AssignmentSubmission assignmentSubmission = assignmentSubmissionRepository.findById(assignmentSubmissionId).orElseThrow(
                ()-> new RuntimeException("No submission for the assignment")
        );
-       if(!userService.getLoggedInUser().getLogin().getRole().equalsIgnoreCase("ADMIN") &&
+       if(!userService.getLoggedInUser().getRole().equalsIgnoreCase("ADMIN") &&
                !Objects.equals(userService.getLoggedInUser().getUserId(),assignmentSubmission.getUsers().getUserId())){
            throw new RuntimeException("Unauthorized User");
        }
@@ -74,7 +80,6 @@ public class AssignmentSubmissionServiceImpl implements AssignmentSubmissionServ
     }
 
     @Override
-    @CacheEvict(value = {"assignmentSubmissions","assignmentSubmissionUser"},allEntries = true)
     public String uploadAssignmentSubmission(Long assignmentId ,MultipartFile file) {
         final String ASSIGNMENTSUBMISSON_DIR = "/assignmentSubmissions/pdfs/";
         try{
@@ -102,24 +107,15 @@ public class AssignmentSubmissionServiceImpl implements AssignmentSubmissionServ
     }
 
     @Override
-    @Cacheable(value = "assignmentSubmissionUser",key="#assignmentId")
+    @Cacheable(value = "assignmentSubmissionUser",key="'Assignment wise:'+ #assignmentId")
     public AssignmentSubmissionDTO getAssignmentSubmissionByUser(Long assignmentId) {
-        Assignment assignment = assignmentRepository.findById(assignmentId).orElseThrow(
-                ()-> new RuntimeException("Assignment not found"));
-        List<AssignmentSubmission> assignmentSubmissions = assignment.getAssignmentSubmissions();
-        AssignmentSubmission assignmentSubmission1 = new AssignmentSubmission();
-        for(AssignmentSubmission assignmentSubmission : assignmentSubmissions){
-            if(Objects.equals(assignmentSubmission.getUsers().getUserId(),userService.getLoggedInUser().getUserId())){
-                assignmentSubmission1 =  assignmentSubmission;
-            }
-        }
-        return new AssignmentSubmissionDTO(
-                assignmentSubmission1.getAssignmentSubmissionId(),
-                assignmentSubmission1.getSubmissionDate(),
-                assignmentSubmission1.getAssignmentSubmissionUrl(),
-                assignmentSubmission1.getUsers().getUserId(),
-                assignmentSubmission1.getAssignment().getAssignmentId()
-        );
+       List<AssignmentSubmissionDTO> userAssignmentSubmissionList = userService.getAllStudentAssignmentSubmissions(userService.getLoggedInUser().getUserId());
+       for(AssignmentSubmissionDTO assignmentSubmissionDTO : userAssignmentSubmissionList){
+           if(Objects.equals(assignmentSubmissionDTO.getAssignmentId(),assignmentId)){
+               return assignmentSubmissionDTO;
+           }
+       }
+       throw new RuntimeException("No submission by the user");
     }
 
     @Override

@@ -6,6 +6,6 @@ import org.springframework.stereotype.Service;
 
 @Service
 public interface AuthService {
-    public AuthResponse authenticate(AuthRequest request);
-
+    AuthResponse authenticate(AuthRequest request);
+    void clearAllCaches();
 }

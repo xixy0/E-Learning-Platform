@@ -1,9 +1,6 @@
 package com.internshipProject1.LearningPLatform.Service.ServiceImpl;
 
-import com.internshipProject1.LearningPLatform.DTO.AssignmentSubmissionDTO;
-import com.internshipProject1.LearningPLatform.DTO.CourseRegistrationDTO;
-import com.internshipProject1.LearningPLatform.DTO.UserDTO;
-import com.internshipProject1.LearningPLatform.DTO.UserRegistrationDTO;
+import com.internshipProject1.LearningPLatform.DTO.*;
 import com.internshipProject1.LearningPLatform.Entity.*;
 import com.internshipProject1.LearningPLatform.Repository.LoginRepository;
 import com.internshipProject1.LearningPLatform.Repository.UserRepository;
@@ -31,6 +28,7 @@ public class UserServiceImpl implements UserService {
     private PasswordEncoder passwordEncoder;
 
     @Override
+    @CacheEvict(value = {"users", "userCourses","userDTO"}, allEntries = true)
     public Users addUser(UserRegistrationDTO userRegistrationDTO) throws IllegalAccessException {
 
         if(loginRepository.findByUsername(userRegistrationDTO.getUsername()).isPresent()){
@@ -55,14 +53,12 @@ public class UserServiceImpl implements UserService {
         users.setEmail(userRegistrationDTO.getEmail());
         users.setGender(userRegistrationDTO.getGender());
 
-        List<Course> courses = new ArrayList<>();
-        users.setCourses(courses);
+        users.setCourses(new ArrayList<>());
+        users.setStudentEnrollments(new ArrayList<>());
+        users.setSubmissions(new ArrayList<>());
+        users.setAssignmentSubmissions(new ArrayList<>());
 
-        List<StudentEnrollment> studentEnrollments= new ArrayList<>();
-        users.setStudentEnrollments(studentEnrollments);
-
-        return userRepository.save(users);
-
+       return userRepository.save(users);
     }
 
     @Override
@@ -72,27 +68,53 @@ public class UserServiceImpl implements UserService {
     }
 
     @Override
-    @CacheEvict(value = {"users", "userCourses","userDTO"}, allEntries = true)
+    @CacheEvict(value = {"users", "userCourses","userDTO","courses"}, allEntries = true)
     public Users updateUser(Long userId, UserRegistrationDTO userRegistrationDTO) {
         Users users = userRepository.findById(userId).orElseThrow(()->new RuntimeException("User does not exist"));
-        if(!getLoggedInUser().getLogin().getRole().equalsIgnoreCase("ADMIN")
+        if(!getLoggedInUser().getRole().equalsIgnoreCase("ADMIN")
                 && !Objects.equals(getLoggedInUser().getUserId(),userId)){
             throw new RuntimeException("Unauthorized user");
         }
-        users.setFirstName(userRegistrationDTO.getFirstName());
-        users.setMiddleName(userRegistrationDTO.getMiddleName());
-        users.setLastName(userRegistrationDTO.getLastName());
-        users.setUserPhone(userRegistrationDTO.getPhoneNum());
-        users.setUserDOB(userRegistrationDTO.getUserDOB());
-        users.setAddress(userRegistrationDTO.getAddress());
-        users.setEmail(userRegistrationDTO.getEmail());
-        users.setGender(userRegistrationDTO.getGender());
+        if(!userRegistrationDTO.getFirstName().isEmpty()) {
+            users.setFirstName(userRegistrationDTO.getFirstName());
+        }
 
+        if(!userRegistrationDTO.getMiddleName().isEmpty()) {
+            users.setMiddleName(userRegistrationDTO.getMiddleName());
+        }
+
+        if(!userRegistrationDTO.getLastName().isEmpty()){
+        users.setLastName(userRegistrationDTO.getLastName());
+        }
+
+        if(!userRegistrationDTO.getPhoneNum().isEmpty()) {
+            users.setUserPhone(userRegistrationDTO.getPhoneNum());
+        }
+
+        if(userRegistrationDTO.getUserDOB()!=null) {
+            users.setUserDOB(userRegistrationDTO.getUserDOB());
+        }
+
+        if(!userRegistrationDTO.getAddress().isEmpty()) {
+            users.setAddress(userRegistrationDTO.getAddress());
+        }
+
+        if(!userRegistrationDTO.getEmail().isEmpty()) {
+            users.setEmail(userRegistrationDTO.getEmail());
+        }
+
+        if(!userRegistrationDTO.getGender().isEmpty()) {
+            users.setGender(userRegistrationDTO.getGender());
+        }
         return userRepository.save(users);
+
     }
 
     @Override
     public void deactivateUser(Long loginId) {
+        if(!getLoggedInUser().getRole().equalsIgnoreCase("ADMIN")){
+            throw new RuntimeException("Unauthorized user");
+        }
         Login login = loginRepository.findById(loginId).orElseThrow(()->new RuntimeException("User does not exist"));
         login.setAccountStatus("INACTIVE");
         loginRepository.save(login);
@@ -101,6 +123,9 @@ public class UserServiceImpl implements UserService {
 
     @Override
     public void activateUser(Long loginId) {
+        if(!getLoggedInUser().getRole().equalsIgnoreCase("ADMIN")){
+            throw new RuntimeException("Unauthorized user");
+        }
         Login login = loginRepository.findById(loginId).orElseThrow(()->new RuntimeException("User does not exist"));
         login.setAccountStatus("ACTIVE");
         loginRepository.save(login);
@@ -109,21 +134,30 @@ public class UserServiceImpl implements UserService {
 
 
     @Override
-    @Cacheable(value = "users",key = "'loggedIn:' + T(org.springframework.security.core.context.SecurityContextHolder).getContext().getAuthentication().getName()")
-    public Users getLoggedInUser() {
+    @Cacheable(value = "users",key = "#root.methodName")
+    public UserDTO getLoggedInUser() {
         Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
         if(authentication==null || !authentication.isAuthenticated()){
             throw new RuntimeException("No authenticated user found");
         }
         String username = authentication.getName();
         Login login = loginRepository.findByUsername(username).get();
-        return login.getUsers();
+        Users users = login.getUsers();
+        return new UserDTO(
+                users.getUserId(),
+                login.getLoginId(),
+                login.getRole(),
+                users.getFirstName(),
+                users.getMiddleName(),
+                users.getLastName(),
+                users.getEmail()
+        );
     }
 
     @Override
     @Cacheable(value = "userCourses", key = "#userId")
     public List<CourseRegistrationDTO> viewCourses(Long userId) {
-        if(getLoggedInUser().getLogin().getRole().equalsIgnoreCase("INSTRUCTOR")
+        if(getLoggedInUser().getRole().equalsIgnoreCase("INSTRUCTOR")
         && !Objects.equals(getLoggedInUser().getUserId(),userId)){
             throw new RuntimeException("Unauthorized instructor");
         }
@@ -140,17 +174,25 @@ public class UserServiceImpl implements UserService {
 
 
     @Override
-    @CacheEvict(value ={"users","userDTO","userCourses"},allEntries = true)
+    @CacheEvict(value ={"users","userDTO","userCourses","courses"},allEntries = true)
     public void deleteUser(Long userId) {
         if(userRepository.findById(userId).isEmpty()){
             throw new UsernameNotFoundException("User does not exist");
+        }
+        if(!getLoggedInUser().getRole().equalsIgnoreCase("ADMIN")){
+            throw new RuntimeException("Unauthorized user");
         }
         userRepository.deleteById(userId);
     }
 
     @Override
-    public List<AssignmentSubmissionDTO> getAllStudentAssignmentSubmissions() {
-        Users users = getLoggedInUser();
+    public List<AssignmentSubmissionDTO> getAllStudentAssignmentSubmissions(Long userId) {
+        if(getLoggedInUser().getRole().equalsIgnoreCase("STUDENT")
+                && !Objects.equals(getLoggedInUser().getUserId(),userId)){
+            throw new RuntimeException("Unauthorized instructor");
+        }
+        Users users = userRepository.findById(userId).orElseThrow(()->new RuntimeException("Username not found"));
+
         List<AssignmentSubmission> assignmentSubmissions =users.getAssignmentSubmissions();
         List<AssignmentSubmissionDTO> assignmentSubmissionDTOList = new ArrayList<>();
         for(AssignmentSubmission assignmentSubmission: assignmentSubmissions){
@@ -166,17 +208,49 @@ public class UserServiceImpl implements UserService {
     @Override
     @Cacheable(value = "userDTO", key = "#userId")
     public UserDTO getUserById(Long userId) {
-        Users users = userRepository.findById(userId).orElseThrow(()->new RuntimeException("User not found"));
-        return new UserDTO(users.getFirstName(), users.getMiddleName(),users.getLastName(),
-                users.getEmail(), users.getGender());
+        if(!getLoggedInUser().getRole().equalsIgnoreCase("ADMIN")){
+            throw new RuntimeException("Unauthorized user");
+        }
+        Users users = userRepository.findById(userId).orElseThrow(
+                ()->new RuntimeException("User not found"));
+        return new UserDTO(
+                users.getUserId(),
+                users.getLogin().getLoginId(),
+                users.getLogin().getRole(),
+                users.getFirstName(),
+                users.getMiddleName(),
+                users.getLastName(),
+                users.getEmail());
     }
 
     @Override
-    @Cacheable(value = "userCourses", key = "'enrolled:'+#userId")
-    public List<CourseRegistrationDTO> viewEnrolledCourses(Long userId) {
-        if(getLoggedInUser().getLogin().getRole().equalsIgnoreCase("STUDENT")
+    @Cacheable(value = "userSubmissions",key="#userId")
+    public List<SubmissionDTO> getSubmissions(Long userId) {
+        if(getLoggedInUser().getRole().equalsIgnoreCase("STUDENT")
                 && !Objects.equals(getLoggedInUser().getUserId(),userId)){
             throw new RuntimeException("Unauthorized instructor");
+        }
+        Users users = userRepository.findById(userId).orElseThrow(()->new RuntimeException("Username not found"));
+        List<Submission> submissions = users.getSubmissions();
+        List<SubmissionDTO> submissionDTOList = new ArrayList<>();
+        for(Submission submission:submissions){
+            submissionDTOList.add(new SubmissionDTO(
+                    submission.getSubmissionId(),
+                    submission.getQuiz().getQuizId(),
+                    submission.getStudent().getUserId(),
+                    submission.getScore(),
+                    submission.getTimestamp(),
+                    submission.getAnswers()));
+        }
+        return submissionDTOList;
+    }
+
+    @Override
+    @Cacheable(value = "userEnrollment", key = "'enrolled:'+#userId")
+    public List<CourseRegistrationDTO> viewEnrolledCourses(Long userId) {
+        if(getLoggedInUser().getRole().equalsIgnoreCase("STUDENT")
+                && !Objects.equals(getLoggedInUser().getUserId(),userId)){
+            throw new RuntimeException("Unauthorized user");
         }
         Users users = userRepository.findById(userId).orElseThrow(()->new RuntimeException("User does not exist"));
         List<StudentEnrollment> enrollments =users.getStudentEnrollments();
@@ -189,4 +263,5 @@ public class UserServiceImpl implements UserService {
         }
         return courseRegistrationDTOArrayList;
     }
+
 }

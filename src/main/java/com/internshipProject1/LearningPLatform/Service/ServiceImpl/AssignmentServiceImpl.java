@@ -33,10 +33,10 @@ public class AssignmentServiceImpl implements AssignmentService {
     private CourseRepository courseRepository;
 
     @Override
-    @CacheEvict(value = {"assignments"},allEntries = true)
+    @CacheEvict(value = {"assignments","courseAssignment"},allEntries = true)
     public Assignment addAssignment(Long courseId, AssignmentDTO assignmentDTO) {
         Course course = courseRepository.findById(courseId).orElseThrow(()->new RuntimeException("Course not found"));
-        if(!userService.getLoggedInUser().getLogin().getRole().equalsIgnoreCase("ADMIN")
+        if(!userService.getLoggedInUser().getRole().equalsIgnoreCase("ADMIN")
                 && !Objects.equals(course.getInstructor().getUserId(), userService.getLoggedInUser().getUserId())){
             throw new RuntimeException("Unauthorized Instructor");
         }
@@ -50,21 +50,25 @@ public class AssignmentServiceImpl implements AssignmentService {
     }
 
     @Override
-    @CacheEvict(value = {"assignments"},allEntries = true)
+    @CacheEvict(value = {"assignments","courseAssignment"},allEntries = true)
     public Assignment updateAssignment(Long assignmentId, AssignmentDTO assignmentDTO) {
         Assignment assignment = assignmentRepository.findById(assignmentId).orElseThrow(
                 ()->new RuntimeException("Assignment not found"));
-        assignment.setAssignmentTitle(assignmentDTO.getAssignmentTitle());
-        assignment.setAssignmentDescription(assignmentDTO.getAssignmentDescription());
+        if(!assignmentDTO.getAssignmentTitle().isEmpty())
+            assignment.setAssignmentTitle(assignmentDTO.getAssignmentTitle());
+
+        if(!assignmentDTO.getAssignmentDescription().isEmpty())
+            assignment.setAssignmentDescription(assignmentDTO.getAssignmentDescription());
+
         return assignmentRepository.save(assignment);
     }
 
     @Override
-    @CacheEvict(value = {"assignments"},allEntries = true)
+    @CacheEvict(value = {"assignments","courseAssignment"},allEntries = true)
     public void deleteAssignment(Long assignmentId) {
         Assignment assignment = assignmentRepository.findById(assignmentId).orElseThrow(
                 ()->new RuntimeException("Assignment not found"));
-        if(!userService.getLoggedInUser().getLogin().getRole().equalsIgnoreCase("ADMIN")
+        if(!userService.getLoggedInUser().getRole().equalsIgnoreCase("ADMIN")
                 && !Objects.equals(assignment.getCourse().getInstructor().getUserId(), userService.getLoggedInUser().getUserId())){
             throw new RuntimeException("Unauthorized Instructor");
         }
@@ -90,12 +94,12 @@ public class AssignmentServiceImpl implements AssignmentService {
     }
 
     @Override
-    @CacheEvict(value = {"assignments"},allEntries = true)
+    @CacheEvict(value = {"assignments","courseAssignment"},allEntries = true)
     public String uploadAssignmentPdf(Long assignmentId, MultipartFile file) {
         final String ASSIGNMENT_DIR = "/assignments/pdfs/";
         Assignment assignment = assignmentRepository.findById(assignmentId).orElseThrow(
                 ()-> new RuntimeException("Assignment not found"));
-        if(!userService.getLoggedInUser().getLogin().getRole().equalsIgnoreCase("ADMIN")
+        if(!userService.getLoggedInUser().getRole().equalsIgnoreCase("ADMIN")
                 && !Objects.equals(assignment.getCourse().getInstructor().getUserId(), userService.getLoggedInUser().getUserId())){
             throw new RuntimeException("Unauthorized Instructor");
         }
@@ -128,11 +132,11 @@ public class AssignmentServiceImpl implements AssignmentService {
 
     /*Here the String path has a hidden /n.So without trimming it .equals dont work*/
     @Override
-    @CacheEvict(value = {"assignments"},allEntries = true)
+    @CacheEvict(value = {"assignments","courseAssignment"},allEntries = true)
     public void removeAssignmentPdf(Long assignmentId, String path) {
         Assignment assignment = assignmentRepository.findById(assignmentId).orElseThrow(
                 ()-> new RuntimeException("Assignment not found"));
-        if(!userService.getLoggedInUser().getLogin().getRole().equalsIgnoreCase("ADMIN")
+        if(!userService.getLoggedInUser().getRole().equalsIgnoreCase("ADMIN")
                 && !Objects.equals(assignment.getCourse().getInstructor().getUserId(), userService.getLoggedInUser().getUserId())){
             throw new RuntimeException("Unauthorized Instructor");
         }
@@ -154,10 +158,11 @@ public class AssignmentServiceImpl implements AssignmentService {
     }
 
     @Override
+    @Cacheable(value = "assignmentsAssignmentSubmissions",key = "#assignmentId")
     public List<AssignmentSubmissionDTO> getAllCourseAssignmentSubmissions(Long assignmentId) {
         Assignment assignment = assignmentRepository.findById(assignmentId).orElseThrow(
                 () -> new RuntimeException("Assignment not found"));
-        if (!userService.getLoggedInUser().getLogin().getRole().equalsIgnoreCase("ADMIN")
+        if (!userService.getLoggedInUser().getRole().equalsIgnoreCase("ADMIN")
                 && !Objects.equals(assignment.getCourse().getInstructor().getUserId(), userService.getLoggedInUser().getUserId())) {
             throw new RuntimeException("Unauthorized Instructor");
         }

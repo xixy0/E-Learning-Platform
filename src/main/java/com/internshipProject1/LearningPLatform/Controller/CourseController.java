@@ -95,5 +95,14 @@ public class CourseController {
         }
     }
 
+    @GetMapping("/getCourseById/{courseId}")
+    public ResponseEntity<?> getCourseById(@PathVariable Long courseId){
+        try{
+            return ResponseEntity.status(HttpStatus.ACCEPTED).body(courseService.getCourseById(courseId));
+        }catch (RuntimeException ex){
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(List.of(ex.getMessage()));
+        }
+    }
+
 
 }

@@ -2,11 +2,15 @@ package com.internshipProject1.LearningPLatform.Entity;
 
 import com.fasterxml.jackson.annotation.JsonBackReference;
 
+import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 import lombok.RequiredArgsConstructor;
+
+import java.io.Serial;
+import java.io.Serializable;
 
 
 @Entity
@@ -34,7 +38,6 @@ public class Login {
     private String accountStatus;
 
     @OneToOne(mappedBy = "login")
-    @JsonBackReference
     private Users users;
 
 

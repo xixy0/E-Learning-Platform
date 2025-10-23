@@ -11,10 +11,8 @@ import java.util.List;
 @Data
 @AllArgsConstructor
 @NoArgsConstructor
-public class AssignmentDTO implements Serializable {
+public class AssignmentDTO {
 
-    @Serial
-    private static final long serialVersionUID = 1L;
 
     private Long assignmentId;
     private String assignmentTitle;

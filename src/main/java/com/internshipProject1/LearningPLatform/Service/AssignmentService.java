@@ -3,7 +3,6 @@ package com.internshipProject1.LearningPLatform.Service;
 import com.internshipProject1.LearningPLatform.DTO.AssignmentDTO;
 import com.internshipProject1.LearningPLatform.DTO.AssignmentSubmissionDTO;
 import com.internshipProject1.LearningPLatform.Entity.Assignment;
-import com.internshipProject1.LearningPLatform.Entity.AssignmentSubmission;
 import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
 

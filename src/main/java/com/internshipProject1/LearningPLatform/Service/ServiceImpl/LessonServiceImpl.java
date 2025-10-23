@@ -32,11 +32,11 @@ public class LessonServiceImpl implements LessonService {
     private UserService userService;
 
     @Override
-    @CacheEvict(value = {"lessons"},allEntries = true)
-    public LessonDTO addLesson(LessonDTO lessonDTO) {
+    @CacheEvict(value = {"lessons","courseLesson"},allEntries = true,beforeInvocation = true)
+    public Lesson addLesson(LessonDTO lessonDTO) {
         Course course = courseRepository.findById(lessonDTO.getCourseId()).orElseThrow(()->new RuntimeException("Course not found"));
 
-        if(!userService.getLoggedInUser().getLogin().getRole().equalsIgnoreCase("ADMIN")
+        if(!userService.getLoggedInUser().getRole().equalsIgnoreCase("ADMIN")
                 && !Objects.equals(course.getInstructor().getUserId(), userService.getLoggedInUser().getUserId())){
             throw new RuntimeException("Unauthorized Instructor");
         }
@@ -48,49 +48,54 @@ public class LessonServiceImpl implements LessonService {
         lesson.setLessonTitle(lessonDTO.getLessonTitle());
         lesson.setCourse(course);
         lesson.setInstructorName(course.getInstructor().getFirstName()+" "+course.getInstructor().getMiddleName() + " " + course.getInstructor().getLastName());
-
-        lessonRepository.save(lesson);
-
-        lessonDTO.setCourseId(course.getCourseId());
-        lessonDTO.setInstructorName(course.getInstructor().getFirstName()+" "+course.getInstructor().getMiddleName() + " " + course.getInstructor().getLastName());
-        lessonDTO.setInstructorName(course.getInstructor().getFirstName()+" "+course.getInstructor().getMiddleName() + " " + course.getInstructor().getLastName());
-
-        return lessonDTO;
-    }
-
-    @Override
-    @CacheEvict(value = {"lessons"},allEntries = true)
-    public Lesson updateLesson(Long lessonId, LessonDTO lessonDTO) {
-        Lesson lesson = lessonRepository.findById(lessonId).orElseThrow(()-> new RuntimeException("Lesson not found"));
-        if(!userService.getLoggedInUser().getLogin().getRole().equalsIgnoreCase("ADMIN")
-                && !Objects.equals(lesson.getCourse().getInstructor().getUserId(), userService.getLoggedInUser().getUserId()))
-        {
-            throw new RuntimeException("Unauthorized Instructor");
-        }
-
-        lesson.setLessonDescription(lessonDTO.getLessonDescription());
-        lesson.setVideourl(lessonDTO.getVideoUrl());
-        lesson.setPdfUrl(lessonDTO.getPdfUrl());
-        lesson.setLessonTitle(lessonDTO.getLessonTitle());
-        Course course = courseRepository.findById(lessonDTO.getCourseId()).orElseThrow(()->new RuntimeException("Course not found"));
-        lesson.setCourse(course);
-        lesson.setInstructorName(course.getInstructor().getFirstName()+" "+course.getInstructor().getMiddleName() + " " + course.getInstructor().getLastName());
+        logCacheClear();
         return lessonRepository.save(lesson);
 
 
-
     }
 
     @Override
-    @CacheEvict(value = {"lessons"},allEntries = true)
-    public void deleteLesson(Long lessonId) {
+    @CacheEvict(value = {"lessons","courseLesson"},allEntries = true,beforeInvocation = true)
+    public Lesson updateLesson(Long lessonId, LessonDTO lessonDTO) {
         Lesson lesson = lessonRepository.findById(lessonId).orElseThrow(()-> new RuntimeException("Lesson not found"));
-        if(!userService.getLoggedInUser().getLogin().getRole().equalsIgnoreCase("ADMIN")
+        if(!userService.getLoggedInUser().getRole().equalsIgnoreCase("ADMIN")
                 && !Objects.equals(lesson.getCourse().getInstructor().getUserId(), userService.getLoggedInUser().getUserId()))
         {
             throw new RuntimeException("Unauthorized Instructor");
         }
+        if(!lessonDTO.getLessonDescription().isEmpty()) {
+            lesson.setLessonDescription(lessonDTO.getLessonDescription());
+        }
 
+        if(!lessonDTO.getVideoUrl().isEmpty()) {
+            lesson.setVideourl(lessonDTO.getVideoUrl());
+        }
+
+        if(!lessonDTO.getPdfUrl().isEmpty()) {
+            lesson.setPdfUrl(lessonDTO.getPdfUrl());
+        }
+
+        if(!lessonDTO.getLessonTitle().isEmpty()) {
+            lesson.setLessonTitle(lessonDTO.getLessonTitle());
+        }
+
+        Course course = courseRepository.findById(lessonDTO.getCourseId()).orElseThrow(()->new RuntimeException("Course not found"));
+        lesson.setCourse(course);
+        lesson.setInstructorName(course.getInstructor().getFirstName()+" "+course.getInstructor().getMiddleName() + " " + course.getInstructor().getLastName());
+        logCacheClear();
+        return lessonRepository.save(lesson);
+    }
+
+    @Override
+    @CacheEvict(value = {"lessons","courseLesson"},allEntries = true,beforeInvocation = true)
+    public void deleteLesson(Long lessonId) {
+        Lesson lesson = lessonRepository.findById(lessonId).orElseThrow(()-> new RuntimeException("Lesson not found"));
+        if(!userService.getLoggedInUser().getRole().equalsIgnoreCase("ADMIN")
+                && !Objects.equals(lesson.getCourse().getInstructor().getUserId(), userService.getLoggedInUser().getUserId()))
+        {
+            throw new RuntimeException("Unauthorized Instructor");
+        }
+        logCacheClear();
         lessonRepository.deleteById(lessonId);
     }
 
@@ -114,11 +119,11 @@ public class LessonServiceImpl implements LessonService {
     }
 
     @Override
-    @CacheEvict(value = {"lessons"},allEntries = true)
+    @CacheEvict(value = {"lessons","courseLesson"},allEntries = true)
     public String uploadPdf(Long lessonId, MultipartFile file) {
         final String UPLOAD_DIR = "/lessons/pdfs/";
         Lesson lesson = lessonRepository.findById(lessonId).orElseThrow(()-> new RuntimeException("Course not found"));
-        if(!userService.getLoggedInUser().getLogin().getRole().equalsIgnoreCase("ADMIN")
+        if(!userService.getLoggedInUser().getRole().equalsIgnoreCase("ADMIN")
                 && !Objects.equals(lesson.getCourse().getInstructor().getUserId(), userService.getLoggedInUser().getUserId())){
             throw new RuntimeException("Unauthorized Instructor");
         }
@@ -155,6 +160,7 @@ public class LessonServiceImpl implements LessonService {
     @Cacheable(value = "lessons",key="#lessonId")
     public LessonDTO getLessonById(Long lessonId) {
         Lesson lesson = lessonRepository.findById(lessonId).orElseThrow(()-> new RuntimeException("Lesson not found"));
+
         return new LessonDTO(
                 lesson.getCourse().getCourseId(),
                 lesson.getLessonId(),
@@ -164,4 +170,10 @@ public class LessonServiceImpl implements LessonService {
                 lesson.getPdfUrl(),
                 (lesson.getCourse().getInstructor().getFirstName()+" "+ lesson.getCourse().getInstructor().getMiddleName()+" "+lesson.getCourse().getInstructor().getLastName()));
     }
+
+    @Override
+    public void logCacheClear() {
+        System.out.println(">>> Cache 'lessons' cleared");
+    }
+
 }

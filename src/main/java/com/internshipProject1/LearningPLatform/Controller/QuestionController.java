@@ -50,7 +50,12 @@ public class QuestionController {
         return ResponseEntity.status(HttpStatus.OK).body(questionService.getAll());
     }
 
-
-
-
+    @GetMapping("/getQuestionById/{questionId}")
+    public ResponseEntity<?> getQuestionById(@PathVariable Long questionId){
+        try{
+            return ResponseEntity.status(HttpStatus.ACCEPTED).body(questionService.getQuestionById(questionId));
+        }catch (RuntimeException ex){
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(List.of(ex.getMessage()));
+        }
+    }
 }

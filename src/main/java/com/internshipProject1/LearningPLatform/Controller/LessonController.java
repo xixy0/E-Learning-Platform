@@ -59,6 +59,13 @@ public class LessonController {
         }
     }
 
-
+    @GetMapping("/getLessonById/{lessonId}")
+    public ResponseEntity<?> getLessonById(@PathVariable Long lessonId){
+        try{
+            return ResponseEntity.status(HttpStatus.ACCEPTED).body(lessonService.getLessonById(lessonId));
+        }catch (RuntimeException ex){
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(List.of(ex.getMessage()));
+        }
+    }
 
 }

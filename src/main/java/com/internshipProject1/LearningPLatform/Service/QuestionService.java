@@ -13,7 +13,5 @@ public interface QuestionService {
     Questions updateQuestion(Long questionId,QuestionDTO questionDTO);
     List<QuestionDTO> getAll();
     QuestionDTO getQuestionById(Long questionId);
-
-    //public Integer validateAnswers(Long quizId,Long submissionId);
 }
 

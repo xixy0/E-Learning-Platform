@@ -36,10 +36,10 @@ public class StudentEnrollmentServiceIMpl implements StudentEnrollmentService {
 
 
     @Override
-    @CacheEvict(value = "enrollments",allEntries = true)
+    @CacheEvict(value = {"enrollments","userEnrollment","courseEnrollments"},allEntries = true)
     public StudentEnrollment enroll(Long courseId) {
         Course course = courseRepository.findById(courseId).orElseThrow(()->new RuntimeException("Course not found"));
-        Users users = userService.getLoggedInUser();
+        Users users = userRepository.findById(userService.getLoggedInUser().getUserId()).get();
         List<StudentEnrollment> studentEnrollments = users.getStudentEnrollments();
         for(StudentEnrollment studentEnrollment: studentEnrollments){
             if(Objects.equals(studentEnrollment.getCourse().getCourseId(), courseId)){
@@ -49,15 +49,15 @@ public class StudentEnrollmentServiceIMpl implements StudentEnrollmentService {
         StudentEnrollment studentEnrollment = new StudentEnrollment();
         studentEnrollment.setEnrollmentDate(LocalDate.now());
         studentEnrollment.setCourse(course);
-        studentEnrollment.setUsers(userService.getLoggedInUser());
+        studentEnrollment.setUsers(users);
         return studentEnrollmentRepository.save(studentEnrollment);
     }
 
     @Override
-    @CacheEvict(value = "enrollments",allEntries = true)
+    @CacheEvict(value = {"enrollments","userEnrollment","courseEnrollments"},allEntries = true)
     public void unEnroll(Long courseId) {
         Course course = courseRepository.findById(courseId).orElseThrow(()->new RuntimeException("Course not found"));
-        Users users = userService.getLoggedInUser();
+        Users users = userRepository.findById(userService.getLoggedInUser().getUserId()).get();
         List<StudentEnrollment> studentEnrollments = users.getStudentEnrollments();
 
 
@@ -79,8 +79,11 @@ public class StudentEnrollmentServiceIMpl implements StudentEnrollmentService {
         List<StudentEnrollment> studentEnrollments = studentEnrollmentRepository.findAll();
         List<StudentEnrollmentDTO> studentEnrollmentDTOList =new ArrayList<>();
         for(StudentEnrollment studentEnrollment:studentEnrollments){
-            studentEnrollmentDTOList.add(new StudentEnrollmentDTO(studentEnrollment.getEnrollmentId(),
-                    studentEnrollment.getEnrollmentDate(),studentEnrollment.getUsers().getUserId(),
+            studentEnrollmentDTOList.add(new StudentEnrollmentDTO(
+                    studentEnrollment.getEnrollmentId(),
+                    studentEnrollment.getEnrollmentDate(),
+                    (studentEnrollment.getUsers().getFirstName()+" "+studentEnrollment.getUsers().getMiddleName()+" "+studentEnrollment.getUsers().getLastName()),
+                    studentEnrollment.getUsers().getUserId(),
                     studentEnrollment.getCourse().getCourseId()));
         }
         return studentEnrollmentDTOList;
@@ -91,14 +94,12 @@ public class StudentEnrollmentServiceIMpl implements StudentEnrollmentService {
     public StudentEnrollmentDTO getEnrollmentById(Long studentEnrollmentId) {
         StudentEnrollment studentEnrollment = studentEnrollmentRepository.findById(studentEnrollmentId).orElseThrow(
                 ()->new RuntimeException("No enrollment"));
-        return new StudentEnrollmentDTO(studentEnrollment.getEnrollmentId(),
-                studentEnrollment.getEnrollmentDate(),studentEnrollment.getUsers().getUserId(),
+        return new StudentEnrollmentDTO(
+                studentEnrollment.getEnrollmentId(),
+                studentEnrollment.getEnrollmentDate(),
+                (studentEnrollment.getUsers().getFirstName()+" "+studentEnrollment.getUsers().getMiddleName()+" "+studentEnrollment.getUsers().getLastName()),
+                studentEnrollment.getUsers().getUserId(),
                 studentEnrollment.getCourse().getCourseId());
     }
 
-
-//    @Override
-//    public Double completionPercentage() {
-//        return 0.0;
-//    }
 }

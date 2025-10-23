@@ -29,10 +29,10 @@ public class QuestionServiceImpl implements QuestionService {
     private QuizRepository quizRepository;
 
     @Override
-    @CacheEvict(value = "questions",allEntries = true)
+    @CacheEvict(value = {"questions","quizQuestion"},allEntries = true)
     public Questions addQuestion(QuestionDTO questionDTO) {
        Quiz quiz = quizRepository.findById(questionDTO.getQuizId()).orElseThrow(()->new RuntimeException("Quiz not found"));
-        if(!userService.getLoggedInUser().getLogin().getRole().equalsIgnoreCase("ADMIN")
+        if(!userService.getLoggedInUser().getRole().equalsIgnoreCase("ADMIN")
                 && !Objects.equals(quiz.getCourse().getInstructor().getUserId(), userService.getLoggedInUser().getUserId())){
             throw new RuntimeException("Unauthorized Instructor");
         }
@@ -50,10 +50,10 @@ public class QuestionServiceImpl implements QuestionService {
     }
 
     @Override
-    @CacheEvict(value = "questions",allEntries = true)
+    @CacheEvict(value = {"questions","quizQuestion"},allEntries = true)
     public void deleteQuestion(Long questionId) {
-        Questions questions = questionRepository.findById(questionId).orElseThrow(()->new RuntimeException("Quiz not found"));
-        if(!userService.getLoggedInUser().getLogin().getRole().equalsIgnoreCase("ADMIN")
+        Questions questions = questionRepository.findById(questionId).orElseThrow(()->new RuntimeException("Question not found"));
+        if(!userService.getLoggedInUser().getRole().equalsIgnoreCase("ADMIN")
                 && !Objects.equals(questions.getQuiz().getCourse().getInstructor().getUserId(), userService.getLoggedInUser().getUserId()))
         {
             throw new RuntimeException("Unauthorized Instructor");
@@ -64,24 +64,36 @@ public class QuestionServiceImpl implements QuestionService {
 
 
     @Override
-    @CacheEvict(value = "questions",allEntries = true)
+    @CacheEvict(value = {"questions","quizQuestion"},allEntries = true)
     public Questions updateQuestion(Long questionId, QuestionDTO questionDTO) {
         Questions question = questionRepository.findById(questionId).orElseThrow(
                 () -> new RuntimeException("Quiz not found"));
         Quiz quiz = quizRepository.findById(questionDTO.getQuizId()).orElseThrow(
                 ()->new RuntimeException("Quiz not found"));
 
-        if (!userService.getLoggedInUser().getLogin().getRole().equalsIgnoreCase("ADMIN")
+        if (!userService.getLoggedInUser().getRole().equalsIgnoreCase("ADMIN")
                 && !Objects.equals(question.getQuiz().getCourse().getInstructor().getUserId(), userService.getLoggedInUser().getUserId())) {
             throw new RuntimeException("Unauthorized Instructor");
         }
-        question.setQuestionText(questionDTO.getQuestionText());
+        if(!questionDTO.getQuestionText().isEmpty())
+            question.setQuestionText(questionDTO.getQuestionText());
+
         question.setQuiz(quiz);
-        question.setOption1(questionDTO.getOption1());
-        question.setOption2(questionDTO.getOption2());
-        question.setOption3(questionDTO.getOption3());
-        question.setOption4(questionDTO.getOption4());
-        question.setCorrectAnswer(questionDTO.getCorrectAnswer());
+
+        if(!questionDTO.getOption1().isEmpty())
+            question.setOption1(questionDTO.getOption1());
+
+        if(!questionDTO.getOption2().isEmpty())
+            question.setOption2(questionDTO.getOption2());
+
+        if(!questionDTO.getOption3().isEmpty())
+            question.setOption3(questionDTO.getOption3());
+
+        if(!questionDTO.getOption4().isEmpty())
+            question.setOption4(questionDTO.getOption4());
+
+        if(!questionDTO.getCorrectAnswer().isEmpty())
+            question.setCorrectAnswer(questionDTO.getCorrectAnswer());
 
         return questionRepository.save(question);
 
@@ -106,9 +118,15 @@ public class QuestionServiceImpl implements QuestionService {
     @Cacheable(value = "questions",key = "#questionId")
     public QuestionDTO getQuestionById(Long questionId) {
         Questions question = questionRepository.findById(questionId).orElseThrow(
-                () -> new RuntimeException("Quiz not found"));
-        return new QuestionDTO(question.getQuiz().getQuizId(),question.getQuestionId(),question.getQuestionText(),
-                question.getOption1(), question.getOption2(), question.getOption3(),
-                question.getOption4(), question.getCorrectAnswer());
+                () -> new RuntimeException("Question not found"));
+        return new QuestionDTO(
+                question.getQuiz().getQuizId(),
+                question.getQuestionId(),
+                question.getQuestionText(),
+                question.getOption1(),
+                question.getOption2(),
+                question.getOption3(),
+                question.getOption4(),
+                question.getCorrectAnswer());
     }
 }

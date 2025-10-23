@@ -10,10 +10,7 @@ import java.io.Serializable;
 @Data
 @AllArgsConstructor
 @NoArgsConstructor
-public class QuestionDTO implements Serializable {
-
-    @Serial
-    private static final long serialVersionUID = 5L;
+public class QuestionDTO {
 
     private Long quizId;
     private Long questionId;

@@ -11,14 +11,14 @@ import java.io.Serializable;
 @Data
 @AllArgsConstructor
 @NoArgsConstructor
-public class UserDTO implements Serializable {
+public class UserDTO {
 
-    @Serial
-    private static final long serialVersionUID = 9L;
-
+    private Long userId;
+    private Long loginId;
+    private String role;
     private String firstName;
     private String middleName;
     private String lastName;
     private String email;
-    private String gender;
+
 }

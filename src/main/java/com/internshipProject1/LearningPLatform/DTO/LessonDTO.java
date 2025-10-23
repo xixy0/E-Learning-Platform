@@ -11,10 +11,7 @@ import java.io.Serializable;
 @Data
 @AllArgsConstructor
 @NoArgsConstructor
-public class LessonDTO implements Serializable {
-
-    @Serial
-    private static final long serialVersionUID = 4L;
+public class LessonDTO {
 
     private Long courseId;
     private Long lessonId;
