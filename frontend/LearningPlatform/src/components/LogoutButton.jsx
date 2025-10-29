@@ -1,25 +1,17 @@
-import { useNavigate } from "react-router-dom";
+import { useContext } from "react";
 import toast from "react-hot-toast";
+import { useAuth } from "../context/AuthContext";
 
 function LogoutButton() {
-  const navigate = useNavigate();
+  
+  const {logout} = useAuth();
 
-  const handleLogout = () => {
-    localStorage.removeItem("token");
-
-    toast.success("Successfully Logged Out!");
-    window.dispatchEvent(new Event("authChange"));
-
-    setTimeout(() => {
-      navigate("/mainpage");
-    }, 200);
-  };
 
   return (
     <div className="tooltip tooltip-left" data-tip="Logout">
       <button
         className="btn btn-ghost btn-error btn-circle mr-2 hover:text-error-content"
-        onClick={handleLogout}
+        onClick={logout}
       >
         <svg
           xmlns="http://www.w3.org/2000/svg"

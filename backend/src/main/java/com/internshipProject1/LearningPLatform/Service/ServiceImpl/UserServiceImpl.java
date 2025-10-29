@@ -63,8 +63,22 @@ public class UserServiceImpl implements UserService {
 
     @Override
     @Cacheable(value = "users",key = "'all'")
-    public List<Users> getAll() {
-        return userRepository.findAll();
+    public List<UserDTO> getAll() {
+        List<Users> users =  userRepository.findAll();
+        List<UserDTO> userDTOList = new ArrayList<>();
+
+        for(Users user : users){
+            userDTOList.add(new UserDTO(
+                    user.getUserId(),
+                    user.getLogin().getLoginId(),
+                    user.getLogin().getRole(),
+                    user.getFirstName(),
+                    user.getMiddleName(),
+                    user.getLastName(),
+                    user.getEmail()
+            ));
+        }
+        return userDTOList;
     }
 
     @Override
@@ -141,6 +155,7 @@ public class UserServiceImpl implements UserService {
             throw new RuntimeException("No authenticated user found");
         }
         String username = authentication.getName();
+        System.out.println("username: " +username);
         Login login = loginRepository.findByUsername(username).get();
         Users users = login.getUsers();
         return new UserDTO(
@@ -156,11 +171,7 @@ public class UserServiceImpl implements UserService {
 
     @Override
     @Cacheable(value = "userCourses", key = "#userId")
-    public List<CourseRegistrationDTO> viewCourses(Long userId) {
-        if(getLoggedInUser().getRole().equalsIgnoreCase("INSTRUCTOR")
-        && !Objects.equals(getLoggedInUser().getUserId(),userId)){
-            throw new RuntimeException("Unauthorized instructor");
-        }
+    public List<CourseRegistrationDTO> viewCoursesByAdmin(Long userId) {
         Users user = userRepository.findById(userId).orElseThrow(()->new RuntimeException("Username not found"));
         List<Course> course =user.getCourses();
         List<CourseRegistrationDTO> courseRegistrationDTOArrayList = new ArrayList<>();
@@ -175,6 +186,22 @@ public class UserServiceImpl implements UserService {
           return courseRegistrationDTOArrayList;
     }
 
+    @Override
+    @Cacheable(value = "userCourses", key = "viewCourses")
+    public List<CourseRegistrationDTO> viewCourses() {
+        Users user = userRepository.findById(getLoggedInUser().getUserId()).orElseThrow(()->new RuntimeException("Username not found"));
+        List<Course> course =user.getCourses();
+        List<CourseRegistrationDTO> courseRegistrationDTOArrayList = new ArrayList<>();
+        for(Course course1 : course){
+            courseRegistrationDTOArrayList.add(new CourseRegistrationDTO(
+                    course1.getCourseId(),
+                    course1.getCourseTitle(),
+                    course1.getCourseDescription(),
+                    course1.getCourseCategory(),
+                    (course1.getInstructor().getFirstName()+" "+ course1.getInstructor().getMiddleName()+" "+course1.getInstructor().getLastName())));
+        }
+        return courseRegistrationDTOArrayList;
+    }
 
 
     @Override
@@ -190,12 +217,26 @@ public class UserServiceImpl implements UserService {
     }
 
     @Override
-    public List<AssignmentSubmissionDTO> getAllStudentAssignmentSubmissions(Long userId) {
-        if(getLoggedInUser().getRole().equalsIgnoreCase("STUDENT")
-                && !Objects.equals(getLoggedInUser().getUserId(),userId)){
-            throw new RuntimeException("Unauthorized instructor");
-        }
+    public List<AssignmentSubmissionDTO> getAllStudentAssignmentSubmissionsByAdmin(Long userId) {
+
         Users users = userRepository.findById(userId).orElseThrow(()->new RuntimeException("Username not found"));
+
+        List<AssignmentSubmission> assignmentSubmissions =users.getAssignmentSubmissions();
+        List<AssignmentSubmissionDTO> assignmentSubmissionDTOList = new ArrayList<>();
+        for(AssignmentSubmission assignmentSubmission: assignmentSubmissions){
+            assignmentSubmissionDTOList.add(new AssignmentSubmissionDTO(assignmentSubmission.getAssignmentSubmissionId(),
+                    assignmentSubmission.getSubmissionDate(),assignmentSubmission.getAssignmentSubmissionUrl(),
+                    assignmentSubmission.getUsers().getUserId(),
+                    assignmentSubmission.getAssignment().getAssignmentId()));
+
+        }
+        return assignmentSubmissionDTOList;
+    }
+
+    @Override
+    public List<AssignmentSubmissionDTO> getAllStudentAssignmentSubmissions() {
+
+        Users users = userRepository.findById(getLoggedInUser().getUserId()).orElseThrow(()->new RuntimeException("Username not found"));
 
         List<AssignmentSubmission> assignmentSubmissions =users.getAssignmentSubmissions();
         List<AssignmentSubmissionDTO> assignmentSubmissionDTOList = new ArrayList<>();
@@ -227,13 +268,11 @@ public class UserServiceImpl implements UserService {
                 users.getEmail());
     }
 
+
     @Override
     @Cacheable(value = "userSubmissions",key="#userId")
-    public List<SubmissionDTO> getSubmissions(Long userId) {
-        if(getLoggedInUser().getRole().equalsIgnoreCase("STUDENT")
-                && !Objects.equals(getLoggedInUser().getUserId(),userId)){
-            throw new RuntimeException("Unauthorized instructor");
-        }
+    public List<SubmissionDTO> getSubmissionsByAdmin(Long userId) {
+
         Users users = userRepository.findById(userId).orElseThrow(()->new RuntimeException("Username not found"));
         List<Submission> submissions = users.getSubmissions();
         List<SubmissionDTO> submissionDTOList = new ArrayList<>();
@@ -250,12 +289,28 @@ public class UserServiceImpl implements UserService {
     }
 
     @Override
-    @Cacheable(value = "userEnrollment", key = "'enrolled:'+#userId")
-    public List<CourseRegistrationDTO> viewEnrolledCourses(Long userId) {
-        if(getLoggedInUser().getRole().equalsIgnoreCase("STUDENT")
-                && !Objects.equals(getLoggedInUser().getUserId(),userId)){
-            throw new RuntimeException("Unauthorized user");
+    @Cacheable(value = "userSubmissions",key="submissions")
+    public List<SubmissionDTO> getSubmissions() {
+
+        Users users = userRepository.findById(getLoggedInUser().getUserId()).orElseThrow(()->new RuntimeException("Username not found"));
+        List<Submission> submissions = users.getSubmissions();
+        List<SubmissionDTO> submissionDTOList = new ArrayList<>();
+        for(Submission submission:submissions){
+            submissionDTOList.add(new SubmissionDTO(
+                    submission.getSubmissionId(),
+                    submission.getQuiz().getQuizId(),
+                    submission.getStudent().getUserId(),
+                    submission.getScore(),
+                    submission.getTimestamp(),
+                    submission.getAnswers()));
         }
+        return submissionDTOList;
+    }
+
+    @Override
+    @Cacheable(value = "userEnrollment", key = "'enrolled:'+#userId")
+    public List<CourseRegistrationDTO> viewEnrolledCoursesByAdmin(Long userId) {
+
         Users users = userRepository.findById(userId).orElseThrow(()->new RuntimeException("User does not exist"));
         List<StudentEnrollment> enrollments =users.getStudentEnrollments();
         List<CourseRegistrationDTO> courseRegistrationDTOArrayList = new ArrayList<>();
@@ -267,6 +322,25 @@ public class UserServiceImpl implements UserService {
                     enrollment.getCourse().getCourseCategory(),
                     (enrollment.getCourse().getInstructor().getFirstName()+" "+enrollment.getCourse().getInstructor().getMiddleName()+" "+ enrollment.getCourse().getInstructor().getLastName())
                     ));
+        }
+        return courseRegistrationDTOArrayList;
+    }
+
+    @Override
+    @Cacheable(value = "userEnrollment", key = "studentEnrollment")
+    public List<CourseRegistrationDTO> viewEnrolledCourses() {
+
+        Users users = userRepository.findById(getLoggedInUser().getUserId()).orElseThrow(()->new RuntimeException("User does not exist"));
+        List<StudentEnrollment> enrollments =users.getStudentEnrollments();
+        List<CourseRegistrationDTO> courseRegistrationDTOArrayList = new ArrayList<>();
+        for(StudentEnrollment enrollment : enrollments){
+            courseRegistrationDTOArrayList.add(new CourseRegistrationDTO(
+                    enrollment.getCourse().getCourseId(),
+                    enrollment.getCourse().getCourseTitle(),
+                    enrollment.getCourse().getCourseDescription(),
+                    enrollment.getCourse().getCourseCategory(),
+                    (enrollment.getCourse().getInstructor().getFirstName()+" "+enrollment.getCourse().getInstructor().getMiddleName()+" "+ enrollment.getCourse().getInstructor().getLastName())
+            ));
         }
         return courseRegistrationDTOArrayList;
     }

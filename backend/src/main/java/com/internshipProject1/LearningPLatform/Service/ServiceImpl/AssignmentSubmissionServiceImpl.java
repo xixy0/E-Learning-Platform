@@ -110,7 +110,7 @@ public class AssignmentSubmissionServiceImpl implements AssignmentSubmissionServ
     @Override
     @Cacheable(value = "assignmentSubmissionUser",key="'Assignment wise:'+ #assignmentId")
     public AssignmentSubmissionDTO getAssignmentSubmissionByUser(Long assignmentId) {
-       List<AssignmentSubmissionDTO> userAssignmentSubmissionList = userService.getAllStudentAssignmentSubmissions(userService.getLoggedInUser().getUserId());
+       List<AssignmentSubmissionDTO> userAssignmentSubmissionList = userService.getAllStudentAssignmentSubmissionsByAdmin(userService.getLoggedInUser().getUserId());
        for(AssignmentSubmissionDTO assignmentSubmissionDTO : userAssignmentSubmissionList){
            if(Objects.equals(assignmentSubmissionDTO.getAssignmentId(),assignmentId)){
                return assignmentSubmissionDTO;

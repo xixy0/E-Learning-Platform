@@ -9,17 +9,24 @@ import java.util.List;
 @Service
 public interface UserService {
      Users addUser(UserRegistrationDTO userRegistrationDTO) throws IllegalAccessException;
-     List<Users> getAll();
+     List<UserDTO> getAll();
      Users updateUser(Long userId , UserRegistrationDTO userRegistrationDTO);
      void deactivateUser(Long userId);
      void activateUser(Long userId);
-     UserDTO getLoggedInUser();
-     List<CourseRegistrationDTO> viewEnrolledCourses(Long userId);
-     List<CourseRegistrationDTO> viewCourses(Long userId);
      void deleteUser(Long userId);
-     List<AssignmentSubmissionDTO> getAllStudentAssignmentSubmissions(Long userId);
+     UserDTO getLoggedInUser();
      UserDTO getUserById(Long userId);
-     List<SubmissionDTO> getSubmissions(Long userId);
+     List<AssignmentSubmissionDTO> getAllStudentAssignmentSubmissionsByAdmin(Long userId);
+     List<AssignmentSubmissionDTO> getAllStudentAssignmentSubmissions();
+     List<CourseRegistrationDTO> viewEnrolledCoursesByAdmin(Long userId);
+     List<CourseRegistrationDTO> viewEnrolledCourses();
+     List<CourseRegistrationDTO> viewCoursesByAdmin(Long userId);
+     List<CourseRegistrationDTO> viewCourses();
+     List<SubmissionDTO> getSubmissionsByAdmin(Long userId);
+     List<SubmissionDTO> getSubmissions();
+
+
+
 
 
 }

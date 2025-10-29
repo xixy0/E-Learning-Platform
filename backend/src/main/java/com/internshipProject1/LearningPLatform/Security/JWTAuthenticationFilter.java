@@ -30,6 +30,15 @@ public class JWTAuthenticationFilter extends OncePerRequestFilter {
             FilterChain filterChain)
             throws ServletException, IOException {
 
+        String path = request.getRequestURI();
+
+        if(path.startsWith("/api/users/register")||
+                path.startsWith("/api/auth/authenticate")||
+                path.startsWith("/api/course/getAll")){
+            filterChain.doFilter(request,response);
+            return;
+        }
+
         final String authHead =  request.getHeader("Authorization");
         final String username;
         final String token;

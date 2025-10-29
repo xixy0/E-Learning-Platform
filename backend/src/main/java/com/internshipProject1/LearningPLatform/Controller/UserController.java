@@ -29,7 +29,7 @@ public class UserController {
     }
 
     @GetMapping("/getAll")
-    public ResponseEntity<List<Users>> getAll(){
+    public ResponseEntity<List<?>> getAll(){
         return ResponseEntity.status(HttpStatus.OK).body(userService.getAll());
     }
 
@@ -68,20 +68,41 @@ public class UserController {
         }
     }
 
-    @GetMapping("/viewCourses/{userId}")
-    public ResponseEntity<?> viewCourses(@PathVariable Long userId){
+    @GetMapping("/viewCoursesByAdmin/{userId}")
+    public ResponseEntity<?> viewCoursesByAdmin(@PathVariable Long userId){
         try{
-            return ResponseEntity.status(HttpStatus.OK).body(userService.viewCourses(userId));
+            return ResponseEntity.status(HttpStatus.OK).body(userService.viewCoursesByAdmin(userId));
         }
         catch(RuntimeException e){
             return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(e.getMessage());
         }
     }
 
-    @GetMapping("/viewEnrolledCourses/{userId}")
-    public ResponseEntity<?> viewEnrolledCourses(@PathVariable Long userId){
+    @GetMapping("/viewCourses")
+    public ResponseEntity<?> viewCourses(){
         try{
-            return ResponseEntity.status(HttpStatus.OK).body(userService.viewEnrolledCourses(userId));
+            return ResponseEntity.status(HttpStatus.OK).body(userService.viewCourses());
+        }
+        catch(RuntimeException e){
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(e.getMessage());
+        }
+    }
+
+
+    @GetMapping("/viewEnrolledCoursesForAdmin/{userId}")
+    public ResponseEntity<?> viewEnrolledCoursesByAdmin(@PathVariable Long userId){
+        try{
+            return ResponseEntity.status(HttpStatus.OK).body(userService.viewEnrolledCoursesByAdmin(userId));
+        }
+        catch(RuntimeException e){
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(e.getMessage());
+        }
+    }
+
+    @GetMapping("/viewEnrolledCourses")
+    public ResponseEntity<?> viewEnrolledCourses(){
+        try{
+            return ResponseEntity.status(HttpStatus.OK).body(userService.viewEnrolledCourses());
         }
         catch(RuntimeException e){
             return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(e.getMessage());
@@ -110,19 +131,48 @@ public class UserController {
     }
 
     @GetMapping("/getSubmissions/{userId}")
-    public ResponseEntity<?> getSubmissions(@PathVariable Long userId){
+    public ResponseEntity<?> getSubmissionsByAdmin(@PathVariable Long userId){
         try{
-            return ResponseEntity.status(HttpStatus.OK).body(userService.getSubmissions(userId));
+            return ResponseEntity.status(HttpStatus.OK).body(userService.getSubmissionsByAdmin(userId));
         }
         catch(RuntimeException e){
             return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(e.getMessage());
         }
     }
 
-    @GetMapping("/getAllStudentAssignmentSubmissions/{userId}")
-    public ResponseEntity<?> getAllAssignmentSubmissions(@PathVariable Long userId){
+    @GetMapping("/getSubmissions")
+    public ResponseEntity<?> getSubmissions(){
         try{
-            return ResponseEntity.status(HttpStatus.OK).body(userService.getAllStudentAssignmentSubmissions(userId));
+            return ResponseEntity.status(HttpStatus.OK).body(userService.getSubmissions());
+        }
+        catch(RuntimeException e){
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(e.getMessage());
+        }
+    }
+    @GetMapping("/getAllStudentAssignmentSubmissions/{userId}")
+    public ResponseEntity<?> getAllAssignmentSubmissionsByAdmin(@PathVariable Long userId){
+        try{
+            return ResponseEntity.status(HttpStatus.OK).body(userService.getAllStudentAssignmentSubmissionsByAdmin(userId));
+        }
+        catch(RuntimeException e){
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(e.getMessage());
+        }
+    }
+
+    @GetMapping("/getAllStudentAssignmentSubmissions")
+    public ResponseEntity<?> getAllAssignmentSubmissions(){
+        try{
+            return ResponseEntity.status(HttpStatus.OK).body(userService.getAllStudentAssignmentSubmissions());
+        }
+        catch(RuntimeException e){
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(e.getMessage());
+        }
+    }
+
+    @GetMapping("/getLoggedInUser")
+    public ResponseEntity<?> getLoggedInUser(){
+        try{
+            return ResponseEntity.status(HttpStatus.OK).body(userService.getLoggedInUser());
         }
         catch(RuntimeException e){
             return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(e.getMessage());

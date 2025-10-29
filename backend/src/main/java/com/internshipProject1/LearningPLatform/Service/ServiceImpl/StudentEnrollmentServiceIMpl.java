@@ -39,7 +39,9 @@ public class StudentEnrollmentServiceIMpl implements StudentEnrollmentService {
     @CacheEvict(value = {"enrollments","userEnrollment","courseEnrollments"},allEntries = true)
     public StudentEnrollment enroll(Long courseId) {
         Course course = courseRepository.findById(courseId).orElseThrow(()->new RuntimeException("Course not found"));
+        System.out.println("Course "+ course.getCourseId());
         Users users = userRepository.findById(userService.getLoggedInUser().getUserId()).get();
+        System.out.println("User:"+ users.getUserId());
         List<StudentEnrollment> studentEnrollments = users.getStudentEnrollments();
         for(StudentEnrollment studentEnrollment: studentEnrollments){
             if(Objects.equals(studentEnrollment.getCourse().getCourseId(), courseId)){

@@ -1,15 +1,10 @@
-import React, { useContext, useEffect, useState } from 'react'
-import api from '../services/api';
-import { useAuth } from '../context/AuthContext';
-import toast from 'react-hot-toast';
+import React, { useState } from 'react'
 
+function EnrolledCourses() {
 
-function MainPage() {
-    const [courses, setCourses] = useState([]);
-    const [searchData, setSearchData] = useState("");
-    const [filteredCourses, setFilteredCourses] = useState([]);
-    const{isLoggedIn} = useAuth();
-
+    const [enrolledCourses, setEnrolledCourses] = useState([]);
+    const [filteredCourses,,setFilteredCourses] = useState([]);
+    
     useEffect(() => {
         fetchCourses();
     }, [])
@@ -17,19 +12,19 @@ function MainPage() {
    
     const fetchCourses = async() => {
         try{
-            const response = await api.get("/course/getAll");
-            setCourses(response.data)
+            const response = await api.get("/users/viewEnrolledCourses");
+            setEnrolledCourses(response.data)
             setFilteredCourses(response.data);
         }
             catch(error) {
                 console.error("Error fetching courses:", error);
-                setCourses([]);
+                setEnrolledCourses([]);
                 setFilteredCourses([]);
             };
     };
 
     const filterData = () => {
-        const newData = courses.filter(
+        const newData = enrolledCourses.filter(
             (course) =>
                 course.courseTitle
                     .toLowerCase()
@@ -45,13 +40,13 @@ function MainPage() {
         
     };
 
-    const handleEnroll = async(courseId) => {
+      const handleUnEnroll = async(courseId) => {
         try {
-            const response = await api.post(`/student/enroll/${courseId}`);
-            toast.success("Succesfully Enrolled!");
+            const response = await api.post(`/student/unenroll/${courseId}`);
+            toast.success("Succesfully Unenrolled!");
         } catch (error) {
             toast.error(
-                "Enrollment failed: " + (
+                "Failed: " + (
                     error?.response?.data?.message ||
                     error.response?.statusText ||
                     error.message
@@ -59,9 +54,12 @@ function MainPage() {
             );
         }
     };
-
+    
+    
     return (
-        <div className='py-100 bg-gray-400'>
+
+        <React.Fragment>
+          <div className='py-100 bg-gray-400'>
             <div>
                 <input
                     type="text"
@@ -88,13 +86,16 @@ function MainPage() {
                         <p>{course.instructorName}</p>
                         <p>{course.numberOfStudentsEnrolled}</p>
                         {isLoggedIn && (
-                            <button onClick={()=>handleEnroll(course.courseId)}>Enroll</button>
+                            <button onClick={()=>handleUnEnroll(course.courseId)}>Enroll</button>
                         )}
                     </div>
                 ))) :
-                (<p>No courses to display</p>)}
+                (<p>Not enrolled in any course</p>)}
         </div>
+    
+        </React.Fragment>
+
     )
 }
 
-export default MainPage
+export default EnrolledCourses

@@ -1,20 +1,11 @@
-import { useEffect, useState } from "react";
+
 import { Link } from "react-router-dom";
 import LogoutButton from "./LogoutButton";
+import { useAuth } from "../context/AuthContext";
 
 function Navbar() {
-  const [isLoggedIn, setIsLoggedIn] = useState(!!localStorage.getItem("token"));
-
-  useEffect(() => {
-    const updateLoginStatus = () => {
-      setIsLoggedIn(!!localStorage.getItem("token"));
-    };
-
-    window.addEventListener("authChange", updateLoginStatus);
-    return () => {
-      window.removeEventListener("authChange", updateLoginStatus);
-    };
-  }, []);
+ 
+  const{isLoggedIn} = useAuth();
 
   return (
     <nav className="fixed top-0 left-0 w-full z-50 bg-white/80 backdrop-blur-md shadow-md">

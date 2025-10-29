@@ -1,12 +1,12 @@
-import React, { useState } from 'react'
+import React, { useContext, useState } from 'react'
 import api from '../services/api';
-import { useNavigate } from 'react-router-dom';
 import toast from 'react-hot-toast';
+import { useAuth } from '../context/AuthContext';
 
 function LoginPage() {
     const [username , setUsername] = useState("");
     const [password , setPassword] = useState("");
-    const navigate = useNavigate();
+    const {login} = useAuth();
 
     const handleLogin = async(e) => {
         e.preventDefault();
@@ -17,10 +17,8 @@ function LoginPage() {
          }
          );
         const token = response.data.token;
-        localStorage.setItem("token",token);
-        toast.success("Successfully Logged In!")
-        window.dispatchEvent(new Event("authChange"));
-        navigate("/userdetails");
+        login(token);
+        console.log(token);
         }catch(error){
          toast.error(
           "Login failed: "+

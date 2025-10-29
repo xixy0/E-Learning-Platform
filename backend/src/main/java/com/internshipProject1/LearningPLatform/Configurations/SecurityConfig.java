@@ -8,6 +8,7 @@ import org.springframework.context.annotation.Configuration;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.AuthenticationProvider;
 import org.springframework.security.authentication.dao.DaoAuthenticationProvider;
+import org.springframework.security.config.Customizer;
 import org.springframework.security.config.annotation.authentication.configuration.AuthenticationConfiguration;
 import org.springframework.security.config.annotation.method.configuration.EnableMethodSecurity;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
@@ -31,29 +32,29 @@ public class SecurityConfig {
     @Bean
     public SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception{
         return http
+                .cors(Customizer.withDefaults())
                 .csrf(AbstractHttpConfigurer::disable)
                 .authorizeHttpRequests(auth -> auth
                         .requestMatchers(
-                                "api/users/register","api/auth/authenticate","api/users/updateUser/**",
-                                "api/course/getInstructor/**","api/course/getAll",
-                                "api/student/unenroll/**",
-                                "api/course/getLessons/**",
-                                "api/submissions/getAll").permitAll()
+                                "/api/users/register","/api/auth/authenticate","/api/users/updateUser/**",
+                                "/api/course/getInstructor/**","/api/course/getAll",
+                                "/api/student/unenroll/**",
+                                "/api/submissions/getAll").permitAll()
                         .requestMatchers(
-                                "api/users/getAll","api/users/deactivate/**","api/users/activate/**","api/users/deleteUser/**",
-                                "api/course/removeEnroll/**").hasRole("ADMIN")
+                                "/api/users/getAll","/api/users/deactivate/**","/api/users/activate/**","/api/users/deleteUser/**",
+                                "/api/course/removeEnroll/**").hasRole("ADMIN")
                         .requestMatchers(
-                                "api/users/viewEnrolledCourses/**",
-                                "api/student/enroll/**",
-                                 "api/submissions/**",
-                                "api/assignmentSubmissions/**",
-                                "api/lessonProgress/**").hasAnyRole("ADMIN","STUDENT")
+                                "/api/users/viewEnrolledCourses/**",
+                                "/api/student/enroll/**",
+                                "/api/submissions/**",
+                                "/api/assignmentSubmissions/**",
+                                "/api/lessonProgress/**").hasAnyRole("ADMIN","STUDENT")
                         .requestMatchers(
-                                "api/users/viewCourses/**","api/course/**",
-                                "api/lesson/**",
-                                "api/quiz/**",
-                                "api/questions/**",
-                                "api/assignment/**").hasAnyRole("ADMIN","INSTRUCTOR")
+                                "/api/users/viewCourses/**","api/course/**",
+                                "/api/lesson/**",
+                                "/api/quiz/**",
+                                "/api/questions/**",
+                                "/api/assignment/**").hasAnyRole("ADMIN","INSTRUCTOR")
                         .anyRequest().authenticated()
                 )
                 .sessionManagement(session -> session.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
