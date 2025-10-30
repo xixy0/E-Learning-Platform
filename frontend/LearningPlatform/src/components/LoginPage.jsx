@@ -4,31 +4,31 @@ import toast from 'react-hot-toast';
 import { useAuth } from '../context/AuthContext';
 
 function LoginPage() {
-    const [username , setUsername] = useState("");
-    const [password , setPassword] = useState("");
-    const {login} = useAuth();
+  const [username, setUsername] = useState("");
+  const [password, setPassword] = useState("");
+  const { login } = useAuth();
 
-    const handleLogin = async(e) => {
-        e.preventDefault();
-        try{
-         const response = await api.post("/auth/authenticate",{
-          username,
-          password
-         }
-         );
-        const token = response.data.token;
-        login(token);
-        console.log(token);
-        }catch(error){
-         toast.error(
-          "Login failed: "+
-          ( error.response?.data?.message || 
-            error.response?.statusText ||
-            error.message
-          )
-        )
-        };
+
+  const handleLogin = async (e) => {
+    e.preventDefault();
+    try {
+      const response = await api.post("/auth/authenticate", {
+        username,
+        password
       }
+      );
+      const token = response.data.token;
+      login(token);
+    } catch (error) {
+      toast.error(
+        "Login failed: " +
+        (error.response?.data?.message ||
+          error.response?.statusText ||
+          error.message
+        )
+      )
+    };
+  }
 
   return (
     <div className="flex items-center justify-center min-h-screen bg-gradient-to-br from-red-50 to-blue-200">
@@ -106,12 +106,12 @@ function LoginPage() {
             >
               Login
             </button>
-            
+
           </div>
         </form>
       </div>
     </div>
   );
 }
-  
+
 export default LoginPage

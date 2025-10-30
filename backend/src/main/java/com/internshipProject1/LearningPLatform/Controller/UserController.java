@@ -130,7 +130,7 @@ public class UserController {
         }
     }
 
-    @GetMapping("/getSubmissions/{userId}")
+    @GetMapping("/getSubmissionsByAdmin/{userId}")
     public ResponseEntity<?> getSubmissionsByAdmin(@PathVariable Long userId){
         try{
             return ResponseEntity.status(HttpStatus.OK).body(userService.getSubmissionsByAdmin(userId));
@@ -149,7 +149,7 @@ public class UserController {
             return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(e.getMessage());
         }
     }
-    @GetMapping("/getAllStudentAssignmentSubmissions/{userId}")
+    @GetMapping("/getAllStudentAssignmentSubmissionsByAdmin/{userId}")
     public ResponseEntity<?> getAllAssignmentSubmissionsByAdmin(@PathVariable Long userId){
         try{
             return ResponseEntity.status(HttpStatus.OK).body(userService.getAllStudentAssignmentSubmissionsByAdmin(userId));

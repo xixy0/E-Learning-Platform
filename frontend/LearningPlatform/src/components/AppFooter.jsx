@@ -1,8 +1,8 @@
 import { Link } from "react-router-dom";
 
-function Footer() {
+function AppFooter() {
   return (
-    <footer className="text-secondary-content bg-secondary shadow-lg">
+    <nav className="text-secondary-content bg-secondary shadow-lg">
       <div className="footer sm:footer-horizontal items-center p-5">
         <aside className="grid-flow-col items-center">
           <p>Copyright © {new Date().getFullYear()} - All right reserved</p>
@@ -30,10 +30,10 @@ function Footer() {
 
           <p>
             <Link to="/" className="hover:text-shadow-lg text-xl">
-              carbonClerk.
+              LearnIT.
             </Link>
             <br />
-            Tracks emissions like a bureaucratic ninja.
+            Learn to be the best version of yourself.
           </p>
         </div>
         <nav className="grid-flow-col gap-4 md:place-self-center md:justify-self-end">
@@ -74,8 +74,8 @@ function Footer() {
           </a>
         </nav>
       </div>
-    </footer>
+    </nav>
   );
 }
 
-export default Footer;
+export default AppFooter;

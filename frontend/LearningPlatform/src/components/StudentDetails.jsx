@@ -3,15 +3,15 @@ import { useAuth } from '../context/AuthContext'
 
 
 function StudentDetails() {
-    const {userData} = useAuth();
+    const {user} = useAuth();
   return (
     <React.Fragment>
         <div>
-         <p>{userData.firstName}{""}
-            {userData.middleName ?(userData.middleName):""}{" "}
-            {userData.lastName}
+         <p>{user.firstName}{""}
+            {user.middleName ?(user.middleName):""}{" "}
+            {user.lastName}
         </p>
-        <p>{userData.email}</p>
+        <p>{user.email}</p>
         <p></p>
         </div>
     </React.Fragment>

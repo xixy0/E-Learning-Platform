@@ -1,5 +1,6 @@
+
 import React from 'react'
-import { useLocation } from 'react-router-dom';
+import { Link, Links, useLocation } from 'react-router-dom';
 
 
 function StudentSidebar() {
@@ -23,7 +24,8 @@ function StudentSidebar() {
         <hr className="mx-4" />
         <div className="flex-1 mt-6 overflow-y-auto">
           <nav className="space-y-4 px-4">
-            <Link to="/role_student" className={linkClasses("/userdetails")}>
+            <Link
+             to="/role_student" className={linkClasses("/role_student")}>
               StudentDetails
             </Link> 
             <Link to="/enrolledCourses" className={linkClasses("/userdetails")}>

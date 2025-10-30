@@ -36,15 +36,16 @@ public class SecurityConfig {
                 .csrf(AbstractHttpConfigurer::disable)
                 .authorizeHttpRequests(auth -> auth
                         .requestMatchers(
-                                "/api/users/register","/api/auth/authenticate","/api/users/updateUser/**",
+                                "/api/users/register","/api/auth/authenticate","/api/users/updateUser/**","/api/users/getLoggedInUser",
                                 "/api/course/getInstructor/**","/api/course/getAll",
                                 "/api/student/unenroll/**",
                                 "/api/submissions/getAll").permitAll()
                         .requestMatchers(
                                 "/api/users/getAll","/api/users/deactivate/**","/api/users/activate/**","/api/users/deleteUser/**",
+                                "/api/users/viewCoursesByAdmin/**","/api/users/viewEnrolledCoursesForAdmin/**","/api/user/getSubmissionsByAdmin/**",
                                 "/api/course/removeEnroll/**").hasRole("ADMIN")
                         .requestMatchers(
-                                "/api/users/viewEnrolledCourses/**",
+                                "/api/users/viewEnrolledCourses/**","/api/users//getSubmissions", "/api/users/getAllStudentAssignmentSubmissions",
                                 "/api/student/enroll/**",
                                 "/api/submissions/**",
                                 "/api/assignmentSubmissions/**",

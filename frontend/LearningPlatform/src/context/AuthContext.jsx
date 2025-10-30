@@ -8,7 +8,10 @@ export const AuthContext = createContext();
 
 export function AuthProvider({ children }) {
   const [isLoggedIn, setIsLoggedIn] = useState(!!localStorage.getItem("token"));
-  const [user, setUser] = useState(null);
+  const [user, setUser] = useState(()=>{
+    const savedUSer = localStorage.getItem("authUser");
+    return savedUSer? JSON.parse(savedUSer): null;
+  })
   const navigate = useNavigate();
 
   const fetchLoggedInUser = async () => {
@@ -23,7 +26,8 @@ export function AuthProvider({ children }) {
       console.error("Error getting logged-in user", error);
       logout();
     }
-  };
+  }
+  
 
   useEffect(() => {
     if (localStorage.getItem("token")) {
@@ -52,7 +56,7 @@ export function AuthProvider({ children }) {
 
     window.dispatchEvent(new Event("authChange"));
     toast.success("Successfully Logged In!");
-    navigate(`${userData.role.toLowerCase()}`);
+    navigate(`${user.role.toLowerCase()}`);
     }catch(error){
       "Login failed :"+
       (error?.response?.data?.message || 
@@ -88,4 +92,4 @@ export const useAuth = () => {
     throw new Error("useAuth must be used within an AuthProvider");
   }
   return context;
-};
+}
