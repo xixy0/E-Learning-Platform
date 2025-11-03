@@ -3,9 +3,12 @@ package com.internshipProject1.LearningPLatform.Service.ServiceImpl;
 import com.internshipProject1.LearningPLatform.DTO.LessonDTO;
 import com.internshipProject1.LearningPLatform.Entity.Course;
 import com.internshipProject1.LearningPLatform.Entity.Lesson;
+import com.internshipProject1.LearningPLatform.Entity.Users;
 import com.internshipProject1.LearningPLatform.Repository.CourseRepository;
 import com.internshipProject1.LearningPLatform.Repository.LessonRepository;
+import com.internshipProject1.LearningPLatform.Repository.UserRepository;
 import com.internshipProject1.LearningPLatform.Service.LessonService;
+import com.internshipProject1.LearningPLatform.Service.NotificationService;
 import com.internshipProject1.LearningPLatform.Service.UserService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.cache.annotation.CacheEvict;
@@ -31,12 +34,18 @@ public class LessonServiceImpl implements LessonService {
     @Autowired
     private UserService userService;
 
+    @Autowired
+    private NotificationService notificationService;
+
+    @Autowired
+    private UserRepository userRepository;
+
     @Override
     @CacheEvict(value = {"lessons","courseLesson"},allEntries = true,beforeInvocation = true)
     public Lesson addLesson(LessonDTO lessonDTO) {
         Course course = courseRepository.findById(lessonDTO.getCourseId()).orElseThrow(()->new RuntimeException("Course not found"));
-
-        if(!userService.getLoggedInUser().getRole().equalsIgnoreCase("ADMIN")
+        Users users = userRepository.findById(userService.getLoggedInUser().getUserId()).get();
+        if(!users.getLogin().getRole().equalsIgnoreCase("ADMIN")
                 && !Objects.equals(course.getInstructor().getUserId(), userService.getLoggedInUser().getUserId())){
             throw new RuntimeException("Unauthorized Instructor");
         }
@@ -49,6 +58,13 @@ public class LessonServiceImpl implements LessonService {
         lesson.setCourse(course);
         lesson.setInstructorName(course.getInstructor().getFirstName()+" "+course.getInstructor().getMiddleName() + " " + course.getInstructor().getLastName());
 
+
+
+        notificationService.createAndSend(users,
+                "LESSON_CREATED",
+                "Title: "+lesson.getLessonTitle(),
+                "Lesson created",
+                "Description: "+ lesson.getLessonDescription() +" Instructor: "+ lesson.getInstructorName());
         return lessonRepository.save(lesson);
 
 
@@ -58,7 +74,9 @@ public class LessonServiceImpl implements LessonService {
     @CacheEvict(value = {"lessons","courseLesson"},allEntries = true,beforeInvocation = true)
     public Lesson updateLesson(Long lessonId, LessonDTO lessonDTO) {
         Lesson lesson = lessonRepository.findById(lessonId).orElseThrow(()-> new RuntimeException("Lesson not found"));
-        if(!userService.getLoggedInUser().getRole().equalsIgnoreCase("ADMIN")
+        Users users = userRepository.findById(userService.getLoggedInUser().getUserId()).get();
+
+        if(!users.getLogin().getRole().equalsIgnoreCase("ADMIN")
                 && !Objects.equals(lesson.getCourse().getInstructor().getUserId(), userService.getLoggedInUser().getUserId()))
         {
             throw new RuntimeException("Unauthorized Instructor");
@@ -82,6 +100,12 @@ public class LessonServiceImpl implements LessonService {
         Course course = courseRepository.findById(lessonDTO.getCourseId()).orElseThrow(()->new RuntimeException("Course not found"));
         lesson.setCourse(course);
         lesson.setInstructorName(course.getInstructor().getFirstName()+" "+course.getInstructor().getMiddleName() + " " + course.getInstructor().getLastName());
+
+        notificationService.createAndSend(users,
+                "LESSON_UPDATED",
+                "Title: "+lesson.getLessonTitle(),
+                "Lesson updated",
+                "Description: "+ lesson.getLessonDescription() +" Instructor: "+ lesson.getInstructorName());
 
         return lessonRepository.save(lesson);
     }
@@ -123,7 +147,9 @@ public class LessonServiceImpl implements LessonService {
     public String uploadPdf(Long lessonId, MultipartFile file) {
         final String UPLOAD_DIR = "/lessons/pdfs/";
         Lesson lesson = lessonRepository.findById(lessonId).orElseThrow(()-> new RuntimeException("Course not found"));
-        if(!userService.getLoggedInUser().getRole().equalsIgnoreCase("ADMIN")
+        Users users = userRepository.findById(userService.getLoggedInUser().getUserId()).get();
+
+        if(!users.getLogin().getRole().equalsIgnoreCase("ADMIN")
                 && !Objects.equals(lesson.getCourse().getInstructor().getUserId(), userService.getLoggedInUser().getUserId())){
             throw new RuntimeException("Unauthorized Instructor");
         }
@@ -149,7 +175,13 @@ public class LessonServiceImpl implements LessonService {
                 String relativePath = "/lessons/pdfs/" + safeFilename;
                 lesson.setPdfUrl(relativePath);
                 lessonRepository.save(lesson);
-                return relativePath;
+            notificationService.createAndSend(users,
+                    "PDF_ADDED",
+                    "Title: "+lesson.getLessonTitle(),
+                    "Pdf added",
+                    "Pdf: "+ relativePath);
+
+            return relativePath;
 
         }catch (IOException ex){
             throw  new RuntimeException("Upload failed");

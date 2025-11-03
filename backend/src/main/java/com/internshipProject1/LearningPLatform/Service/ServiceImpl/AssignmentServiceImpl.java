@@ -5,9 +5,12 @@ import com.internshipProject1.LearningPLatform.DTO.AssignmentSubmissionDTO;
 import com.internshipProject1.LearningPLatform.Entity.Assignment;
 import com.internshipProject1.LearningPLatform.Entity.AssignmentSubmission;
 import com.internshipProject1.LearningPLatform.Entity.Course;
+import com.internshipProject1.LearningPLatform.Entity.Users;
 import com.internshipProject1.LearningPLatform.Repository.AssignmentRepository;
 import com.internshipProject1.LearningPLatform.Repository.CourseRepository;
+import com.internshipProject1.LearningPLatform.Repository.UserRepository;
 import com.internshipProject1.LearningPLatform.Service.AssignmentService;
+import com.internshipProject1.LearningPLatform.Service.NotificationService;
 import com.internshipProject1.LearningPLatform.Service.UserService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.cache.annotation.CacheEvict;
@@ -33,14 +36,23 @@ public class AssignmentServiceImpl implements AssignmentService {
     @Autowired
     private CourseRepository courseRepository;
 
+    @Autowired
+    private UserRepository userRepository;
+
+    @Autowired
+    private NotificationService notificationService;
+
     @Override
     @CacheEvict(value = {"assignments","courseAssignment"},allEntries = true)
     public Assignment addAssignment(Long courseId, AssignmentDTO assignmentDTO) {
         Course course = courseRepository.findById(courseId).orElseThrow(()->new RuntimeException("Course not found"));
-        if(!userService.getLoggedInUser().getRole().equalsIgnoreCase("ADMIN")
+        Users users = userRepository.findById(userService.getLoggedInUser().getUserId()).get();
+
+        if(!users.getLogin().getRole().equalsIgnoreCase("ADMIN")
                 && !Objects.equals(course.getInstructor().getUserId(), userService.getLoggedInUser().getUserId())){
             throw new RuntimeException("Unauthorized Instructor");
         }
+
         Assignment assignment = new Assignment();
         assignment.setAssignmentTitle(assignmentDTO.getAssignmentTitle());
         assignment.setAssignmentDescription(assignmentDTO.getAssignmentDescription());
@@ -48,7 +60,15 @@ public class AssignmentServiceImpl implements AssignmentService {
         assignment.setSubmissionDate(LocalDateTime.now());
         assignment.setAssignmentPdfUrl(new ArrayList<>());
         assignment.setAssignmentSubmissions(new ArrayList<>());
-        return assignmentRepository.save(assignment);
+        Assignment assignment1 = assignmentRepository.save(assignment);
+
+        notificationService.createAndSend(users,
+                "ASSIGNMENT_ADDED" ,
+                assignment1.getAssignmentTitle(),
+                "Assignment added successfully",
+                "Timestamp "+assignment1.getAssignmentId());
+
+        return assignment1;
     }
 
     @Override
@@ -102,7 +122,9 @@ public class AssignmentServiceImpl implements AssignmentService {
         final String ASSIGNMENT_DIR = "/assignments/pdfs/";
         Assignment assignment = assignmentRepository.findById(assignmentId).orElseThrow(
                 ()-> new RuntimeException("Assignment not found"));
-        if(!userService.getLoggedInUser().getRole().equalsIgnoreCase("ADMIN")
+        Users users = userRepository.findById(userService.getLoggedInUser().getUserId()).get();
+
+        if(!users.getLogin().getRole().equalsIgnoreCase("ADMIN")
                 && !Objects.equals(assignment.getCourse().getInstructor().getUserId(), userService.getLoggedInUser().getUserId())){
             throw new RuntimeException("Unauthorized Instructor");
         }
@@ -126,6 +148,13 @@ public class AssignmentServiceImpl implements AssignmentService {
             String relativePath = "/assignments/pdfs/" + safeFilename;
             assignment.getAssignmentPdfUrl().add(relativePath);
             assignmentRepository.save(assignment);
+
+            notificationService.createAndSend(users,
+                    "ASSIGNMENT_ADDED" ,
+                    assignment.getAssignmentTitle(),
+                    "Pdf added successfully",
+                    "Pdf :"+relativePath);
+
             return relativePath;
 
         }catch (IOException ex){

@@ -1,7 +1,8 @@
-import React, { useContext, useState } from 'react'
+import React, { useState } from 'react'
 import api from '../services/api';
 import toast from 'react-hot-toast';
 import { useAuth } from '../context/AuthContext';
+import { Link } from 'react-router-dom';
 
 function LoginPage() {
   const [username, setUsername] = useState("");
@@ -39,7 +40,7 @@ function LoginPage() {
 
         <form onSubmit={handleLogin} className="space-y-5">
           <div>
-            <label className="input validator flex items-center gap-2 font-semibold bg-white !text-black border-gray-300 rounded-lg px-3 py-2 focus-within:ring bg-black">
+            <label className="input validator flex items-center gap-2 font-semibold bg-white text-black border rounded-lg px-3 py-2 focus-within:ring bg-black">
               <svg
                 className="h-5 w-5 text-gray-400"
                 xmlns="http://www.w3.org/2000/svg"
@@ -70,7 +71,7 @@ function LoginPage() {
           </div>
 
           <div>
-            <label className="input validator flex items-center gap-2 bg-white font-semibold !text-black border-gray-400 rounded-lg px-3 py-2 focus-within:ring bg-black">
+            <label className="input validator flex items-center gap-2 bg-white font-semibold text-black border rounded-lg px-3 py-2 focus-within:ring bg-black">
               <svg
                 className="h-5 w-5 text-gray-400"
                 xmlns="http://www.w3.org/2000/svg"
@@ -106,6 +107,18 @@ function LoginPage() {
             >
               Login
             </button>
+
+            <div className="mt-6 text-center text-gray-700 text-sm">
+              <p>
+                New User?{" "}
+                <Link
+                  to="/newUser"
+                  className="text-blue-600 font-semibold hover:underline hover:text-blue-700"
+                >
+                  Register
+                </Link>
+              </p>
+            </div>
 
           </div>
         </form>

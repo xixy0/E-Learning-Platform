@@ -19,9 +19,7 @@ function MainPage() {
       setCourses(response.data);
       setFilteredCourses(response.data);
     } catch (error) {
-      console.error("Error fetching courses:", error);
-      setCourses([]);
-      setFilteredCourses([]);
+      toast.error("Failed to load courses.");
     }
   };
 
@@ -40,76 +38,86 @@ function MainPage() {
       await api.post(`/student/enroll/${courseId}`);
       toast.success("Successfully Enrolled!");
     } catch (error) {
-      toast.error(
-        "Enrollment failed: " +
-          (error?.response?.data?.message ||
-            error.response?.statusText ||
-            error.message)
-      );
+      toast.error("Enrollment failed");
     }
   };
 
   return (
-    <div className="min-h-screen bg-gray-100 py-10 px-6">
-      {/* Search Section */}
-      <div className="max-w-4xl mx-auto mb-8 flex flex-col sm:flex-row items-center gap-3">
-        <input
-          type="text"
-          value={searchData}
-          name="search"
-          placeholder="Search by course name, category or instructor"
-          onChange={(e) => setSearchData(e.target.value)}
-          className="flex-1 bg-white text-gray-900 px-4 py-2 border border-gray-300 rounded-lg shadow-sm focus:ring-2 focus:ring-blue-500 focus:outline-none"
-        />
-        <button
-          onClick={filterData}
-          className="px-5 py-2 bg-blue-600 text-white font-semibold rounded-lg shadow hover:bg-blue-700 transition"
-        >
-          Search
-        </button>
-      </div>
+    <div className="min-h-screen bg-gradient-to-br from-red-50 to-blue-100 py-10 px-6">
+      <div className="max-w-screen mx-auto bg-white shadow-2xl rounded-2xl p-8 border border-blue-100">
+        <h1 className="text-2xl font-semibold mb-6 text-center text-blue-700">
+           Courses
+        </h1>
 
-      {/* Course List */}
-      <div className="max-w-6xl mx-auto grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
-        {filteredCourses.length > 0 ? (
-          filteredCourses.map((course) => (
-            <div
-              key={course.courseId}
-              className="bg-white rounded-2xl shadow-md p-5 border border-gray-200 hover:shadow-lg transition duration-200"
-            >
-              <h3 className="text-xl font-semibold text-gray-800 mb-2">
-                {course.courseTitle}
-              </h3>
-              <p className="text-gray-600 mb-3">{course.courseDescription}</p>
-              <p className="text-sm text-gray-500">
-                <span className="font-semibold text-gray-700">Instructor:</span>{" "}
-                {course.instructorName}
-              </p>
-              <p className="text-sm text-gray-500 mb-4">
-                <span className="font-semibold text-gray-700">
-                  Students Enrolled:
-                </span>{" "}
-                {course.numberOfStudentsEnrolled}
-              </p>
+        {/* Search bar */}
+        <div className="flex flex-col sm:flex-row items-center gap-3 mb-8">
+          <input
+            type="text"
+            value={searchData}
+            onChange={(e) => setSearchData(e.target.value)}
+            placeholder="Search by course title, category or instructor"
+            className="flex-1 border border-gray-300 rounded-lg px-4 py-2 focus:ring-2 focus:ring-blue-500 focus:outline-none"
+          />
+          <button
+            onClick={filterData}
+            className="px-5 py-2 bg-blue-600 text-white font-semibold rounded-lg hover:bg-blue-700 transition"
+          >
+            Search
+          </button>
+        </div>
 
-              {isLoggedIn && (
-                <button
-                  onClick={() => handleEnroll(course.courseId)}
-                  className="mt-auto w-full bg-green-600 text-white py-2 rounded-lg font-semibold hover:bg-green-700 transition"
-                >
-                  Enroll
-                </button>
-              )}
-            </div>
-          ))
-        ) : (
-          <p className="col-span-full text-center text-gray-600">
-            No courses to display.
-          </p>
-        )}
+        {/* Courses */}
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
+          {filteredCourses.length > 0 ? (
+            filteredCourses.map((course) => (
+              <div
+                key={course.courseId}
+                className="bg-white border border-gray-200 rounded-xl p-5 shadow hover:shadow-lg transition duration-200"
+              >
+                <img
+                  src={course.imageUrl || "https://via.placeholder.com/150"}
+                  alt={course.courseTitle}
+                  className="w-full h-40 object-cover rounded-lg mb-3"
+                />
+                <h3 className="text-lg font-semibold text-gray-800 mb-1">
+                  {course.courseTitle}
+                </h3>
+                <p className="text-gray-600 text-sm mb-2">
+                  {course.courseDescription}
+                </p>
+                <p className="text-sm text-gray-500 mb-1">
+                  <span className="font-semibold text-gray-700">
+                    Instructor:
+                  </span>{" "}
+                  {course.instructorName}
+                </p>
+                <p className="text-sm text-gray-500 mb-4">
+                  <span className="font-semibold text-gray-700">
+                    Enrolled:
+                  </span>{" "}
+                  {course.numberOfStudentsEnrolled}
+                </p>
+
+                {isLoggedIn && (
+                  <button
+                    onClick={() => handleEnroll(course.courseId)}
+                    className="w-full bg-green-600 text-white py-2 rounded-lg font-semibold hover:bg-green-700 transition"
+                  >
+                    Enroll
+                  </button>
+                )}
+              </div>
+            ))
+          ) : (
+            <p className="col-span-full text-center text-gray-600">
+              No courses found.
+            </p>
+          )}
+        </div>
       </div>
     </div>
   );
 }
 
 export default MainPage;
+

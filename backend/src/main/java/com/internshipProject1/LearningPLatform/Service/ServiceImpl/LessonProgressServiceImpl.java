@@ -8,6 +8,7 @@ import com.internshipProject1.LearningPLatform.Repository.LessonProgressReposito
 import com.internshipProject1.LearningPLatform.Repository.LessonRepository;
 import com.internshipProject1.LearningPLatform.Repository.UserRepository;
 import com.internshipProject1.LearningPLatform.Service.LessonProgressService;
+import com.internshipProject1.LearningPLatform.Service.NotificationService;
 import com.internshipProject1.LearningPLatform.Service.UserService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.cache.annotation.CacheEvict;
@@ -31,6 +32,10 @@ public class LessonProgressServiceImpl implements LessonProgressService {
 
     @Autowired
     private UserService userService;
+
+    @Autowired
+    private NotificationService notificationService;
+
 
     @Override
     @CacheEvict(value = {"progress"},allEntries = true)
@@ -66,7 +71,24 @@ public class LessonProgressServiceImpl implements LessonProgressService {
             lessonProgress.setPlayedTime(playedTime);
             lessonProgress.setDuration(duration);
         }
-        return lessonProgressRepository.save(lessonProgress);
+        LessonProgress lessonProgress1 =  lessonProgressRepository.save(lessonProgress);
+        float completePercent = (lessonProgress1.getPlayedTime()/lessonProgress1.getDuration())*100;
+        if(completePercent<100){
+            notificationService.createAndSend(users,
+                    "UPDATED",
+                    "Progress updated",
+                    "Your progress has been successfully updated",
+                    "");
+        }
+        else {
+            notificationService.createAndSend(users,
+                    "UPDATED",
+                    "Progress updated for lesson"+lesson.getLessonTitle(),
+                    "("+(int)completePercent+"% Completed",
+                    "");
+        }
+
+        return lessonProgress1;
 
     }
 
@@ -92,6 +114,7 @@ public class LessonProgressServiceImpl implements LessonProgressService {
                 ()->new RuntimeException("No progress"));
 
         lessonProgress.setDuration(duration);
+
         return lessonProgressRepository.save(lessonProgress);
     }
 

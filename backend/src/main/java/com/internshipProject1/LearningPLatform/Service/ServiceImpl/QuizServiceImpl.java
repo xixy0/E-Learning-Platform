@@ -4,12 +4,11 @@ package com.internshipProject1.LearningPLatform.Service.ServiceImpl;
 import com.internshipProject1.LearningPLatform.DTO.QuestionDTO;
 import com.internshipProject1.LearningPLatform.DTO.QuizDTO;
 import com.internshipProject1.LearningPLatform.DTO.SubmissionDTO;
-import com.internshipProject1.LearningPLatform.Entity.Course;
-import com.internshipProject1.LearningPLatform.Entity.Questions;
-import com.internshipProject1.LearningPLatform.Entity.Quiz;
-import com.internshipProject1.LearningPLatform.Entity.Submission;
+import com.internshipProject1.LearningPLatform.Entity.*;
 import com.internshipProject1.LearningPLatform.Repository.CourseRepository;
 import com.internshipProject1.LearningPLatform.Repository.QuizRepository;
+import com.internshipProject1.LearningPLatform.Repository.UserRepository;
+import com.internshipProject1.LearningPLatform.Service.NotificationService;
 import com.internshipProject1.LearningPLatform.Service.QuizService;
 import com.internshipProject1.LearningPLatform.Service.UserService;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -35,12 +34,19 @@ public class QuizServiceImpl implements QuizService {
     @Autowired
     private QuizRepository quizRepository;
 
+    @Autowired
+    private NotificationService notificationService;
+
+    @Autowired
+    private UserRepository userRepository;
+
     @Override
     @CacheEvict(value = {"quizzes","quizQuestion","quizSubmission","courseQuiz"},allEntries = true)
     public Quiz addQuiz(Long courseId ,QuizDTO quizDTO) {
         Course course = courseRepository.findById(courseId).orElseThrow(()->new RuntimeException("Course not found"));
+        Users users = userRepository.findById(userService.getLoggedInUser().getUserId()).get();
 
-        if(!userService.getLoggedInUser().getRole().equalsIgnoreCase("ADMIN")
+        if(!users.getLogin().getRole().equalsIgnoreCase("ADMIN")
                 && !Objects.equals(course.getInstructor().getUserId(), userService.getLoggedInUser().getUserId())){
             throw new RuntimeException("Unauthorized Instructor");
         }
@@ -53,6 +59,11 @@ public class QuizServiceImpl implements QuizService {
         quiz.setQuestions(new ArrayList<>());
         quiz.setSubmissions(new ArrayList<>());
 
+        notificationService.createAndSend(users,
+                "QUIZ_ADDED",
+                "Title: "+quiz.getQuizTitle(),
+                "Quiz added",
+                "Timestamp: "+ quiz.getTimestamp());
         return quizRepository.save(quiz);
     }
 
@@ -73,7 +84,9 @@ public class QuizServiceImpl implements QuizService {
     @CacheEvict(value = {"quizzes","quizQuestion","quizSubmission","courseQuiz"},allEntries = true)
     public Quiz updateQuiz(Long quizId, QuizDTO quizDTO) {
         Quiz quiz = quizRepository.findById(quizId).orElseThrow(()->new RuntimeException("Quiz not found"));
-        if(!userService.getLoggedInUser().getRole().equalsIgnoreCase("ADMIN")
+        Users users = userRepository.findById(userService.getLoggedInUser().getUserId()).get();
+
+        if(!users.getLogin().getRole().equalsIgnoreCase("ADMIN")
                 && !Objects.equals(quiz.getCourse().getInstructor().getUserId(), userService.getLoggedInUser().getUserId()))
         {
             throw new RuntimeException("Unauthorized Instructor");
@@ -87,6 +100,11 @@ public class QuizServiceImpl implements QuizService {
         if(quizDTO.getTimestamp()!=null)
             quiz.setTimestamp(LocalDateTime.now());
 
+        notificationService.createAndSend(users,
+                "QUIZ_UPDATED",
+                "Title: "+quiz.getQuizTitle(),
+                "Quiz updated",
+                "Timestamp: "+ quiz.getTimestamp());
         return quizRepository.save(quiz);
 
     }

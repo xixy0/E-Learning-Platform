@@ -4,8 +4,6 @@ import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
-import java.io.Serial;
-import java.io.Serializable;
 
 
 @Data
@@ -19,6 +17,7 @@ public class CourseRegistrationDTO {
     private String courseCategory;
     private String instructorName;
     private Integer numberOfStudentsEnrolled;
+    private String imageUrl;
 
     public CourseRegistrationDTO(Long courseId, String courseTitle, String courseDescription, String courseCategory, String instructorName) {
         this.courseId =courseId;

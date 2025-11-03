@@ -6,6 +6,7 @@ import com.internshipProject1.LearningPLatform.Repository.CourseRepository;
 import com.internshipProject1.LearningPLatform.Repository.StudentEnrollmentRepository;
 import com.internshipProject1.LearningPLatform.Repository.UserRepository;
 import com.internshipProject1.LearningPLatform.Service.CourseService;
+import com.internshipProject1.LearningPLatform.Service.NotificationService;
 import com.internshipProject1.LearningPLatform.Service.UserService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.cache.annotation.CacheEvict;
@@ -32,7 +33,8 @@ public class CourseServiceImpl implements CourseService {
     @Autowired
     private UserService userService;
 
-
+    @Autowired
+    private NotificationService notificationService;
 
     @Override
     @CacheEvict(value = {"courses","courseLesson","courseQuiz","courseAssignment","userCourses"},allEntries = true)
@@ -41,6 +43,7 @@ public class CourseServiceImpl implements CourseService {
       course.setCourseTitle(courseRegistrationDTO.getCourseTitle());
       course.setCourseDescription(courseRegistrationDTO.getCourseDescription());
       course.setCourseCategory(courseRegistrationDTO.getCourseCategory());
+      course.setImageUrl(courseRegistrationDTO.getImageUrl());
 
       Users instructor = userRepository.findById(userService.getLoggedInUser().getUserId()).get();
       course.setInstructor(instructor);
@@ -49,6 +52,11 @@ public class CourseServiceImpl implements CourseService {
       course.setQuiz(new ArrayList<>());
       course.setAssignments(new ArrayList<>());
 
+        notificationService.createAndSend(instructor,
+                "COURSE_CREATED",
+                "Title: "+course.getCourseTitle(),
+                "Course created",
+                "Description: "+ course.getCourseDescription() +" Category: "+ course.getCourseCategory());
       return courseRepository.save(course);
 
 
@@ -58,12 +66,17 @@ public class CourseServiceImpl implements CourseService {
     @CacheEvict(value = {"courses","courseLesson","courseQuiz","courseAssignment","userCourses"},allEntries = true)
     public Course updateCourse(Long courseId, CourseRegistrationDTO courseRegistrationDTO) {
         Course courses = courseRepository.findById(courseId).orElseThrow(()->new RuntimeException("Course not found"));
-        if(!userService.getLoggedInUser().getRole().equalsIgnoreCase("ADMIN")
+        Users users = userRepository.findById(userService.getLoggedInUser().getUserId()).get();
+        if(!users.getLogin().getRole().equalsIgnoreCase("ADMIN")
                 && !Objects.equals(courses.getInstructor().getUserId(), userService.getLoggedInUser().getUserId())){
            throw new RuntimeException("Unauthorized Instructor");
         }
         if(!courseRegistrationDTO.getCourseTitle().isEmpty()) {
             courses.setCourseTitle(courseRegistrationDTO.getCourseTitle());
+        }
+
+        if(!courseRegistrationDTO.getImageUrl().isEmpty()){
+            courses.setImageUrl(courseRegistrationDTO.getImageUrl());
         }
 
         if(!courseRegistrationDTO.getCourseCategory().isEmpty()) {
@@ -73,6 +86,13 @@ public class CourseServiceImpl implements CourseService {
         if(!courseRegistrationDTO.getCourseDescription().isEmpty()) {
             courses.setCourseDescription(courseRegistrationDTO.getCourseDescription());
         }
+
+
+        notificationService.createAndSend(users,
+                "COURSE_UPDATED",
+                "Title: "+courses.getCourseTitle(),
+                "Course updated",
+                "Description: "+ courses.getCourseDescription() +" Category: "+ courses.getCourseCategory());
         return courseRepository.save(courses);
     }
 
@@ -108,7 +128,8 @@ public class CourseServiceImpl implements CourseService {
                     course.getCourseDescription(),
                     course.getCourseCategory(),
                     (course.getInstructor().getFirstName()+" "+ course.getInstructor().getMiddleName()+" "+course.getInstructor().getLastName()),
-                    course.getStudentEnrollments().size()));
+                    course.getStudentEnrollments().size(),
+                    course.getImageUrl()));
         }
         return courseRegistrationDTOList;
     }
@@ -189,10 +210,10 @@ public class CourseServiceImpl implements CourseService {
     @Cacheable(value = "courseQuiz", key="#courseId")
     public List<QuizDTO> getAllQuiz(Long courseId) {
         Course course = courseRepository.findById(courseId).orElseThrow(()->new RuntimeException("Course not found"));
-        if(!userService.getLoggedInUser().getRole().equalsIgnoreCase("ADMIN")
-                && !Objects.equals(course.getInstructor().getUserId(), userService.getLoggedInUser().getUserId())){
-            throw new RuntimeException("Unauthorized Instructor");
-        }
+//        if(userService.getLoggedInUser().getRole().equalsIgnoreCase("INSTRUCTOR")
+//                && !Objects.equals(course.getInstructor().getUserId(), userService.getLoggedInUser().getUserId())){
+//            throw new RuntimeException("Unauthorized");
+//        }
 
         List<Quiz> quizzes = course.getQuiz();
         List<QuizDTO> quizDTOList = new ArrayList<>();
@@ -239,6 +260,7 @@ public class CourseServiceImpl implements CourseService {
                 course.getCourseDescription(),
                 course.getCourseCategory(),
                 (course.getInstructor().getFirstName()+" "+ course.getInstructor().getMiddleName()+" "+course.getInstructor().getLastName()),
-                course.getStudentEnrollments().size());
+                course.getStudentEnrollments().size(),
+                course.getImageUrl());
     }
 }

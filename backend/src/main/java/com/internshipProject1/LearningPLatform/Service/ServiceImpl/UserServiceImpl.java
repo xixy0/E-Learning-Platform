@@ -28,7 +28,7 @@ public class UserServiceImpl implements UserService {
     private PasswordEncoder passwordEncoder;
 
     @Override
-    @CacheEvict(value = {"users", "userCourses","userDTO"}, allEntries = true)
+    @CacheEvict(value = {"users", "userCourses","userDTO","userEnrollment","userSubmissions"}, allEntries = true)
     public Users addUser(UserRegistrationDTO userRegistrationDTO) throws IllegalAccessException {
 
         if(loginRepository.findByUsername(userRegistrationDTO.getUsername()).isPresent()){
@@ -82,7 +82,7 @@ public class UserServiceImpl implements UserService {
     }
 
     @Override
-    @CacheEvict(value = {"users", "userCourses","userDTO","courses"}, allEntries = true)
+    @CacheEvict(value = {"users", "userCourses","userDTO","courses","userEnrollment","userSubmissions"}, allEntries = true)
     public Users updateUser(Long userId, UserRegistrationDTO userRegistrationDTO) {
         Users users = userRepository.findById(userId).orElseThrow(()->new RuntimeException("User does not exist"));
         if(!getLoggedInUser().getRole().equalsIgnoreCase("ADMIN")
@@ -125,6 +125,7 @@ public class UserServiceImpl implements UserService {
     }
 
     @Override
+    @CacheEvict(value ={"users","userDTO","userCourses","courses","userSubmissions","userEnrollment"},allEntries = true)
     public void deactivateUser(Long loginId) {
         if(!getLoggedInUser().getRole().equalsIgnoreCase("ADMIN")){
             throw new RuntimeException("Unauthorized user");
@@ -136,6 +137,7 @@ public class UserServiceImpl implements UserService {
     }
 
     @Override
+    @CacheEvict(value ={"users","userDTO","userCourses","courses","userSubmissions","userEnrollment"},allEntries = true)
     public void activateUser(Long loginId) {
         if(!getLoggedInUser().getRole().equalsIgnoreCase("ADMIN")){
             throw new RuntimeException("Unauthorized user");
@@ -205,7 +207,7 @@ public class UserServiceImpl implements UserService {
 
 
     @Override
-    @CacheEvict(value ={"users","userDTO","userCourses","courses"},allEntries = true)
+    @CacheEvict(value ={"users","userDTO","userCourses","courses","userSubmissions","userEnrollment"},allEntries = true)
     public void deleteUser(Long userId) {
         if(userRepository.findById(userId).isEmpty()){
             throw new UsernameNotFoundException("User does not exist");
@@ -327,7 +329,7 @@ public class UserServiceImpl implements UserService {
     }
 
     @Override
-    @Cacheable(value = "userEnrollment", key = "studentEnrollment")
+    @Cacheable(value = "userEnrollment", key = "'studentEnrollment'")
     public List<CourseRegistrationDTO> viewEnrolledCourses() {
 
         Users users = userRepository.findById(getLoggedInUser().getUserId()).orElseThrow(()->new RuntimeException("User does not exist"));

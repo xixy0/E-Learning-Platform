@@ -1,13 +1,10 @@
 package com.internshipProject1.LearningPLatform.Controller;
 
 import com.internshipProject1.LearningPLatform.DTO.CourseRegistrationDTO;
-import com.internshipProject1.LearningPLatform.DTO.UserDTO;
-import com.internshipProject1.LearningPLatform.Entity.Course;
 import com.internshipProject1.LearningPLatform.Service.CourseService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
-import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
@@ -103,6 +100,4 @@ public class CourseController {
             return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(List.of(ex.getMessage()));
         }
     }
-
-
 }

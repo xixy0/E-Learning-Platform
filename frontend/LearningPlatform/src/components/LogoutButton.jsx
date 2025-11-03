@@ -8,9 +8,9 @@ function LogoutButton() {
 
 
   return (
-    <div className="tooltip tooltip-left" data-tip="Logout">
+    <div>
       <button
-        className="btn btn-ghost btn-error btn-circle mr-2 hover:text-error-content"
+        className="p-2 rounded-full hover:bg-blue-100 transition focus:outline-none focus:ring-2 focus:ring-blue-300"
         onClick={logout}
       >
         <svg

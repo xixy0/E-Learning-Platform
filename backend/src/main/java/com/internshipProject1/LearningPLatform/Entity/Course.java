@@ -32,6 +32,9 @@ public class Course {
     @Column(name = "course_category",nullable = false)
     private String courseCategory;
 
+    @Column(name = "image_url")
+    private String imageUrl;
+
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "instructor_id")
     @JsonIgnore
@@ -52,5 +55,6 @@ public class Course {
     @OneToMany(mappedBy = "course",cascade = CascadeType.ALL,orphanRemoval = true)
     @JsonIgnore
     private List<Assignment> assignments;
+
 
 }

@@ -9,6 +9,7 @@ import com.internshipProject1.LearningPLatform.Repository.AssignmentRepository;
 import com.internshipProject1.LearningPLatform.Repository.AssignmentSubmissionRepository;
 import com.internshipProject1.LearningPLatform.Repository.UserRepository;
 import com.internshipProject1.LearningPLatform.Service.AssignmentSubmissionService;
+import com.internshipProject1.LearningPLatform.Service.NotificationService;
 import com.internshipProject1.LearningPLatform.Service.UserService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.cache.annotation.CacheEvict;
@@ -37,6 +38,9 @@ public class AssignmentSubmissionServiceImpl implements AssignmentSubmissionServ
     @Autowired
     private UserRepository userRepository;
 
+    @Autowired
+    private NotificationService notificationService;
+
 
     @Override
     @CacheEvict(value={"assignmentSubmissions","assignmentSubmissionUser","assignmentsAssignmentSubmissions"},allEntries = true)
@@ -63,7 +67,15 @@ public class AssignmentSubmissionServiceImpl implements AssignmentSubmissionServ
         assignmentSubmission.setSubmissionDate(LocalDateTime.now());
         assignmentSubmission.setUsers(users);
         assignmentSubmission.setAssignmentSubmissionUrl(uploadAssignmentSubmission(assignmentId,assignmentSubmissionDTO.getFile()));
-        return assignmentSubmissionRepository.save(assignmentSubmission);
+
+        AssignmentSubmission assignmentSubmission1 = assignmentSubmissionRepository.save(assignmentSubmission);
+
+        notificationService.createAndSend(users,
+                "ASSIGNMENT_SUBMISSION",
+                "Title: "+assignment.getAssignmentTitle(),
+                "Assignment Submitted",
+                "Timestamp "+ assignmentSubmission1.getSubmissionDate());
+        return assignmentSubmission1;
     }
 
     @Override

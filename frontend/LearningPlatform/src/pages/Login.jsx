@@ -7,11 +7,6 @@ function Login() {
         <React.Fragment>
             <div>
                 <LoginPage />
-                <p>
-                    <Link to="/newUser" >
-                        New User
-                    </Link>
-                </p>
             </div>
         </React.Fragment>
     )

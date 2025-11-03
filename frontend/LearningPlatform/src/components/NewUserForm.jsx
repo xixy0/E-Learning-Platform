@@ -201,7 +201,7 @@ function NewUserForm() {
           <div className="flex justify-end gap-4 pt-4">
             <button
               type="button"
-              onClick={() => navigate(-1)}
+              onClick={() => navigate("/login")}
               className="px-5 py-2 border border-gray-300 text-gray-600 rounded-lg hover:bg-gray-100 transition"
             >
               Cancel

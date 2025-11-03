@@ -7,6 +7,7 @@ import com.internshipProject1.LearningPLatform.Entity.Users;
 import com.internshipProject1.LearningPLatform.Repository.CourseRepository;
 import com.internshipProject1.LearningPLatform.Repository.StudentEnrollmentRepository;
 import com.internshipProject1.LearningPLatform.Repository.UserRepository;
+import com.internshipProject1.LearningPLatform.Service.NotificationService;
 import com.internshipProject1.LearningPLatform.Service.StudentEnrollmentService;
 import com.internshipProject1.LearningPLatform.Service.UserService;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -33,7 +34,8 @@ public class StudentEnrollmentServiceIMpl implements StudentEnrollmentService {
     @Autowired
     private UserRepository userRepository;
 
-
+    @Autowired
+    private NotificationService notificationService;
 
     @Override
     @CacheEvict(value = {"enrollments","userEnrollment","courseEnrollments"},allEntries = true)
@@ -52,6 +54,12 @@ public class StudentEnrollmentServiceIMpl implements StudentEnrollmentService {
         studentEnrollment.setEnrollmentDate(LocalDate.now());
         studentEnrollment.setCourse(course);
         studentEnrollment.setUsers(users);
+
+        notificationService.createAndSend(users,
+                "ENROLLED",
+                "User: "+ users.getFirstName() +" "+users.getMiddleName()+ " "+users.getLastName(),
+                "Successfully enrolled",
+                "Timestamp: "+ studentEnrollment.getEnrollmentDate());
         return studentEnrollmentRepository.save(studentEnrollment);
     }
 

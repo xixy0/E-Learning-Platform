@@ -1,9 +1,13 @@
-import React, { useState } from 'react'
+import React, { useEffect, useState } from 'react'
+import api from '../services/api';
+import { useAuth } from '../context/AuthContext';
 
 function EnrolledCourses() {
 
     const [enrolledCourses, setEnrolledCourses] = useState([]);
-    const [filteredCourses,,setFilteredCourses] = useState([]);
+    const [filteredCourses,setFilteredCourses] = useState([]);
+    const [searchData,setSearchData] = useState();
+    const{isLoggedIn} = useAuth()
     
     useEffect(() => {
         fetchCourses();
