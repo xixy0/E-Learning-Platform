@@ -5,6 +5,7 @@ import com.internshipProject1.LearningPLatform.Entity.*;
 import com.internshipProject1.LearningPLatform.Repository.QuizRepository;
 import com.internshipProject1.LearningPLatform.Repository.SubmissionRepository;
 import com.internshipProject1.LearningPLatform.Repository.UserRepository;
+import com.internshipProject1.LearningPLatform.Service.NotificationService;
 import com.internshipProject1.LearningPLatform.Service.SubmissionService;
 import com.internshipProject1.LearningPLatform.Service.UserService;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -31,26 +32,15 @@ public class SubmissionServiceImpl implements SubmissionService {
     @Autowired
     private SubmissionRepository submissionRepository;
 
+    @Autowired
+    private NotificationService notificationService;
+
     @Override
     @CacheEvict(value = {"submissions","userSubmissions","quizSubmission"},allEntries = true)
     public Submission addSubmission(SubmissionDTO submissionDTO) {
         Quiz quiz = quizRepository.findById(submissionDTO.getQuizId()).orElseThrow(
                 () -> new RuntimeException("Quiz not found"));
         Users users = userRepository.findById(userService.getLoggedInUser().getUserId()).get();
-        List<Course> courses = users.getCourses();
-        if(!userService.getLoggedInUser().getRole().equalsIgnoreCase("ADMIN")) {
-            boolean c = false;
-            for (Course course : courses) {
-                if (Objects.equals(course.getCourseId(), quiz.getCourse().getCourseId())) {
-                    c = true;
-                    break;
-                }
-            }
-            if (!c) {
-                throw new RuntimeException("Student not enrolled");
-            }
-        }
-
         double score = 0.0;
         int totalQuestions = quiz.getQuestions().size();
 
@@ -67,7 +57,13 @@ public class SubmissionServiceImpl implements SubmissionService {
         submission.setAnswers(submissionDTO.getAnswers());
         submission.setScore(finalScore);
         submission.setTimestamp(LocalDateTime.now());
-        return submissionRepository.save(submission);
+        Submission savedSubmission = submissionRepository.save(submission);
+        notificationService.createAndSend(users,
+                "QUIZ_SUBMITTED",
+                "User: "+ users.getFirstName() +" "+users.getMiddleName()+ " "+users.getLastName(),
+                "Quiz submitted and graded",
+                "Username: "+ users.getLogin().getUsername() + " Score: "+ finalScore);
+        return savedSubmission;
 
     }
 

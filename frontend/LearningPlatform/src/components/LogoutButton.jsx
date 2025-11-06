@@ -1,5 +1,4 @@
-import { useContext } from "react";
-import toast from "react-hot-toast";
+
 import { useAuth } from "../context/AuthContext";
 
 function LogoutButton() {

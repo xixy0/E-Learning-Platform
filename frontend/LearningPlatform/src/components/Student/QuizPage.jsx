@@ -1,11 +1,14 @@
 import React, { useEffect, useState } from "react";
 import { useParams } from "react-router-dom";
-import api from "../services/api";
+
 import toast from "react-hot-toast";
+import api from "../../services/api";
+import { useAuth } from "../../context/AuthContext";
 
 function QuizPage() {
-  const { quizId } = useParams(); // get quizId from URL
-  const [quiz, setQuiz] = useState(null);
+  const{user} = useAuth();
+  const { quizId } = useParams(); 
+  const [questions, setQuestions] = useState(null);
   const [answers, setAnswers] = useState({});
   const [submitted, setSubmitted] = useState(false);
   const [score, setScore] = useState(null);
@@ -14,8 +17,8 @@ function QuizPage() {
   useEffect(() => {
     const fetchQuiz = async () => {
       try {
-        const response = await api.get(`/course/getQuizById/${quizId}`);
-        setQuiz(response.data);
+        const response = await api.get(`/quiz/getQuestions/${quizId}`);
+        setQuestions(response.data);
       } catch (error) {
         toast.error(
           "Failed to load quiz: " +
@@ -40,15 +43,16 @@ function QuizPage() {
   const handleSubmit = async (e) => {
     e.preventDefault();
 
-    if (!quiz) return;
+    if (!questions) return;
 
     const payload = {
-      quizId: quiz.quizId,
+      quizId: quizId,
+      studentId: user.userId,
       answers: answers, // {questionId: "userAnswer"}
     };
 
     try {
-      const response = await api.post("/submission/addSubmission", payload);
+      const response = await api.post("/submissions/addSubmission", payload);
       setScore(response.data.score);
       setSubmitted(true);
       toast.success("Quiz submitted successfully!");
@@ -62,25 +66,25 @@ function QuizPage() {
     }
   };
 
-  if (!quiz) return <p className="text-center mt-10">Loading quiz...</p>;
+  if (!questions) return <p className="text-center mt-10">Loading quiz...</p>;
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-blue-50 to-blue-100 flex flex-col items-center py-10">
       <div className="bg-white shadow-xl rounded-2xl p-8 w-full max-w-3xl border border-gray-200">
         <h1 className="text-3xl font-semibold text-blue-700 mb-6 text-center">
-          {quiz.quizTitle}
+          Quiz
         </h1>
 
         {!submitted ? (
           <form onSubmit={handleSubmit} className="space-y-6">
-            {quiz.questions.map((q) => (
+            {questions.map((q) => (
               <div
                 key={q.questionId}
                 className="p-4 border border-gray-200 rounded-lg shadow-sm hover:shadow-md transition"
               >
                 <p className="font-medium mb-3 text-gray-800">{q.questionText}</p>
                 <div className="space-y-2">
-                  {[q.optionA, q.optionB, q.optionC, q.optionD].map((option, i) => (
+                  {[q.option1, q.option2, q.option3, q.option4].map((option, i) => (
                     <label key={i} className="flex items-center space-x-2 cursor-pointer">
                       <input
                         type="radio"

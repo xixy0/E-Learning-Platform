@@ -13,8 +13,7 @@ import org.springframework.web.servlet.mvc.method.annotation.SseEmitter;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
-import java.util.concurrent.ConcurrentHashMap;
-import java.util.concurrent.CopyOnWriteArrayList;
+import java.util.concurrent.*;
 
 @Service
 public class NotificationServiceImpl implements NotificationService {
@@ -72,14 +71,44 @@ public class NotificationServiceImpl implements NotificationService {
         notificationRepository.save(n);
     }
 
+
     @Override
     public SseEmitter registerSse(String username) {
-        SseEmitter emitter = new SseEmitter(0L); // 0 = infinite or set timeout
+
+        if (username == null || username.isBlank()) {
+            SseEmitter dummy = new SseEmitter(0L);
+            try {
+                dummy.send(SseEmitter.event().comment("unauthorized - no active user"));
+            } catch (Exception ignored) {}
+            dummy.complete();
+            return dummy;
+        }
+
+        SseEmitter emitter = new SseEmitter(60L * 60L * 1000L);
+
         sseEmitters.computeIfAbsent(username, k -> new CopyOnWriteArrayList<>()).add(emitter);
+
         emitter.onCompletion(() -> sseEmitters.getOrDefault(username, List.of()).remove(emitter));
         emitter.onTimeout(() -> sseEmitters.getOrDefault(username, List.of()).remove(emitter));
+        emitter.onError((e) -> {
+            System.out.println("SSE connection error for user " + username + ": " + e.getMessage());
+            sseEmitters.getOrDefault(username, List.of()).remove(emitter);
+            emitter.complete();
+        });
+
+        ScheduledExecutorService heartbeatExecutor = Executors.newSingleThreadScheduledExecutor();
+        heartbeatExecutor.scheduleAtFixedRate(() -> {
+            try {
+                emitter.send(SseEmitter.event().comment("heartbeat"));
+            } catch (Exception e) {
+                emitter.complete();
+                heartbeatExecutor.shutdown();
+            }
+        }, 0, 25, TimeUnit.SECONDS);
+
         return emitter;
     }
+
 
     @Override
     public NotificationDTO toDto(Notification n) {

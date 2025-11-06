@@ -1,7 +1,8 @@
 import { useState } from "react";
-import api from "../services/api";
+
 import { toast } from "react-hot-toast";
 import { useNavigate } from "react-router-dom";
+import api from "../../services/api";
 
 function NewUserForm() {
   const navigate = useNavigate();
@@ -25,7 +26,7 @@ function NewUserForm() {
     setFormData({ ...formData, [name]: value });
   };
 
-  const handleAddUser = async () => {
+  const handleAddUser = async() => {
     if (formData.password !== formData.confirmpassword) {
       toast.error("Passwords do not match");
       return;
@@ -37,7 +38,7 @@ function NewUserForm() {
 
       await api.post("/users/register", payload);
       toast.success("User Added Successfully!");
-      navigate("/userdetails", { state: { refresh: true } });
+      navigate("/login");
 
       setFormData({
         firstName: "",
@@ -54,7 +55,6 @@ function NewUserForm() {
         role: "STUDENT",
       });
     } catch (err) {
-      console.error("Failed to add user:", err);
       toast.error("Failed to add user");
     }
   };
@@ -85,7 +85,7 @@ function NewUserForm() {
               className="border border-gray-300 rounded-lg px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500"
             />
             <label htmlFor="middleName">Middle Name</label>
-<input
+            <input
               name="middleName"
               value={formData.middleName}
               onChange={handleInputChange}
@@ -114,7 +114,7 @@ function NewUserForm() {
               required
               className="border border-gray-300 rounded-lg px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500"
             />
-           
+
             <label htmlFor="gender">Gender</label>
             <select
               name="gender"
@@ -131,7 +131,7 @@ function NewUserForm() {
           </div>
 
           {/* --- Phone --- */}
-            <label htmlFor="phoneNum">Phone Number</label>
+          <label htmlFor="phoneNum">Phone Number</label>
           <input
             required
             name="phoneNum"
@@ -145,7 +145,7 @@ function NewUserForm() {
           />
 
           {/* --- Address --- */}
-            <label htmlFor="address">Address</label>
+          <label htmlFor="address">Address</label>
           <textarea
             required
             name="address"
@@ -155,9 +155,21 @@ function NewUserForm() {
             className="w-full border border-gray-300 rounded-lg px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500"
             rows="3"
           ></textarea>
+          {/* --- Email --- */}
+          <label htmlFor="email">Email</label>
+          <input
+
+            name="email"
+            type="text"
+            title="Enter a valid email"
+            value={formData.email}
+            onChange={handleInputChange}
+            placeholder="Email"
+            className="w-full border border-gray-300 rounded-lg px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500"
+          />
 
           {/* --- Username + Passwords --- */}
-            <label htmlFor="username">Username</label>
+          <label htmlFor="username">Username</label>
           <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
             <input
               type="text"

@@ -37,7 +37,7 @@ public class Submission {
     @JsonIgnore
     private Quiz quiz;
 
-    @ElementCollection
+    @ElementCollection(fetch = FetchType.EAGER)
     @CollectionTable(name = "submission_answers",
     joinColumns = @JoinColumn(name = "submission_id")
     )

@@ -113,7 +113,23 @@ public class QuizServiceImpl implements QuizService {
     @Cacheable(value = "quizzes",key = "#quizId")
     public QuizDTO getQuizById(Long quizId){
         Quiz quiz = quizRepository.findById(quizId).orElseThrow(()->new RuntimeException("Quiz not found"));
-        if(!userService.getLoggedInUser().getRole().equalsIgnoreCase("ADMIN")
+        Users users = userRepository.findById(userService.getLoggedInUser().getUserId()).get();
+
+        if(users.getLogin().getRole().equalsIgnoreCase("STUDENT")) {
+            boolean c = false;
+            Long courseId = quiz.getCourse().getCourseId();
+            List<StudentEnrollment> studentEnrollments = users.getStudentEnrollments();
+            for (StudentEnrollment studentEnrollment : studentEnrollments) {
+                if (Objects.equals(studentEnrollment.getCourse().getCourseId(), courseId)) {
+                    c = true;
+                    break;
+                }
+            }
+            if(!c){
+                throw new RuntimeException("Student not enrolled for Quiz");
+            }
+        }
+        if(userService.getLoggedInUser().getRole().equalsIgnoreCase("INSTRUCTOR")
                 && !Objects.equals(quiz.getCourse().getInstructor().getUserId(), userService.getLoggedInUser().getUserId()))
         {
             throw new RuntimeException("Unauthorized Instructor");
@@ -146,8 +162,23 @@ public class QuizServiceImpl implements QuizService {
     @Cacheable(value = "quizQuestion",key = "#quizId")
     public List<QuestionDTO> getQuestions(Long quizId) {
         Quiz quiz = quizRepository.findById(quizId).orElseThrow(()->new RuntimeException("Quiz not found"));
+        Users users = userRepository.findById(userService.getLoggedInUser().getUserId()).get();
 
-        if(!userService.getLoggedInUser().getRole().equalsIgnoreCase("ADMIN")
+        if(users.getLogin().getRole().equalsIgnoreCase("STUDENT")) {
+            boolean c = false;
+            Long courseId = quiz.getCourse().getCourseId();
+            List<StudentEnrollment> studentEnrollments = users.getStudentEnrollments();
+            for (StudentEnrollment studentEnrollment : studentEnrollments) {
+                if (Objects.equals(studentEnrollment.getCourse().getCourseId(), courseId)) {
+                    c = true;
+                    break;
+                }
+            }
+            if(!c){
+                throw new RuntimeException("Student not enrolled for Quiz");
+            }
+        }
+        if(userService.getLoggedInUser().getRole().equalsIgnoreCase("INSTRUCTOR")
                 && !Objects.equals(quiz.getCourse().getInstructor().getUserId(), userService.getLoggedInUser().getUserId())){
             throw new RuntimeException("Unauthorized Instructor");
         }

@@ -76,7 +76,7 @@ export function AuthProvider({ children }) {
     navigate("/");
   };
 
-  const value = { isLoggedIn, user, login, logout };
+  const value = { isLoggedIn, user, setUser, login, logout };
 
   return (
     <AuthContext.Provider value={value}>

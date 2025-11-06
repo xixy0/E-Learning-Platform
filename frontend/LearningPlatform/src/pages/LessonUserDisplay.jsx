@@ -1,13 +1,14 @@
-import React from 'react'
-import StudentSidebar from '../components/Student/StudentSidebar'
-import { Outlet } from 'react-router-dom';
+import { Outlet, useParams } from 'react-router-dom';
+import LessonSidebarUser from '../components/Student/LessonSidebarUser';
 
-function StudentDashboard() {
+function LessonUserDisplay() {
+
+    const{courseId} = useParams();
    return (
     <div className="flex min-h-screen  bg-gradient-to-br from-blue-50 to-blue-100">
-      {/* Sidebar always visible */}
+     
       <div className="w-64">
-       <StudentSidebar />
+      <LessonSidebarUser courseId = {courseId} />
       </div>
 
       {/* Main content area */}
@@ -19,4 +20,4 @@ function StudentDashboard() {
   );
 }
 
-export default StudentDashboard
+export default LessonUserDisplay

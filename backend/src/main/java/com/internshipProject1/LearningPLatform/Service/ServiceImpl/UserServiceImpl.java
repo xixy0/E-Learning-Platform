@@ -4,8 +4,10 @@ import com.internshipProject1.LearningPLatform.DTO.*;
 import com.internshipProject1.LearningPLatform.Entity.*;
 import com.internshipProject1.LearningPLatform.Repository.LoginRepository;
 import com.internshipProject1.LearningPLatform.Repository.UserRepository;
+import com.internshipProject1.LearningPLatform.Service.NotificationService;
 import com.internshipProject1.LearningPLatform.Service.UserService;
-import org.springframework.beans.factory.annotation.Autowired;
+
+import org.springframework.beans.factory.annotation.*;
 import org.springframework.cache.annotation.CacheEvict;
 import org.springframework.cache.annotation.Cacheable;
 import org.springframework.security.core.Authentication;
@@ -13,6 +15,7 @@ import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.util.*;
 
@@ -26,6 +29,9 @@ public class UserServiceImpl implements UserService {
 
     @Autowired
     private PasswordEncoder passwordEncoder;
+
+    @Autowired
+    private NotificationService notificationService;
 
     @Override
     @CacheEvict(value = {"users", "userCourses","userDTO","userEnrollment","userSubmissions"}, allEntries = true)
@@ -57,8 +63,9 @@ public class UserServiceImpl implements UserService {
         users.setStudentEnrollments(new ArrayList<>());
         users.setSubmissions(new ArrayList<>());
         users.setAssignmentSubmissions(new ArrayList<>());
+       Users savedUser =  userRepository.save(users);
 
-       return userRepository.save(users);
+        return savedUser;
     }
 
     @Override
@@ -120,6 +127,11 @@ public class UserServiceImpl implements UserService {
         if(!userRegistrationDTO.getGender().isEmpty()) {
             users.setGender(userRegistrationDTO.getGender());
         }
+        notificationService.createAndSend(users,
+                "USER_UPDATED",
+                "User: "+ users.getFirstName() +" "+users.getMiddleName()+ " "+users.getLastName(),
+                "User Updated",
+                "Username: "+ users.getLogin().getUsername() + " Role: "+ users.getLogin().getRole());
         return userRepository.save(users);
 
     }
@@ -127,11 +139,18 @@ public class UserServiceImpl implements UserService {
     @Override
     @CacheEvict(value ={"users","userDTO","userCourses","courses","userSubmissions","userEnrollment"},allEntries = true)
     public void deactivateUser(Long loginId) {
+        Users users = userRepository.findById(loginId).orElseThrow(()-> new RuntimeException("User does not exist"));
         if(!getLoggedInUser().getRole().equalsIgnoreCase("ADMIN")){
             throw new RuntimeException("Unauthorized user");
         }
-        Login login = loginRepository.findById(loginId).orElseThrow(()->new RuntimeException("User does not exist"));
+        Login login = users.getLogin();
         login.setAccountStatus("INACTIVE");
+
+        notificationService.createAndSend(users,
+                "USER_DEACTIVATED",
+                "User: "+ users.getFirstName() +" "+users.getMiddleName()+ " "+users.getLastName(),
+                "User deactivated By Admin due to inactivity",
+                "Username: "+ users.getLogin().getUsername() + " Role: "+ users.getLogin().getRole());
         loginRepository.save(login);
 
     }
@@ -139,11 +158,18 @@ public class UserServiceImpl implements UserService {
     @Override
     @CacheEvict(value ={"users","userDTO","userCourses","courses","userSubmissions","userEnrollment"},allEntries = true)
     public void activateUser(Long loginId) {
+        Users users = userRepository.findById(loginId).orElseThrow(()->new RuntimeException("User does not exist"));
         if(!getLoggedInUser().getRole().equalsIgnoreCase("ADMIN")){
             throw new RuntimeException("Unauthorized user");
         }
-        Login login = loginRepository.findById(loginId).orElseThrow(()->new RuntimeException("User does not exist"));
+        Login login = users.getLogin();
         login.setAccountStatus("ACTIVE");
+
+        notificationService.createAndSend(users,
+                "USER_ACTIVATED",
+                "User: "+ users.getFirstName() +" "+users.getMiddleName()+ " "+users.getLastName(),
+                "User activated",
+                "Username: "+ users.getLogin().getUsername() + " Role: "+ users.getLogin().getRole());
         loginRepository.save(login);
     }
 
@@ -291,7 +317,8 @@ public class UserServiceImpl implements UserService {
     }
 
     @Override
-    @Cacheable(value = "userSubmissions",key="submissions")
+    @Transactional(readOnly = true)
+    @Cacheable(value = "userSubmissions",key="'submissions'")
     public List<SubmissionDTO> getSubmissions() {
 
         Users users = userRepository.findById(getLoggedInUser().getUserId()).orElseThrow(()->new RuntimeException("Username not found"));
@@ -303,8 +330,7 @@ public class UserServiceImpl implements UserService {
                     submission.getQuiz().getQuizId(),
                     submission.getStudent().getUserId(),
                     submission.getScore(),
-                    submission.getTimestamp(),
-                    submission.getAnswers()));
+                    submission.getTimestamp()));
         }
         return submissionDTOList;
     }

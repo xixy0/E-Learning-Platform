@@ -9,12 +9,12 @@ function StudentSidebar() {
     `flex items-center gap-3 px-4 py-3 rounded-xl text-[15px] font-medium transition-all duration-200
     ${
       isActive(path)
-        ? "bg-primary text-white shadow-md"
+        ? "bg-primary text-blue-700 shadow-md"
         : "text-gray-700 hover:bg-primary/10 hover:text-primary"
     }`;
 
   return (
-    <aside className="w-64 min-h-[calc(100vh-80px)] bg-white shadow-md border-r border-gray-100 flex flex-col">
+    <aside className="w-64 h-full  bg-blue-200 shadow-md border-r border-gray-100 flex flex-col">
       {/* Header */}
       <div className="p-6 border-b border-gray-200">
         <h1 className="text-xl font-semibold text-primary">Student Dashboard</h1>
@@ -23,7 +23,6 @@ function StudentSidebar() {
       {/* Navigation */}
       <nav className="flex-1 px-4 py-6 space-y-2">
         <Link to="/student" className={linkClasses("/student")}>
-          <span className="material-symbols-outlined text-lg">person</span>
           Student Details
         </Link>
 
@@ -31,12 +30,10 @@ function StudentSidebar() {
           to="/userSubmissionDetails"
           className={linkClasses("/userSubmissionDetails")}
         >
-          <span className="material-symbols-outlined text-lg">assignment</span>
           Submission Reports
         </Link>
 
         <Link to="/userQuizDetails" className={linkClasses("/userQuizDetails")}>
-          <span className="material-symbols-outlined text-lg">quiz</span>
           Quiz
         </Link>
       </nav>

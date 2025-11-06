@@ -40,7 +40,12 @@ public class SecurityConfig {
                                 "/api/course/getInstructor/**","/api/course/getAll",
                                 "/api/student/unenroll/**",
                                 "/api/course/getAllQuiz/**",
-                                "/api/submissions/getAll").permitAll()
+                                "/api/submissions/getAll",
+                                "/api/notifications/subscribe").permitAll()
+                        .requestMatchers("/api/notifications/**",
+                                "/api/quiz/getQuestions/**","/api/quiz/getQuizById/**",
+                                "/api/course/getLessons/**",
+                                "/api/lesson/getLessonById/**").hasAnyRole("ADMIN","INSTRUCTOR","STUDENT")
                         .requestMatchers(
                                 "/api/users/getAll","/api/users/deactivate/**","/api/users/activate/**","/api/users/deleteUser/**",
                                 "/api/users/viewCoursesByAdmin/**","/api/users/viewEnrolledCoursesForAdmin/**","/api/user/getSubmissionsByAdmin/**",
@@ -50,13 +55,15 @@ public class SecurityConfig {
                                 "/api/student/enroll/**",
                                 "/api/submissions/**",
                                 "/api/assignmentSubmissions/**",
-                                "/api/lessonProgress/**").hasAnyRole("ADMIN","STUDENT")
+                                "/api/lessonProgress/**",
+                                "/api/quiz/getQuizById/**" ).hasAnyRole("ADMIN","STUDENT")
                         .requestMatchers(
                                 "/api/users/viewCourses/**","api/course/**",
-                                "/api/lesson/**",
-                                "/api/quiz/**",
                                 "/api/questions/**",
+                                "/api/quiz/**",
+                                "/api/lesson/**",
                                 "/api/assignment/**").hasAnyRole("ADMIN","INSTRUCTOR")
+
                         .anyRequest().authenticated()
                 )
                 .sessionManagement(session -> session.sessionCreationPolicy(SessionCreationPolicy.STATELESS))

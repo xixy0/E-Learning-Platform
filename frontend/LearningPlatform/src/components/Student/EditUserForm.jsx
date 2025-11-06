@@ -1,12 +1,12 @@
 import { useState } from 'react'
-import { useAuth } from '../context/AuthContext';
-import api from '../services/api';
 import toast from 'react-hot-toast';
 import { useNavigate } from 'react-router-dom';
+import api from '../../services/api';
+import { useAuth  } from '../../context/AuthContext';
 
 
 function EditUserForm() {
-    const { user } = useAuth();
+    const { user , setUser } = useAuth();
     const navigate = useNavigate();
     const [formData, setFormData] = useState({
         firstName: "",
@@ -35,9 +35,10 @@ function EditUserForm() {
             const payload = { ...formData };
             delete payload.confirmpassword;
 
-            await api.post(`/users/updateUser/${user.userId}`, payload);
+            const {data:updatedUser} = await api.post(`/users/updateUser/${user.userId}`, payload);
+            setUser(updatedUser);
             toast.success("User Edited Successfully!");
-            navigate("/role_student", { state: { refresh: true } });
+            navigate("/student", { state: { refresh: true } });
 
             setFormData({
                 firstName: "",
@@ -50,8 +51,7 @@ function EditUserForm() {
                 email: "",
                 username: "",
                 password: "",
-                confirmpassword: "",
-                role: "STUDENT",
+                newpassword: "",
             });
         } catch (err) {
             console.error("Failed to edit user:", err);
@@ -76,7 +76,7 @@ function EditUserForm() {
                     <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
                         <label htmlFor="firstName">First Name</label>
                         <input
-                           
+
                             name="firstName"
                             value={formData.firstName}
                             onChange={handleInputChange}
@@ -93,7 +93,7 @@ function EditUserForm() {
                         />
                         <label htmlFor="lastName">Last Name</label>
                         <input
-                            
+
                             name="lastName"
                             value={formData.lastName}
                             onChange={handleInputChange}
@@ -110,7 +110,7 @@ function EditUserForm() {
                             name="userDOB"
                             value={formData.userDOB}
                             onChange={handleInputChange}
-                            
+
                             className="border border-gray-300 rounded-lg px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500"
                         />
 
@@ -119,7 +119,7 @@ function EditUserForm() {
                             name="gender"
                             value={formData.gender}
                             onChange={handleInputChange}
-            
+
                             className="border border-gray-300 rounded-lg px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500"
                         >
                             <option value="">Select Gender</option>
@@ -132,7 +132,7 @@ function EditUserForm() {
                     {/* --- Phone --- */}
                     <label htmlFor="phoneNum">Phone Number</label>
                     <input
-                        
+
                         name="phoneNum"
                         type="tel"
                         pattern="[0-9]{10}"
@@ -146,7 +146,7 @@ function EditUserForm() {
                     {/* --- Address --- */}
                     <label htmlFor="address">Address</label>
                     <textarea
-                        
+
                         name="address"
                         value={formData.address}
                         onChange={handleInputChange}
@@ -155,12 +155,25 @@ function EditUserForm() {
                         rows="3"
                     ></textarea>
 
+                    {/* --- Email --- */}
+                    <label htmlFor="email">Email</label>
+                    <input
+
+                        name="email"
+                        type="text"
+                        title="Enter a valid email"
+                        value={formData.email}
+                        onChange={handleInputChange}
+                        placeholder="Email"
+                        className="w-full border border-gray-300 rounded-lg px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500"
+                    />
+
                     {/* --- Username + Passwords --- */}
                     <label htmlFor="username">Username</label>
                     <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
                         <input
                             type="text"
-                           
+
                             placeholder="Username"
                             name="username"
                             value={formData.username}
@@ -174,7 +187,7 @@ function EditUserForm() {
                             value={formData.password}
                             onChange={handleInputChange}
                             placeholder="Old Password"
-                            
+
                             pattern="(?=.*\d)(?=.*[a-z]).{5,}"
                             title="Min 5 characters with letters and numbers"
                             className="border border-gray-300 rounded-lg px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500"
@@ -183,13 +196,13 @@ function EditUserForm() {
                         <input
                             type="password"
                             name="newpassword"
-                            value={formData.confirmpassword}
+                            value={formData.newpassword}
                             onChange={handleInputChange}
                             placeholder="New Password"
 
                             className={`border rounded-lg px-3 py-2 focus:outline-none focus:ring-2 ${formData.password &&
                                 formData.confirmpassword &&
-                                formData.password !== formData.confirmpassword
+                                formData.password !== formData.newpassword
                                 ? "border-red-500 focus:ring-red-400"
                                 : "border-gray-300 focus:ring-blue-500"
                                 }`}
