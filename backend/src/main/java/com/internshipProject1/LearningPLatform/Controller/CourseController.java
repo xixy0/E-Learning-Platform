@@ -83,7 +83,7 @@ public class CourseController {
     }
 
 
-    @GetMapping("/getAllAssignments/{courseId}")
+    @GetMapping("/getAssignments/{courseId}")
     public ResponseEntity<List<?>> getAllAssignments(@PathVariable Long courseId){
         try{
             return ResponseEntity.status(HttpStatus.ACCEPTED).body(courseService.getAllAssignments(courseId));

@@ -44,21 +44,23 @@ public class SecurityConfig {
                                 "/api/notifications/subscribe").permitAll()
                         .requestMatchers("/api/notifications/**",
                                 "/api/quiz/getQuestions/**","/api/quiz/getQuizById/**",
-                                "/api/course/getLessons/**",
-                                "/api/lesson/getLessonById/**").hasAnyRole("ADMIN","INSTRUCTOR","STUDENT")
+                                "/api/course/getLessons/**","/api/course/getAssignments/**",
+                                "/api/lesson/getLessonById/**",
+                                "/api/assignmentSubmissions/addAssignmentSubmission/**").hasAnyRole("ADMIN","INSTRUCTOR","STUDENT")
                         .requestMatchers(
                                 "/api/users/getAll","/api/users/deactivate/**","/api/users/activate/**","/api/users/deleteUser/**",
                                 "/api/users/viewCoursesByAdmin/**","/api/users/viewEnrolledCoursesForAdmin/**","/api/user/getSubmissionsByAdmin/**",
                                 "/api/course/removeEnroll/**").hasRole("ADMIN")
                         .requestMatchers(
-                                "/api/users/viewEnrolledCourses","/api/users//getSubmissions", "/api/users/getAllStudentAssignmentSubmissions",
+                                "/api/users/viewEnrolledCourses","/api/users/getSubmissions", "/api/users/getAllStudentAssignmentSubmissions",
                                 "/api/student/enroll/**",
                                 "/api/submissions/**",
                                 "/api/assignmentSubmissions/**",
                                 "/api/lessonProgress/**",
                                 "/api/quiz/getQuizById/**" ).hasAnyRole("ADMIN","STUDENT")
                         .requestMatchers(
-                                "/api/users/viewCourses/**","api/course/**",
+                                "/api/users/viewCourses",
+                                "/api/course/**",
                                 "/api/questions/**",
                                 "/api/quiz/**",
                                 "/api/lesson/**",

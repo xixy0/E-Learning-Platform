@@ -29,7 +29,6 @@ public class RedisConfig {
         mapper.disable(SerializationFeature.FAIL_ON_EMPTY_BEANS);
         mapper.registerModule(new JavaTimeModule());
 
-        // 👇 This is the crucial fix:
         mapper.activateDefaultTyping(
                 LaissezFaireSubTypeValidator.instance,
                 ObjectMapper.DefaultTyping.NON_FINAL,

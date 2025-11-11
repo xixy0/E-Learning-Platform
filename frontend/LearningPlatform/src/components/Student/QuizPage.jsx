@@ -6,14 +6,15 @@ import api from "../../services/api";
 import { useAuth } from "../../context/AuthContext";
 
 function QuizPage() {
-  const{user} = useAuth();
-  const { quizId } = useParams(); 
+  const { user } = useAuth();
+  const { quizId } = useParams();
   const [questions, setQuestions] = useState(null);
   const [answers, setAnswers] = useState({});
   const [submitted, setSubmitted] = useState(false);
   const [score, setScore] = useState(null);
+  const [timeLeft, setTimeLeft] = useState(600);
 
-  // Fetch quiz details when the page loads
+
   useEffect(() => {
     const fetchQuiz = async () => {
       try {
@@ -22,16 +23,57 @@ function QuizPage() {
       } catch (error) {
         toast.error(
           "Failed to load quiz: " +
-            (error.response?.data?.message ||
-              error.response?.statusText ||
-              error.message)
+          (error.response?.data?.message ||
+            error.response?.statusText ||
+            error.message)
         );
       }
     };
     fetchQuiz();
   }, [quizId]);
 
-  // Handle answer change
+  useEffect(() => {
+    if (submitted) {
+      localStorage.removeItem(`quizStart_${quizId}`);
+    }
+  }, [submitted, quizId]);
+
+  useEffect(() => {
+    if (submitted) return;
+
+    const savedStartTime = localStorage.getItem(`quizStart_${quizId}`);
+    let startTime;
+
+    if (savedStartTime) {
+      startTime = parseInt(savedStartTime, 10);
+    } else {
+      startTime = Date.now();
+      localStorage.setItem(`quizStart_${quizId}`, startTime);
+    }
+
+    const timer = setInterval(() => {
+      const elapsed = Math.floor((Date.now() - startTime) / 1000);
+      const remaining = 600 - elapsed;
+
+      if (remaining <= 0) {
+        clearInterval(timer);
+        setTimeLeft(0);
+        handleSubmit();
+      } else {
+        setTimeLeft(remaining);
+      }
+    }, 1000);
+
+    return () => clearInterval(timer);
+  }, [submitted, quizId]);
+
+
+  const formatTime = (seconds) => {
+    const m = Math.floor(seconds / 60);
+    const s = seconds % 60;
+    return `${m}:${s < 10 ? "0" : ""}${s}`;
+  };
+
   const handleAnswerChange = (questionId, selectedOption) => {
     setAnswers((prev) => ({
       ...prev,
@@ -39,16 +81,16 @@ function QuizPage() {
     }));
   };
 
-  // ✅ Submit handler (sends answers to backend)
+
   const handleSubmit = async (e) => {
-    e.preventDefault();
+    if (e && e.preventDefault) e.preventDefault();
 
     if (!questions) return;
 
     const payload = {
       quizId: quizId,
       studentId: user.userId,
-      answers: answers, // {questionId: "userAnswer"}
+      answers: answers,
     };
 
     try {
@@ -59,9 +101,9 @@ function QuizPage() {
     } catch (error) {
       toast.error(
         "Failed to submit quiz: " +
-          (error.response?.data?.message ||
-            error.response?.statusText ||
-            error.message)
+        (error.response?.data?.message ||
+          error.response?.statusText ||
+          error.message)
       );
     }
   };
@@ -70,7 +112,14 @@ function QuizPage() {
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-blue-50 to-blue-100 flex flex-col items-center py-10">
-      <div className="bg-white shadow-xl rounded-2xl p-8 w-full max-w-3xl border border-gray-200">
+      <div className="bg-white shadow-xl rounded-2xl p-8 w-full max-w-3xl border border-gray-200 relative">
+
+        {!submitted && (
+          <p className="absolute top-4 right-6 bg-red-400 rounded-2xl px-3 py-1 m-3 text-lg  font-semibold text-white">
+            Time Left: {formatTime(timeLeft)}
+          </p>
+        )}
+
         <h1 className="text-3xl font-semibold text-blue-700 mb-6 text-center">
           Quiz
         </h1>

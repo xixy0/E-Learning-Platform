@@ -7,7 +7,9 @@ function MainPage() {
   const [courses, setCourses] = useState([]);
   const [searchData, setSearchData] = useState("");
   const [filteredCourses, setFilteredCourses] = useState([]);
-  const { isLoggedIn } = useAuth();
+  const { isLoggedIn , user } = useAuth();
+
+ 
 
   useEffect(() => {
     fetchCourses();
@@ -49,8 +51,8 @@ function MainPage() {
            Courses
         </h1>
 
-        {/* Search bar */}
-        <div className="flex flex-col sm:flex-row items-center gap-3 mb-8">
+        
+        <div className="flex flex-col  items-center justify-center w-full max-w-4xl mx-auto sm:flex-row  gap-3 mb-8">
           <input
             type="text"
             value={searchData}
@@ -66,7 +68,7 @@ function MainPage() {
           </button>
         </div>
 
-        {/* Courses */}
+        
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
           {filteredCourses.length > 0 ? (
             filteredCourses.map((course) => (
@@ -98,7 +100,7 @@ function MainPage() {
                   {course.numberOfStudentsEnrolled}
                 </p>
 
-                {isLoggedIn && (
+                {isLoggedIn && user?.role?.toUpperCase().includes("STUDENT") && (
                   <button
                     onClick={() => handleEnroll(course.courseId)}
                     className="w-full bg-green-600 text-white py-2 rounded-lg font-semibold hover:bg-green-700 transition"

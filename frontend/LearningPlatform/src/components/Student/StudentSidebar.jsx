@@ -23,7 +23,7 @@ function StudentSidebar() {
       {/* Navigation */}
       <nav className="flex-1 px-4 py-6 space-y-2">
         <Link to="/student" className={linkClasses("/student")}>
-          Student Details
+          Profile
         </Link>
 
         <Link
@@ -35,6 +35,10 @@ function StudentSidebar() {
 
         <Link to="/userQuizDetails" className={linkClasses("/userQuizDetails")}>
           Quiz
+        </Link>
+
+        <Link to="/userAssignmentDetails" className={linkClasses("/userAssignmentDetails")}>
+          Assignment
         </Link>
       </nav>
     </aside>

@@ -215,7 +215,7 @@ public class UserServiceImpl implements UserService {
     }
 
     @Override
-    @Cacheable(value = "userCourses", key = "viewCourses")
+    @Cacheable(value = "userCourses", key = "'viewCourses'")
     public List<CourseRegistrationDTO> viewCourses() {
         Users user = userRepository.findById(getLoggedInUser().getUserId()).orElseThrow(()->new RuntimeException("Username not found"));
         List<Course> course =user.getCourses();

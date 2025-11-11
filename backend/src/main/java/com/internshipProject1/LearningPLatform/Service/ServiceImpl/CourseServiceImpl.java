@@ -210,10 +210,10 @@ public class CourseServiceImpl implements CourseService {
     @Cacheable(value = "courseQuiz", key="#courseId")
     public List<QuizDTO> getAllQuiz(Long courseId) {
         Course course = courseRepository.findById(courseId).orElseThrow(()->new RuntimeException("Course not found"));
-//        if(userService.getLoggedInUser().getRole().equalsIgnoreCase("INSTRUCTOR")
-//                && !Objects.equals(course.getInstructor().getUserId(), userService.getLoggedInUser().getUserId())){
-//            throw new RuntimeException("Unauthorized");
-//        }
+        if(userService.getLoggedInUser().getRole().equalsIgnoreCase("INSTRUCTOR")
+                && !Objects.equals(course.getInstructor().getUserId(), userService.getLoggedInUser().getUserId())){
+            throw new RuntimeException("Unauthorized");
+        }
 
         List<Quiz> quizzes = course.getQuiz();
         List<QuizDTO> quizDTOList = new ArrayList<>();
@@ -232,7 +232,8 @@ public class CourseServiceImpl implements CourseService {
     @Cacheable(value = "courseAssignment",key = "#courseId")
     public List<AssignmentDTO> getAllAssignments(Long courseId) {
         Course course = courseRepository.findById(courseId).orElseThrow(()->new RuntimeException("Course not found"));
-        if(!userService.getLoggedInUser().getRole().equalsIgnoreCase("ADMIN")
+
+        if(userService.getLoggedInUser().getRole().equalsIgnoreCase("INSTRUCTOR")
                 && !Objects.equals(course.getInstructor().getUserId(), userService.getLoggedInUser().getUserId())){
             throw new RuntimeException("Unauthorized Instructor");
         }

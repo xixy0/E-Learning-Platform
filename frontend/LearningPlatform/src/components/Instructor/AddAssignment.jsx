@@ -1,23 +1,12 @@
-import { useState } from "react";
-import { toast } from "react-hot-toast";
-import { useNavigate } from "react-router-dom";
-import api from "../../services/api";
+import React from 'react'
 
-function NewUserForm() {
+function AddAssignment() {
+  const { user, setUser } = useAuth();
   const navigate = useNavigate();
+
   const [formData, setFormData] = useState({
-    firstName: "",
-    middleName: "",
-    lastName: "",
-    userDOB: "",
-    gender: "",
-    phoneNum: "",
-    address: "",
-    email: "",
-    username: "",
-    password: "",
-    confirmpassword: "",
-    role: "STUDENT",
+    assignmentTitle: "",
+    assignmentDescription: "",
   });
 
   const handleInputChange = (e) => {
@@ -25,19 +14,13 @@ function NewUserForm() {
     setFormData({ ...formData, [name]: value });
   };
 
-  const handleAddUser = async () => {
-    if (formData.password !== formData.confirmpassword) {
-      toast.error("Passwords do not match");
-      return;
-    }
-
+  const handleUpdateUser = async () => {
     try {
       const payload = { ...formData };
-      delete payload.confirmpassword;
-
-      await api.post("/users/register", payload);
-      toast.success("User Added Successfully!");
-      navigate("/login");
+      const { data: updatedUser } = await api.post(`/assignment/addAssignment/${courseId}`, payload);
+      setUser(updatedUser);
+      toast.success("Assignement added Successfully!");
+      navigate("/", { state: { refresh: true } });
 
       setFormData({
         firstName: "",
@@ -50,46 +33,43 @@ function NewUserForm() {
         email: "",
         username: "",
         password: "",
-        confirmpassword: "",
-        role: "STUDENT",
+        newpassword: "",
       });
     } catch (err) {
-      toast.error("Failed to add user");
+      console.error("Failed to add Assignment:", err);
+      toast.error("Failed to add Assignment");
     }
   };
 
   return (
     <div className="flex justify-center items-center min-h-screen  bg-gradient-to-br from-red-50 to-blue-100  p-5">
-      <div className="w-full max-w-4xl bg-white shadow-md rounded-lg p-8">
-        <h3 className="text-2xl text-blue-600 font-semibold text-hite mb-6 text-center">
-          Add New User
+      <div className="w-full max-w-3xl bg-white shadow-md rounded-lg p-8">
+        <h3 className="text-2xl font-semibold text-blue-600 mb-6 text-center">
+          Add Assignment
         </h3>
 
         <form
           className="space-y-5"
           onSubmit={(e) => {
             e.preventDefault();
-            handleAddUser();
+            handleUpdateUser();
           }}
         >
           {/* --- Name Fields --- */}
           <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
-            {/* First Name */}
             <div className="flex flex-col">
               <label className="text-sm font-medium text-gray-700 mb-1">
                 First Name
               </label>
               <input
-                required
-                name="firstName"
-                value={formData.firstName}
+                name="assignmentTitle"
+                value={formData.assignmentTitle}
                 onChange={handleInputChange}
-                placeholder="First Name"
+                placeholder="Assignment Title"
                 className="border border-gray-300 rounded-lg px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500"
               />
             </div>
 
-            {/* Middle Name */}
             <div className="flex flex-col">
               <label className="text-sm font-medium text-gray-700 mb-1">
                 Middle Name
@@ -103,13 +83,11 @@ function NewUserForm() {
               />
             </div>
 
-            {/* Last Name */}
             <div className="flex flex-col">
               <label className="text-sm font-medium text-gray-700 mb-1">
                 Last Name
               </label>
               <input
-                required
                 name="lastName"
                 value={formData.lastName}
                 onChange={handleInputChange}
@@ -130,7 +108,6 @@ function NewUserForm() {
                 name="userDOB"
                 value={formData.userDOB}
                 onChange={handleInputChange}
-                required
                 className="border border-gray-300 rounded-lg px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500"
               />
             </div>
@@ -143,7 +120,6 @@ function NewUserForm() {
                 name="gender"
                 value={formData.gender}
                 onChange={handleInputChange}
-                required
                 className="border border-gray-300 rounded-lg px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500"
               >
                 <option value="">Select Gender</option>
@@ -160,7 +136,6 @@ function NewUserForm() {
               Phone Number
             </label>
             <input
-              required
               name="phoneNum"
               type="tel"
               pattern="[0-9]{10}"
@@ -178,7 +153,6 @@ function NewUserForm() {
               Address
             </label>
             <textarea
-              required
               name="address"
               value={formData.address}
               onChange={handleInputChange}
@@ -196,7 +170,6 @@ function NewUserForm() {
             <input
               name="email"
               type="email"
-              title="Enter a valid email"
               value={formData.email}
               onChange={handleInputChange}
               placeholder="Email"
@@ -212,7 +185,6 @@ function NewUserForm() {
               </label>
               <input
                 type="text"
-                required
                 placeholder="Username"
                 name="username"
                 value={formData.username}
@@ -223,15 +195,14 @@ function NewUserForm() {
 
             <div className="flex flex-col">
               <label className="text-sm font-medium text-gray-700 mb-1">
-                Password
+                Old Password
               </label>
               <input
                 type="password"
                 name="password"
                 value={formData.password}
                 onChange={handleInputChange}
-                placeholder="Password"
-                required
+                placeholder="Old Password"
                 pattern="(?=.*\d)(?=.*[a-z]).{5,}"
                 title="Min 5 characters with letters and numbers"
                 className="border border-gray-300 rounded-lg px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500"
@@ -240,22 +211,20 @@ function NewUserForm() {
 
             <div className="flex flex-col">
               <label className="text-sm font-medium text-gray-700 mb-1">
-                Confirm Password
+                New Password
               </label>
               <input
                 type="password"
-                name="confirmpassword"
-                value={formData.confirmpassword}
+                name="newpassword"
+                value={formData.newpassword}
                 onChange={handleInputChange}
-                placeholder="Confirm Password"
-                required
-                className={`border rounded-lg px-3 py-2 focus:outline-none focus:ring-2 ${
-                  formData.password &&
-                  formData.confirmpassword &&
-                  formData.password !== formData.confirmpassword
+                placeholder="New Password"
+                className={`border rounded-lg px-3 py-2 focus:outline-none focus:ring-2 ${formData.password &&
+                    formData.newpassword &&
+                    formData.password === formData.newpassword
                     ? "border-red-500 focus:ring-red-400"
                     : "border-gray-300 focus:ring-blue-500"
-                }`}
+                  }`}
               />
             </div>
           </div>
@@ -264,7 +233,7 @@ function NewUserForm() {
           <div className="flex justify-end gap-4 pt-4">
             <button
               type="button"
-              onClick={() => navigate("/login")}
+              onClick={() => navigate(-1)}
               className="px-5 py-2 border border-gray-300 text-gray-600 rounded-lg hover:bg-gray-100 transition"
             >
               Cancel
@@ -273,7 +242,7 @@ function NewUserForm() {
               type="submit"
               className="px-5 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition"
             >
-              Add User
+              Submit
             </button>
           </div>
         </form>
@@ -282,4 +251,5 @@ function NewUserForm() {
   );
 }
 
-export default NewUserForm;
+
+export default AddAssignment

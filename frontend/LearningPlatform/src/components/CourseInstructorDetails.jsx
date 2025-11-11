@@ -1,6 +1,6 @@
 import React from 'react'
 
-function CourseDetails() {
+function CourseInstructorDetails() {
   return (
     <React.Fragment>
         <div></div>
@@ -8,4 +8,4 @@ function CourseDetails() {
   )
 }
 
-export default CourseDetails
+export default CourseInstructorDetails

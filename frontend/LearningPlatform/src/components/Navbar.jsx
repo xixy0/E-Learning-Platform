@@ -6,6 +6,7 @@ import LogoutButton from "./LogoutButton";
 function Navbar() {
   const { isLoggedIn, user } = useAuth();
   const [menuOpen, setMenuOpen] = useState(false);
+  
 
   return (
     <nav className="sticky top-0 z-50 bg-white/90 backdrop-blur-md shadow-sm">
@@ -21,14 +22,20 @@ function Navbar() {
 
 
         <div className="hidden md:flex items-center space-x-6 text-gray-700 font-medium">
-          {isLoggedIn && (
+          {isLoggedIn && user?.role?.toUpperCase().includes("STUDENT") &&   (
             <Link to="/student" className="hover:text-blue-600 transition">
               Dashboard
             </Link>
           )}
-          {isLoggedIn && (
+          {isLoggedIn && user?.role?.toUpperCase().includes("STUDENT") && (
             <Link to="/mycourses" className="hover:text-blue-600 transition">
               My Courses
+            </Link>
+          )}
+
+          {isLoggedIn && user?.role?.toUpperCase().includes("INSTRUCTOR") && (
+            <Link to="/instructor" className="hover:text-blue-600 transition">
+              Courses
             </Link>
           )}
           <Link to="/about" className="hover:text-blue-600 transition">
@@ -78,17 +85,24 @@ function Navbar() {
       {menuOpen && (
         <div className="md:hidden bg-white shadow-md border-t border-gray-200">
           <ul className="flex flex-col px-6 py-4 space-y-3 text-gray-700 font-medium">
-            {isLoggedIn && (
+            {(isLoggedIn && user.role === "STUDENT") && (
               <Link to="/student" onClick={() => setMenuOpen(false)}>
                 Dashboard
               </Link>
             )
             }
-            {isLoggedIn && (
+            {isLoggedIn && user?.role?.toUpperCase().includes("STUDENT") && (
               <Link to="/mycourses" onClick={() => setMenuOpen(false)}>
                 My Courses
               </Link>
             )}
+
+            {isLoggedIn && user?.role?.toUpperCase().includes("INSTRUCTOR") && (
+              <Link to="/instructor" onClick={() => setMenuOpen(false)}>
+                Courses
+              </Link>
+            )}
+
             <Link to="/about" onClick={() => setMenuOpen(false)}>
               About
             </Link>

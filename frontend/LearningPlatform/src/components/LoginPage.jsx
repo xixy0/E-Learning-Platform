@@ -61,8 +61,8 @@ function LoginPage() {
                 placeholder="Username"
                 value={username}
                 onChange={(e) => setUsername(e.target.value)}
-                pattern="[a-z0-9._%+\-]+@[a-z0-9.\-]+\.[a-z]{2,}$"
-                minLength="5"
+                //pattern="[a-z0-9._%+\-]+@[a-z0-9.\-]+\.[a-z]{2,}$"
+                //minLength="5"
                 maxLength="100"
                 title="Enter a valid email"
                 className="w-full outline-none"

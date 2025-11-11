@@ -38,7 +38,7 @@ function StudentDetails() {
             to="/editProfile"
             className="inline-block bg-blue-600 text-white px-6 py-2 rounded-lg font-semibold hover:bg-blue-700 transition duration-200"
           >
-            Edit Profile
+            Update Profile
           </Link>
         </div>
       </div>

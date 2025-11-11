@@ -7,6 +7,7 @@ function LessonSidebarUser({ courseId }) {
   const location = useLocation();
   const isActive = (path) => location.pathname === path;
   const [lessons, setLessons] = useState([]);
+ 
 
   useEffect(() => {
     fetchLessons();

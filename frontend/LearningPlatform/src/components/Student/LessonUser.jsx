@@ -2,10 +2,12 @@ import React, { useEffect, useState } from "react";
 import toast from "react-hot-toast";
 import { useParams } from "react-router-dom";
 import api from "../../services/api";
+import { useAuth } from "../../context/AuthContext";
 
 function LessonUser() {
     const { lessonId } = useParams();
     const [lesson, setLesson] = useState(null);
+    const { user } = useAuth();;
 
     useEffect(() => {
         fetchLesson();
@@ -62,6 +64,7 @@ function LessonUser() {
                             Download PDF
                         </a>
                     )}
+                    
                 </div>
 
                 <p className="text-gray-700 text-lg mb-8 text-justify leading-relaxed">
