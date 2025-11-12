@@ -18,7 +18,7 @@ public class AssignmentController {
     private AssignmentService assignmentService;
 
     @PostMapping("/addAssignment/{courseId}")
-    public ResponseEntity<?> addAssignment(@PathVariable Long courseId,@RequestBody AssignmentDTO assignmentDTO){
+    public ResponseEntity<?> addAssignment(@PathVariable Long courseId,@ModelAttribute AssignmentDTO assignmentDTO){
         try{
             return ResponseEntity.status(HttpStatus.CREATED).body(assignmentService.addAssignment(courseId,assignmentDTO));
         }catch(RuntimeException ex){
@@ -26,8 +26,17 @@ public class AssignmentController {
         }
     }
 
+    @PostMapping("/addAssignmentPdf/{assignmentId}")
+    public ResponseEntity<?> addAssignmentPdf(@PathVariable Long assignmentId,@ModelAttribute AssignmentDTO assignmentDTO){
+        try{
+            return ResponseEntity.status(HttpStatus.CREATED).body(assignmentService.addAssignmentPdf(assignmentId,assignmentDTO));
+        }catch(RuntimeException ex){
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(ex.getMessage());
+        }
+    }
+
     @PostMapping("/updateAssignment/{assignmentId}")
-    public ResponseEntity<?> updateAssignment(@PathVariable Long assignmentId, @RequestBody AssignmentDTO assignmentDTO){
+    public ResponseEntity<?> updateAssignment(@PathVariable Long assignmentId, @ModelAttribute AssignmentDTO assignmentDTO){
         try {
             return ResponseEntity.status(HttpStatus.ACCEPTED).body(assignmentService.updateAssignment(assignmentId,assignmentDTO));
         }catch (RuntimeException ex){
@@ -48,15 +57,6 @@ public class AssignmentController {
     @GetMapping("/getAll")
     public ResponseEntity<List<?>> getAll(){
         return  ResponseEntity.status(HttpStatus.OK).body(assignmentService.getAll());
-    }
-
-    @PostMapping("/uploadAssignmentPdf/{assignmentId}")
-    public ResponseEntity<?> uploadPdf(@PathVariable Long assignmentId, @RequestBody MultipartFile file){
-        try{
-            return ResponseEntity.status(HttpStatus.OK).body(assignmentService.uploadAssignmentPdf(assignmentId,file));
-        }catch (RuntimeException ex){
-            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(ex.getMessage());
-        }
     }
 
     @DeleteMapping("/deleteAssignmentUrl/{assignmentId}")// not tested

@@ -42,8 +42,8 @@ public class LessonServiceImpl implements LessonService {
 
     @Override
     @CacheEvict(value = {"lessons","courseLesson"},allEntries = true,beforeInvocation = true)
-    public Lesson addLesson(LessonDTO lessonDTO) {
-        Course course = courseRepository.findById(lessonDTO.getCourseId()).orElseThrow(()->new RuntimeException("Course not found"));
+    public Lesson addLesson(Long courseId ,LessonDTO lessonDTO) {
+        Course course = courseRepository.findById(courseId).orElseThrow(()->new RuntimeException("Course not found"));
         Users users = userRepository.findById(userService.getLoggedInUser().getUserId()).get();
         if(!users.getLogin().getRole().equalsIgnoreCase("ADMIN")
                 && !Objects.equals(course.getInstructor().getUserId(), userService.getLoggedInUser().getUserId())){
@@ -53,21 +53,23 @@ public class LessonServiceImpl implements LessonService {
         Lesson lesson = new Lesson();
         lesson.setLessonDescription(lessonDTO.getLessonDescription());
         lesson.setVideourl(lessonDTO.getVideoUrl());
-        lesson.setPdfUrl(lessonDTO.getPdfUrl());
+        lesson.setPdfUrl(" ");
         lesson.setLessonTitle(lessonDTO.getLessonTitle());
         lesson.setCourse(course);
         lesson.setInstructorName(course.getInstructor().getFirstName()+" "+course.getInstructor().getMiddleName() + " " + course.getInstructor().getLastName());
-
-
-
+        Lesson lesson1 =  lessonRepository.save(lesson);
+        if (lessonDTO.getFile() != null && !lessonDTO.getFile().isEmpty()) {
+            String pdfUrl = uploadPdf(lesson1.getLessonId(), lessonDTO.getFile());
+            lesson1.setPdfUrl(pdfUrl);
+            lessonRepository.save(lesson1);
+        }
         notificationService.createAndSend(users,
                 "LESSON_CREATED",
                 "Title: "+lesson.getLessonTitle(),
                 "Lesson created",
                 "Description: "+ lesson.getLessonDescription() +" Instructor: "+ lesson.getInstructorName());
-        return lessonRepository.save(lesson);
 
-
+        return lesson1;
     }
 
     @Override
@@ -143,45 +145,28 @@ public class LessonServiceImpl implements LessonService {
     }
 
     @Override
-    @CacheEvict(value = {"lessons","courseLesson"},allEntries = true)
     public String uploadPdf(Long lessonId, MultipartFile file) {
         final String UPLOAD_DIR = "/lessons/pdfs/";
-        Lesson lesson = lessonRepository.findById(lessonId).orElseThrow(()-> new RuntimeException("Course not found"));
-        Users users = userRepository.findById(userService.getLoggedInUser().getUserId()).get();
-
-        if(!users.getLogin().getRole().equalsIgnoreCase("ADMIN")
-                && !Objects.equals(lesson.getCourse().getInstructor().getUserId(), userService.getLoggedInUser().getUserId())){
-            throw new RuntimeException("Unauthorized Instructor");
-        }
-        try{
-
+        try {
             if (file.isEmpty()) {
                 return "File is empty!";
             }
-                String uploadDir = System.getProperty("user.dir") + File.separator + "uploads" + File.separator + "pdfs";
-                File directory = new File(uploadDir);
-                if (!directory.exists()) directory.mkdirs();
+            String uploadDir = System.getProperty("user.dir") + File.separator + "uploads" + File.separator + "pdfs";
+            File directory = new File(uploadDir);
+            if (!directory.exists()) directory.mkdirs();
 
-                String originalFilename = file.getOriginalFilename();
-                String extension = "";
-                if (originalFilename != null && originalFilename.contains(".")) {
-                    extension = originalFilename.substring(originalFilename.lastIndexOf("."));
-                }
+            String originalFilename = file.getOriginalFilename();
+            String extension = "";
+            if (originalFilename != null && originalFilename.contains(".")) {
+                extension = originalFilename.substring(originalFilename.lastIndexOf("."));
+            }
 
-                String safeFilename = "lesson_" + lessonId + "_" + System.currentTimeMillis() + extension;
-                File destinationFile = new File(directory, safeFilename);
-                file.transferTo(destinationFile);
+            String safeFilename = "lesson_" + lessonId + "_" + System.currentTimeMillis() + extension;
+            File destinationFile = new File(directory, safeFilename);
+            file.transferTo(destinationFile);
 
-                String relativePath = "/lessons/pdfs/" + safeFilename;
-                lesson.setPdfUrl(relativePath);
-                lessonRepository.save(lesson);
-            notificationService.createAndSend(users,
-                    "PDF_ADDED",
-                    "Title: "+lesson.getLessonTitle(),
-                    "Pdf added",
-                    "Pdf: "+ relativePath);
 
-            return relativePath;
+            return "/lessons/pdfs/" + safeFilename;
 
         }catch (IOException ex){
             throw  new RuntimeException("Upload failed");

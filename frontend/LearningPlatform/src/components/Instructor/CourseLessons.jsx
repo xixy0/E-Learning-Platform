@@ -35,8 +35,8 @@ function CourseLessons() {
     navigate(`/editLesson`)
   }
 
-  const handleAdd = () =>{
-      navigate()
+  const handleAdd = (courseId) =>{
+      navigate(`/addLesson/${courseId}`)
   }
   
   return (

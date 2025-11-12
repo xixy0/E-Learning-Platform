@@ -31,7 +31,7 @@ function CourseQuiz() {
   }
 
   const handleAdd = () =>{
-      navigate()
+      navigate(`/addQuiz/${courseId}`)
   }
   return (
     <div className="min-h-screen bg-gray-50 p-6">

@@ -1,11 +1,12 @@
 import React, { useEffect, useState } from 'react'
-import { useParams } from 'react-router-dom'
+import { useNavigate, useParams } from 'react-router-dom'
 import api from '../../services/api';
 import toast from 'react-hot-toast';
 
 function CourseAssignments() {
   const { courseId } = useParams();
   const [assignments, setAssignments] = useState([]);
+  const navigate = useNavigate();
 
   useEffect(() => {
     fetchAssignments();
@@ -26,7 +27,7 @@ function CourseAssignments() {
   }
 
   const handleAdd = (courseId)=>{
-
+    navigate(`/addAssignment/${courseId}`)
   }
 
   const handleEdit = (assignmentId)=>{

@@ -30,7 +30,7 @@ function CourseDetails() {
     <React.Fragment>
       <div className="min-h-screen bg-gradient-to-br from-blue-50 to-blue-100 flex flex-col items-center py-10">
         <div className="bg-white shadow-xl rounded-2xl p-8 w-full max-w-md border border-gray-200">
-          <h1 className="text-3xl font-semibold text-blue-700 mb-6 text-center">
+          <h1 className="text-3xl  font-semibold text-blue-700 mb-6 text-center">
             Course Details
           </h1>
 

@@ -54,6 +54,10 @@ function InstructorCourse() {
         }
     };
 
+    const handleAdd = () =>{
+     navigate(`/addCourse`)   
+    }
+
     const handleDetails = (courseId) => {
         navigate(`/courseDetails/${courseId}/overview`)
     }
@@ -115,16 +119,16 @@ function InstructorCourse() {
 
                                 <div className="flex justify-between gap-4 mt-4">
                                     <button
-                                        onClick={() => handleDelete(course.courseId)}
-                                        className="flex-1 bg-red-500 text-white py-2 rounded-lg font-semibold hover:bg-red-600 transition duration-200"
-                                    >
-                                        Delete Course
-                                    </button>
-                                    <button
                                         onClick={() => handleDetails(course.courseId)}
                                         className="flex-1 bg-blue-500 text-white py-2 rounded-lg font-semibold hover:bg-blue-600 transition duration-200"
                                     >
                                         Details
+                                    </button>
+                                    <button
+                                        onClick={() => handleDelete(course.courseId)}
+                                        className="flex-1 bg-red-500 text-white py-2 rounded-lg font-semibold hover:bg-red-600 transition duration-200"
+                                    >
+                                        Delete Course
                                     </button>
 
                                 </div>

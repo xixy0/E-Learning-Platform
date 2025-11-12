@@ -9,7 +9,7 @@ import java.util.List;
 
 @Service
 public interface LessonService {
-    Lesson addLesson(LessonDTO lessonDTO);
+    Lesson addLesson(Long courseId,LessonDTO lessonDTO);
     Lesson updateLesson(Long lessonId,LessonDTO lessonDTO);
     void deleteLesson(Long lessonId);
     List<LessonDTO> getAll();

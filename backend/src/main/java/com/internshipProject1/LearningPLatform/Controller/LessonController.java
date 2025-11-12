@@ -17,17 +17,17 @@ public class LessonController {
     @Autowired
     private LessonService lessonService;
 
-    @PostMapping("/addLesson")
-    public ResponseEntity<?> addLesson(@RequestBody LessonDTO lessonDTO){
+    @PostMapping("/addLesson/{courseId}")
+    public ResponseEntity<?> addLesson(@PathVariable Long courseId,@ModelAttribute LessonDTO lessonDTO){
         try{
-            return ResponseEntity.status(HttpStatus.CREATED).body(lessonService.addLesson(lessonDTO));
+            return ResponseEntity.status(HttpStatus.CREATED).body(lessonService.addLesson(courseId,lessonDTO));
         }catch(RuntimeException ex){
             return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(ex.getMessage());
         }
     }
 
     @PostMapping("/updateLesson/{lessonId}")
-    public ResponseEntity<?> updateLesson(@PathVariable Long lessonId,@RequestBody LessonDTO lessonDTO){
+    public ResponseEntity<?> updateLesson(@PathVariable Long lessonId,@ModelAttribute LessonDTO lessonDTO){
         try {
             return ResponseEntity.status(HttpStatus.ACCEPTED).body(lessonService.updateLesson(lessonId,lessonDTO));
         }catch (RuntimeException ex){
@@ -50,14 +50,7 @@ public class LessonController {
      return  ResponseEntity.status(HttpStatus.OK).body(lessonService.getAll());
     }
 
-    @PostMapping("/uploadPdf/{lessonId}")
-    public ResponseEntity<?> uploadPdf(@PathVariable Long lessonId, @RequestBody MultipartFile file){
-        try{
-            return ResponseEntity.status(HttpStatus.OK).body(lessonService.uploadPdf(lessonId,file));
-        }catch (RuntimeException ex){
-            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(ex.getMessage());
-        }
-    }
+
 
     @GetMapping("/getLessonById/{lessonId}")
     public ResponseEntity<?> getLessonById(@PathVariable Long lessonId){

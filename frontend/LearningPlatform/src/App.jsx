@@ -25,6 +25,10 @@ import CourseAssignments from './components/Instructor/CourseAssignments'
 import CourseStudentEnrollments from './components/Instructor/CourseStudentEnrollments'
 import InstructorCourse from './components/Instructor/InstructorCourse'
 import CourseDetails from './components/Instructor/CourseDetails'
+import AddAssignment from './components/Instructor/AddAssignment'
+import AddLesson from './components/Instructor/AddLesson'
+import AddCourse from './components/Instructor/AddCourse'
+import AddQuiz from './components/Instructor/AddQuiz'
 
 
 
@@ -49,7 +53,11 @@ function App() {
             <Route path="/editProfile" element={<EditUserForm />} />
             <Route path="/userQuizPage/:quizId" element={<QuizPage />} />
             <Route path="/instructor" element={<InstructorCourse />} />
-
+            <Route path="/addAssignment/:courseId" element={<AddAssignment />} />
+            <Route path="/addLesson/:courseId" element={<AddLesson/>} />
+            <Route path="/addCourse" element={<AddCourse/>} />
+            <Route path="/addQuiz/:courseId" element={<AddQuiz/>} />
+            
 
             <Route element={<StudentDashboard />}>
               <Route path="/student" element={<StudentDetails />} />

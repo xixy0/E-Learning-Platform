@@ -52,12 +52,14 @@ public class CourseServiceImpl implements CourseService {
       course.setQuiz(new ArrayList<>());
       course.setAssignments(new ArrayList<>());
 
+      Course course1 =courseRepository.save(course);
+
         notificationService.createAndSend(instructor,
                 "COURSE_CREATED",
                 "Title: "+course.getCourseTitle(),
                 "Course created",
                 "Description: "+ course.getCourseDescription() +" Category: "+ course.getCourseCategory());
-      return courseRepository.save(course);
+        return  course1;
 
 
     }

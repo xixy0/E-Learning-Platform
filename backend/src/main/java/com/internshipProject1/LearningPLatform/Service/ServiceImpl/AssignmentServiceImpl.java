@@ -62,6 +62,12 @@ public class AssignmentServiceImpl implements AssignmentService {
         assignment.setAssignmentSubmissions(new ArrayList<>());
         Assignment assignment1 = assignmentRepository.save(assignment);
 
+        if (assignmentDTO.getFile() != null && !assignmentDTO.getFile().isEmpty()) {
+            String pdfUrl = uploadAssignmentPdf(assignment1.getAssignmentId(), assignmentDTO.getFile());
+            assignment1.getAssignmentPdfUrl().add(pdfUrl);
+            assignmentRepository.save(assignment1);
+        }
+
         notificationService.createAndSend(users,
                 "ASSIGNMENT_ADDED" ,
                 assignment1.getAssignmentTitle(),
@@ -117,17 +123,8 @@ public class AssignmentServiceImpl implements AssignmentService {
     }
 
     @Override
-    @CacheEvict(value = {"assignments","courseAssignment"},allEntries = true)
     public String uploadAssignmentPdf(Long assignmentId, MultipartFile file) {
         final String ASSIGNMENT_DIR = "/assignments/pdfs/";
-        Assignment assignment = assignmentRepository.findById(assignmentId).orElseThrow(
-                ()-> new RuntimeException("Assignment not found"));
-        Users users = userRepository.findById(userService.getLoggedInUser().getUserId()).get();
-
-        if(!users.getLogin().getRole().equalsIgnoreCase("ADMIN")
-                && !Objects.equals(assignment.getCourse().getInstructor().getUserId(), userService.getLoggedInUser().getUserId())){
-            throw new RuntimeException("Unauthorized Instructor");
-        }
         try{
             if(file.isEmpty()){
                 return "File is empty";
@@ -145,17 +142,7 @@ public class AssignmentServiceImpl implements AssignmentService {
             File destinationFile = new File(directory, safeFilename);
             file.transferTo(destinationFile);
 
-            String relativePath = "/assignments/pdfs/" + safeFilename;
-            assignment.getAssignmentPdfUrl().add(relativePath);
-            assignmentRepository.save(assignment);
-
-            notificationService.createAndSend(users,
-                    "ASSIGNMENT_ADDED" ,
-                    assignment.getAssignmentTitle(),
-                    "Pdf added successfully",
-                    "Pdf :"+relativePath);
-
-            return relativePath;
+            return "/assignments/pdfs/" + safeFilename;
 
         }catch (IOException ex){
             throw  new RuntimeException("Upload failed");
@@ -223,6 +210,30 @@ public class AssignmentServiceImpl implements AssignmentService {
                 assignment.getAssignmentDescription(),
                 assignment.getCourse().getCourseId(),
                 assignment.getAssignmentPdfUrl());
+    }
+
+    @Override
+    @CacheEvict(value = {"assignments","courseAssignment"},allEntries = true)
+    public String addAssignmentPdf(Long assignmentId, AssignmentDTO assignmentDTO) {
+        Assignment assignment = assignmentRepository.findById(assignmentId)
+                .orElseThrow(() -> new RuntimeException("Assignment not found"));
+
+        Users instructor = userRepository.findById(userService.getLoggedInUser().getUserId()).get();
+        if (!instructor.getLogin().getRole().equalsIgnoreCase("ADMIN") &&
+                !Objects.equals(assignment.getCourse().getInstructor().getUserId(), instructor.getUserId())) {
+            throw new RuntimeException("Unauthorized Instructor");
+        }
+        String pdfUrl = uploadAssignmentPdf(assignmentId, assignmentDTO.getFile());
+        assignment.getAssignmentPdfUrl().add(pdfUrl);
+        assignmentRepository.save(assignment);
+        notificationService.createAndSend(
+                instructor,
+                "ASSIGNMENT_PDF_ADDED",
+                assignment.getAssignmentTitle(),
+                "PDF uploaded successfully",
+                pdfUrl
+        );
+        return pdfUrl;
     }
 }
 
