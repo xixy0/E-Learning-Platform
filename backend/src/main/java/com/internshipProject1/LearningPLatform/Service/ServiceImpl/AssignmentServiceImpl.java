@@ -89,6 +89,10 @@ public class AssignmentServiceImpl implements AssignmentService {
         if(!assignmentDTO.getAssignmentDescription().isEmpty())
             assignment.setAssignmentDescription(assignmentDTO.getAssignmentDescription());
 
+        if (assignmentDTO.getFile() != null && !assignmentDTO.getFile().isEmpty()) {
+            String pdfUrl = uploadAssignmentPdf(assignmentId, assignmentDTO.getFile());
+            assignment.getAssignmentPdfUrl().add(pdfUrl);
+        }
         return assignmentRepository.save(assignment);
     }
 

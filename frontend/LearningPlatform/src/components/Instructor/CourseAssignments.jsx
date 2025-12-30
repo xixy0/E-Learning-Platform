@@ -31,7 +31,7 @@ function CourseAssignments() {
   }
 
   const handleEdit = (assignmentId)=>{
-    
+    navigate(`/editAssignment/${assignmentId}`)
   }
 
   const handleSubmission = (assignmentId)=>{
@@ -57,8 +57,8 @@ function CourseAssignments() {
                   <th className="py-3 px-6 text-left">Assignment Id</th>
                   <th className="py-3 px-6 text-left">Assignment Title</th>
                   <th className="py-3 px-6 text-left">Description</th>
-                  <th className="py-3 px-6 text-left">Actions</th>
-                  <th className="py-3 px-6 text-left">Submissions</th>
+                  <th className="py-3 px-6 text-middle">Actions</th>
+                  
                 </tr>
                   
               </thead>
@@ -80,21 +80,20 @@ function CourseAssignments() {
                       {assignment.assignmentDescription}
                     </td>
 
-                    <td className="py-3 px-6 text-white">
+                    <td className="flex gap-1 py-3 px-6 text-white">
                       <button
-                        className='bg-gray-500 hover:bg-gray-700 text-white text-sm font-medium px-4 py-2 rounded-lg transition duration-200'
+                        className='bg-gray-500 hover:bg-gray-700 text-white text-xs font-medium px-2 py-1.5 rounded-md transition duration-200'
                         onClick={() => handleEdit(assignment.assignmentId)}>
                         Edit Assignment
                       </button>
-                    </td>
-
-                     <td className="py-3 px-6 text-white">
                       <button
-                        className='bg-green-500 hover:bg-green-700 text-white text-sm font-medium px-4 py-2 rounded-lg transition duration-200'
+                        className='bg-green-500 hover:bg-green-700 text-white text-xs font-medium px-2 py-1.5 rounded-md transition duration-200'
                         onClick={() => handleSubmission(assignment.assignmentId)}>
                         Submissions
                       </button>
                     </td>
+
+                     
                   </tr>
                 ))}
               </tbody>

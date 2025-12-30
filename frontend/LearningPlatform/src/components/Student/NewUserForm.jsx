@@ -5,20 +5,8 @@ import api from "../../services/api";
 
 function NewUserForm() {
   const navigate = useNavigate();
-  const [formData, setFormData] = useState({
-    firstName: "",
-    middleName: "",
-    lastName: "",
-    userDOB: "",
-    gender: "",
-    phoneNum: "",
-    address: "",
-    email: "",
-    username: "",
-    password: "",
-    confirmpassword: "",
-    role: "STUDENT",
-  });
+  
+
 
   const handleInputChange = (e) => {
     const { name, value } = e.target;

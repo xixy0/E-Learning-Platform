@@ -12,6 +12,7 @@ function EditAssignment() {
   const [formData, setFormData] = useState({
     assignmentTitle: "",
     assignmentDescription: "",
+    file: null
   });
 
   useEffect(() => {
@@ -21,7 +22,8 @@ function EditAssignment() {
   const fetchPdfs = async () => {
     try {
       const { data } = await api.get(`/assignment/getAssignmentById/${assignmentId}`);
-      setPdfs(data);
+      setPdfs(data.assignmentPdfUrl);
+      console.log(data);
     } catch (error) {
       console.error("Failed to update Assignment:", err);
       toast.error("Failed to update Assignment");
@@ -35,37 +37,35 @@ function EditAssignment() {
 
   const handleDeletePdf = async (path) => {
     try {
-      await api.delete(`/assignment/deleteAssignmentUrl/${assignmentId}`, path)
+      await api.delete(`/assignment/deleteAssignmentUrl/${assignmentId}?path=${encodeURIComponent(path)}`)
+      fetchPdfs();
     } catch (error) {
       console.error("Failed to update Assignment:", err);
       toast.error("Failed to update Assignment");
     }
   }
 
-  const handleAddPdf = async () => {
-    try {
-      await api.post(`/assignment/addAssignmentPdf/${assignmentId}`)
-      toast.success("Pdf added succesfully")
-    } catch (error) {
-      console.error("Failed to update Assignment:", err);
-      toast.error("Failed to update Assignment");
-    }
-  }
+  const handleFileChange = (e) => {
+    setFormData({ ...formData, file: e.target.files[0] });
+  };
 
   const handleEditAssignment = async () => {
     try {
       const payload = { ...formData };
 
       await api.post(
-        `/assignment/updateAssignment/${courseId}`,
+        `/assignment/updateAssignment/${assignmentId}`,
         payload,
-      );
+        {
+          headers: { "Content-Type": "multipart/form-data" },
+        });
 
       toast.success("Assignement updated Successfully!");
       navigate(-1, { state: { refresh: true } });
       setFormData({
         assignmentTitle: "",
         assignmentDescription: "",
+        file:null
       });
     } catch (err) {
       console.error("Failed to update Assignment:", err);
@@ -111,18 +111,40 @@ function EditAssignment() {
                 onChange={handleInputChange}
                 rows="4"
                 className="w-full border border-gray-300 rounded-lg px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500"
-                required
               ></textarea>
             </div>
-            {pdfs.length >0?(
-              (pdfs.map((pdf)=>(
-                 <div key={pdf}>
+            {pdfs.length > 0 ? (
+              (pdfs.map((pdf) => (
+                <div key={pdf} className='flex gap-2 text-sm'>
+                  {pdf}
 
-                 </div>
+                  <button onClick={() => handleDeletePdf(pdf)}>
+                    <svg xmlns="http://www.w3.org/2000/svg"
+                      fill="none"
+                      viewBox="0 0 24 24"
+                      strokeWidth={1.5}
+                      stroke="red"
+                      className="size-4 ">
+                      <path strokeLinecap="round"
+                        strokeLinejoin="round"
+                        d="m14.74 9-.346 9m-4.788 0L9.26 9m9.968-3.21c.342.052.682.107 1.022.166m-1.022-.165L18.16 19.673a2.25 2.25 0 0 1-2.244 2.077H8.084a2.25 2.25 0 0 1-2.244-2.077L4.772 5.79m14.456 0a48.108 48.108 0 0 0-3.478-.397m-12 .562c.34-.059.68-.114 1.022-.165m0 0a48.11 48.11 0 0 1 3.478-.397m7.5 0v-.916c0-1.18-.91-2.164-2.09-2.201a51.964 51.964 0 0 0-3.32 0c-1.18.037-2.09 1.022-2.09 2.201v.916m7.5 0a48.667 48.667 0 0 0-7.5 0" />
+                    </svg>
+                  </button>
+                </div>
               )))
-            ):(<p>No pdf available</p>)}
+            ) : (<p>No pdf available</p>)}
           </div>
-
+          <div>
+            <label className="block text-gray-700 font-medium mb-2">
+              Upload Assignment PDF
+            </label>
+            <input
+              type="file"
+              accept=".pdf"
+              onChange={handleFileChange}
+              className="w-full max-w-xl text-gray-700 border border-black rounded-lg"
+            />
+          </div>
 
           {/* --- Buttons --- */}
           <div className="flex justify-end gap-4 pt-4">
@@ -138,13 +160,6 @@ function EditAssignment() {
               className="px-5 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition"
             >
               Submit
-            </button>
-            
-            <button
-              onClick={() => handleAddPdf()}
-              className="px-5 py-2 bg-green-600 text-white rounded-lg hover:bg-green-700 transition"
-            >
-              Add Pdf
             </button>
           </div>
         </form>

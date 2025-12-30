@@ -97,9 +97,6 @@ public class QuizServiceImpl implements QuizService {
         if(quizDTO.getTotalMarks()!=null)
             quiz.setTotalMarks(quizDTO.getTotalMarks());
 
-        if(quizDTO.getTimestamp()!=null)
-            quiz.setTimestamp(LocalDateTime.now());
-
         notificationService.createAndSend(users,
                 "QUIZ_UPDATED",
                 "Title: "+quiz.getQuizTitle(),

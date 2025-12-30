@@ -11,7 +11,7 @@ function InstructorCourse() {
     const [filteredCourses, setFilteredCourses] = useState([]);
     const [searchData, setSearchData] = useState("");
     const navigate = useNavigate();
-    const { user } = useAuth();
+    
 
     useEffect(() => {
         fetchCourses();
@@ -42,7 +42,7 @@ function InstructorCourse() {
 
     const handleDelete = async (courseId) => {
         try {
-            await api.delete(`/deleteCourse/${courseId}`)
+            await api.delete(`/course/deleteCourse/${courseId}`)
             fetchCourses();
         } catch (error) {
             toast.error(

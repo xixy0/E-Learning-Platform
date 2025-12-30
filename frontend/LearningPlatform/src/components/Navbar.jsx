@@ -22,6 +22,7 @@ function Navbar() {
 
 
         <div className="hidden md:flex items-center space-x-6 text-gray-700 font-medium">
+          
           {isLoggedIn && user?.role?.toUpperCase().includes("STUDENT") &&   (
             <Link to="/student" className="hover:text-blue-600 transition">
               Dashboard

@@ -68,8 +68,7 @@ public class QuestionServiceImpl implements QuestionService {
     public Questions updateQuestion(Long questionId, QuestionDTO questionDTO) {
         Questions question = questionRepository.findById(questionId).orElseThrow(
                 () -> new RuntimeException("Quiz not found"));
-        Quiz quiz = quizRepository.findById(questionDTO.getQuizId()).orElseThrow(
-                ()->new RuntimeException("Quiz not found"));
+
 
         if (!userService.getLoggedInUser().getRole().equalsIgnoreCase("ADMIN")
                 && !Objects.equals(question.getQuiz().getCourse().getInstructor().getUserId(), userService.getLoggedInUser().getUserId())) {
@@ -77,8 +76,6 @@ public class QuestionServiceImpl implements QuestionService {
         }
         if(!questionDTO.getQuestionText().isEmpty())
             question.setQuestionText(questionDTO.getQuestionText());
-
-        question.setQuiz(quiz);
 
         if(!questionDTO.getOption1().isEmpty())
             question.setOption1(questionDTO.getOption1());
@@ -106,9 +103,14 @@ public class QuestionServiceImpl implements QuestionService {
         List<Questions> questions = questionRepository.findAll();
         List<QuestionDTO> questionDTOList = new ArrayList<>();
         for(Questions question : questions){
-         questionDTOList.add(new QuestionDTO(question.getQuiz().getQuizId(),question.getQuestionId(),question.getQuestionText(),
-                 question.getOption1(), question.getOption2(), question.getOption3(),
-                 question.getOption4(), question.getCorrectAnswer()));
+         questionDTOList.add(new QuestionDTO(
+                 question.getQuiz().getQuizId(),
+                 question.getQuestionId(),question.getQuestionText(),
+                 question.getOption1(),
+                 question.getOption2(),
+                 question.getOption3(),
+                 question.getOption4(),
+                 question.getCorrectAnswer()));
         }
 
         return questionDTOList;

@@ -1,7 +1,7 @@
 import React from 'react'
 import { BrowserRouter, Route, Routes } from 'react-router-dom'
 import Navbar from './components/NavBar'
-import { AuthProvider, useAuth } from './context/AuthContext'
+import { AuthProvider} from './context/AuthContext'
 import MainPage from './components/MainPage'
 import NewUserForm from './components/Student/NewUserForm'
 import EnrolledCourses from './components/Student/EnrolledCourses'
@@ -29,6 +29,13 @@ import AddAssignment from './components/Instructor/AddAssignment'
 import AddLesson from './components/Instructor/AddLesson'
 import AddCourse from './components/Instructor/AddCourse'
 import AddQuiz from './components/Instructor/AddQuiz'
+import EditQuiz from './components/Instructor/EditQuiz'
+import AddQuestions from './components/Instructor/AddQuestions'
+import InstructorQuestions from './components/Instructor/InstructorQuestions'
+import EditQuestion from './components/Instructor/EditQuestion'
+import EditAssignment from './components/Instructor/EditAssignment'
+import EditCourse from './components/Instructor/EditCourse'
+import EditLesson from './components/Instructor/EditLesson'
 
 
 
@@ -54,9 +61,17 @@ function App() {
             <Route path="/userQuizPage/:quizId" element={<QuizPage />} />
             <Route path="/instructor" element={<InstructorCourse />} />
             <Route path="/addAssignment/:courseId" element={<AddAssignment />} />
+            <Route path="/editAssignment/:assignmentId" element={<EditAssignment />} />
             <Route path="/addLesson/:courseId" element={<AddLesson/>} />
+            <Route path="/editLesson/:lessonId" element={<EditLesson/>} />
             <Route path="/addCourse" element={<AddCourse/>} />
+            <Route path="/editCourse/:courseId" element={<EditCourse/>} />
             <Route path="/addQuiz/:courseId" element={<AddQuiz/>} />
+            <Route path="/editQuiz/:quizId" element={<EditQuiz/>} />
+            <Route path="/addQuestions/:quizId" element={<AddQuestions/>} />
+            <Route path="/addQuestions/:quizId" element={<AddQuestions/>} />
+            <Route path="/viewQuestions/:quizId" element={<InstructorQuestions/>} />
+            <Route path="/editQuestion/:questionId" element={<EditQuestion/>} />
             
 
             <Route element={<StudentDashboard />}>

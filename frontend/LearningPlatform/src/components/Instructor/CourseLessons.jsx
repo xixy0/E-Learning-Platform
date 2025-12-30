@@ -32,24 +32,24 @@ function CourseLessons() {
   }
 
   const handleEdit = (lessonId) => {
-    navigate(`/editLesson`)
+    navigate(`/editLesson/${lessonId}`)
   }
 
-  const handleAdd = (courseId) =>{
-      navigate(`/addLesson/${courseId}`)
+  const handleAdd = (courseId) => {
+    navigate(`/addLesson/${courseId}`)
   }
-  
+
   return (
     <div className="min-h-screen bg-gray-50 p-6">
       <div className="max-w-5xl mx-auto bg-white shadow-xl rounded-2xl p-6">
         <div className='flex justify-between items-center'>
-        <h2 className="text-2xl font-bold text-gray-800  pb-3">
-          Lesson Details
-        </h2>
-         <button
-         onClick={()=>handleAdd(courseId)}
-         className='bg-blue-500 hover:bg-blue-700 text-white text-sm font-semibold px-4 py-2 rounded-lg shadow transition duration-200'
-         >+ Add Lesson</button></div>
+          <h2 className="text-2xl font-bold text-gray-800  pb-3">
+            Lesson Details
+          </h2>
+          <button
+            onClick={() => handleAdd(courseId)}
+            className='bg-blue-500 hover:bg-blue-700 text-white text-sm font-semibold px-4 py-2 rounded-lg shadow transition duration-200'
+          >+ Add Lesson</button></div>
 
         {lessons.length > 0 ? (
           <div className="overflow-x-auto">
@@ -59,8 +59,7 @@ function CourseLessons() {
                   <th className="py-3 px-6 text-left">Lesson Id</th>
                   <th className="py-3 px-6 text-left">Lesson Title</th>
                   <th className="py-3 px-6 text-left">Description</th>
-                  <th className="py-3 px-6 text-left">Urls</th>
-                  <th className="py-3 px-6 text-left">Actions</th>
+                  <th className="py-3 px-6 text-middle">Actions</th>
                 </tr>
               </thead>
               <tbody>
@@ -78,17 +77,15 @@ function CourseLessons() {
                     <td className="py-3 px-6 text-gray-600">
                       {lesson.lessonDescription}
                     </td>
-                    <td className="py-3 px-6 text-white">
+                    <td className="flex gap-1 py-3 px-6 text-white">
                       <button
-                        className='bg-blue-500 hover:bg-blue-700 text-white text-sm font-medium px-4 py-2 rounded-lg transition duration-200'
+                        className='bg-blue-500 hover:bg-blue-700 text-white text-xs font-medium px-2 py-1.5 rounded-md transition duration-200'
                         onClick={() => handleLesson(courseId)} >
                         View URLs
                       </button>
-                    </td>
-                    <td className="py-3 px-6 text-white">
-                      <button 
-                      className='bg-gray-500 hover:bg-gray-700 text-white text-sm font-medium px-4 py-2 rounded-lg transition duration-200'
-                      onClick={() => handleEdit(lessons.lessonId)}>
+                      <button
+                        className='bg-gray-500 hover:bg-gray-700 text-white text-xs font-medium px-1 py-1,5 rounded-md transition duration-200'
+                        onClick={() => handleEdit(lesson.lessonId)}>
                         Edit Lesson
                       </button>
                     </td>

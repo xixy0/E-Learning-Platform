@@ -6,7 +6,7 @@ import toast from 'react-hot-toast';
 function AddAssignment() {
 
   const navigate = useNavigate();
-  const {courseId} = useParams();
+  const { courseId } = useParams();
 
   const [formData, setFormData] = useState({
     assignmentTitle: "",
@@ -26,8 +26,8 @@ function AddAssignment() {
   const handleAddAssignment = async () => {
     try {
       const payload = { ...formData };
-      
-       await api.post(
+
+      await api.post(
         `/assignment/addAssignment/${courseId}`,
         payload,
         {
@@ -73,11 +73,12 @@ function AddAssignment() {
                 onChange={handleInputChange}
                 placeholder="Assignment Title"
                 className="border border-gray-300 rounded-lg px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500"
+                required
               />
             </div>
             <div className="flex flex-col">
               <label className="text-sm font-medium text-gray-700 mb-1">
-               Assignmet Descriptipon
+                Assignmet Descriptipon
               </label>
               <textarea
                 name="assignmentDescription"
@@ -97,7 +98,6 @@ function AddAssignment() {
                 accept=".pdf"
                 onChange={handleFileChange}
                 className="w-full max-w-xl text-gray-700 border border-black rounded-lg"
-                required
               />
             </div>
           </div>

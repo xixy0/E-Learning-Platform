@@ -26,24 +26,32 @@ function CourseQuiz() {
     }
   }
 
-  const handleEdit = () =>{
-      navigate()
+  const handleEdit = (quizId) => {
+    navigate(`/editQuiz/${quizId}`)
   }
 
-  const handleAdd = () =>{
-      navigate(`/addQuiz/${courseId}`)
+  const handleAdd = () => {
+    navigate(`/addQuiz/${courseId}`)
   }
+  const handleAddQuestion = (quizId) => {
+    navigate(`/addQuestions/${quizId}`)
+  }
+
+  const handleViewQuestion = (quizId) =>{
+    navigate(`/viewQuestions/${quizId}`)
+  }
+
   return (
     <div className="min-h-screen bg-gray-50 p-6">
       <div className="max-w-5xl mx-auto bg-white shadow-xl rounded-2xl p-6">
         <div className='flex justify-between items-center'>
-        <h2 className="text-2xl font-bold text-gray-800 mb-6 pb-3">
-          Quiz Details
-        </h2>
-         <button
-         onClick={()=>handleAdd(courseId)}
-         className='bg-blue-500 hover:bg-blue-700 text-white text-sm font-semibold px-4 py-2 rounded-lg shadow transition duration-200'
-         >+ Add Quiz</button></div>
+          <h2 className="text-2xl font-bold text-gray-800 mb-6 pb-3">
+            Quiz Details
+          </h2>
+          <button
+            onClick={() => handleAdd()}
+            className='bg-blue-500 hover:bg-blue-700 text-white text-sm font-semibold px-4 py-2 rounded-lg shadow transition duration-200'
+          >+ Add Quiz</button></div>
 
         {quizez.length > 0 ? (
           <div className="overflow-x-auto">
@@ -54,7 +62,8 @@ function CourseQuiz() {
                   <th className="py-3 px-6 text-left">Quiz Title</th>
                   <th className="py-3 px-6 text-left">Total Questions</th>
                   <th className="py-3 px-6 text-left">Timestamp</th>
-                  <th className="py-3 px-6 text-left">Actions</th>
+                  <th className="py-3 px-6 text-middle">Actions</th>
+                  
                 </tr>
               </thead>
               <tbody>
@@ -79,13 +88,25 @@ function CourseQuiz() {
                       {new Date(quiz.timestamp).toLocaleDateString()}
                     </td>
 
-                    <td className="py-3 px-6 text-white">
+                    <td className="flex py-3 gap-1 px-6 text-white">
                       <button
-                        className='bg-gray-500 hover:bg-gray-700 text-white text-sm font-medium px-4 py-2 rounded-lg transition duration-200'
+                        className='bg-gray-500 hover:bg-gray-700 text-white text-xs font-medium px-3 py-1.5 rounded-md transition duration-200'
                         onClick={() => handleEdit(quiz.quizId)}>
                         Edit Quiz
                       </button>
+                        <button
+                        className='bg-blue-500 hover:bg-blue-700 text-white text-xs font-medium px-3 py-1.5 rounded-md transition duration-200'
+                        onClick={() => handleAddQuestion(quiz.quizId)}>
+                        Add Questions
+                      </button>
+                        <button
+                        className='bg-green-500 hover:bg-green-700 text-white text-xs font-medium px-3 py-1.5 rounded-md
+                         transition duration-200'
+                        onClick={() => handleViewQuestion(quiz.quizId)}>
+                        View Questions
+                      </button>
                     </td>
+                    
                   </tr>
                 ))}
               </tbody>

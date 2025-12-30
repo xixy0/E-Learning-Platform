@@ -1,10 +1,11 @@
 import React, { useEffect, useState } from 'react'
-import { Link, useParams } from 'react-router-dom';
+import { Link, useNavigate, useParams } from 'react-router-dom';
 import api from '../../services/api';
 
 function CourseDetails() {
   const { courseId } = useParams();
   const [details, setDetails] = useState({});
+  const navigate = useNavigate();
 
   useEffect(() => {
     fetchCourseDetails();
@@ -23,8 +24,10 @@ function CourseDetails() {
       );
     }
   }
-  
 
+  const handleEdit = () => {
+    navigate(`/editCourse/${courseId}`)
+  }
 
   return (
     <React.Fragment>
@@ -76,13 +79,13 @@ function CourseDetails() {
             </div>
           </div>
           <div className="mt-8 text-center">
-          <Link
-            to="/editCourse"
-            className="inline-block bg-blue-600 text-white px-6 py-2 rounded-lg font-semibold hover:bg-blue-700 transition duration-200"
-          >
-            Update Course Details
-          </Link>
-        </div>
+            <button
+              onClick={() => handleEdit(courseId)}
+              className='bg-blue-500 font-medium text-sm text-white rounded-lg px-4 py-2 hover:bg-blue-700 transition'
+            >
+              Update Course
+            </button>
+          </div>
         </div>
       </div>
     </React.Fragment>

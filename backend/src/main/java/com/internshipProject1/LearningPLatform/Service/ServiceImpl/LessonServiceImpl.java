@@ -91,17 +91,18 @@ public class LessonServiceImpl implements LessonService {
             lesson.setVideourl(lessonDTO.getVideoUrl());
         }
 
-        if(!lessonDTO.getPdfUrl().isEmpty()) {
-            lesson.setPdfUrl(lessonDTO.getPdfUrl());
-        }
-
         if(!lessonDTO.getLessonTitle().isEmpty()) {
             lesson.setLessonTitle(lessonDTO.getLessonTitle());
         }
 
-        Course course = courseRepository.findById(lessonDTO.getCourseId()).orElseThrow(()->new RuntimeException("Course not found"));
-        lesson.setCourse(course);
-        lesson.setInstructorName(course.getInstructor().getFirstName()+" "+course.getInstructor().getMiddleName() + " " + course.getInstructor().getLastName());
+        if (lessonDTO.getFile() != null && !lessonDTO.getFile().isEmpty()) {
+            String pdfUrl = uploadPdf(lessonId, lessonDTO.getFile());
+            lesson.setPdfUrl(pdfUrl);
+        }
+
+//        Course course = courseRepository.findById(lessonDTO.getCourseId()).orElseThrow(()->new RuntimeException("Course not found"));
+//        lesson.setCourse(course);
+//        lesson.setInstructorName(course.getInstructor().getFirstName()+" "+course.getInstructor().getMiddleName() + " " + course.getInstructor().getLastName());
 
         notificationService.createAndSend(users,
                 "LESSON_UPDATED",

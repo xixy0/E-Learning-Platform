@@ -29,9 +29,6 @@ public class CustomUserDetailsService implements UserDetailsService {
                 throw new UsernameNotFoundException("Account not active");
 
         }
-        System.out.println("Loaded user: " + login.getUsername());
-        System.out.println("Role: " + login.getRole());
-        System.out.println("Authorities: " + Collections.singletonList(new SimpleGrantedAuthority("ROLE_" + login.getRole())));
 
         return new User(
                 login.getUsername(),
